@@ -1,9 +1,13 @@
 #ifndef BG_H
 #define BG_H
 
-#include "defines.h"
+#include "types.h"
 
 u16 RGB15(uint r, uint g, uint b);
+
+int dir_get_x(direction_t direction);
+int dir_get_x(direction_t direction);
+
 
 /**
  * @param bg pointer to structure to fill
@@ -29,15 +33,7 @@ void bg_fill(const BG_REGULAR *bg, const uint x, const uint y, uint w, uint h, u
  */
 void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, uint tile);
 
-
-/**
- * Writes a 16x16 tile at (x, y)
- * @param bg background to draw onto
- * @param x unclipped tile x position
- * @param x unclipped tile y position
- * @param tile tile
- */
-void bg_write16(const BG_REGULAR *bg, uint x, uint y, uint tile);
+void bg_move_by(BG_REGULAR *bg, const direction_t direction);
 
 uint bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty);
 uint bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty);

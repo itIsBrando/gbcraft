@@ -95,7 +95,7 @@ static void tile_render_top_bot(const BG_REGULAR *bg, const level_t *lvl, tile_t
 {
     tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x, y);
 
-    if(mask & SURROUNDING_DOWN)
+    if(mask & DIRECTION_DOWN)
     {
         u16 data[4] = {tile->tiling.topRight,
             tile->tiling.topRight + 1,
@@ -105,7 +105,7 @@ static void tile_render_top_bot(const BG_REGULAR *bg, const level_t *lvl, tile_t
     } else
         tile_render_single_16x16(bg, lvl, tile, x, y);
 
-    if(mask & SURROUNDING_UP)
+    if(mask & DIRECTION_UP)
         tile_render_top_bot(bg, lvl, tile, x, y - 1);
 }
 

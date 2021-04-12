@@ -11,6 +11,21 @@ inline u16 RGB15(uint r, uint g, uint b)
 }
 
 
+int _dx[] = {-1, 1, 0, 0};
+int _dy[] = {0, 0, -1, 1};
+
+inline int dir_get_x(direction_t direction)
+{
+    return _dx[direction];
+}
+
+inline int dir_get_y(direction_t direction)
+{
+    return _dy[direction];
+}
+
+
+
 static vu16 *regs[][3] = {
     {&REG_BG0CNT, &REG_BG0VOFS, &REG_BG0HOFS},
     {&REG_BG1CNT, &REG_BG1VOFS, &REG_BG1HOFS},
@@ -24,6 +39,14 @@ uint bg_get_ssb(const uint tx, const uint ty)
     return (ty >> 5) * 2;
 }
 
+
+void bg_move_by(BG_REGULAR *bg, const direction_t direction)
+{
+    bg->bgx += dir_get_x(direction);
+    bg->bgy += dir_get_y(direction);
+    *bg->BG_Y = bg->bgy;
+    *bg->BG_X = bg->bgx;
+}
 
 /**
  * Scrolls the background to (`x`, `y`)
