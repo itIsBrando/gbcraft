@@ -33,8 +33,14 @@ const item_t ALL_ITEMS[] = {
 
 void item_add_to_inventory(item_t *item, inventory_t *inv)
 {
-    item->parent = inv;
-    inv->items[inv->size++] = *item;
+    item_t *i = item_get_from_inventory(item->type, inv);
+    // check if we already have this item in our inventory
+    if(i) {
+        i->count += item->count;
+    } else {
+        item->parent = inv;
+        inv->items[inv->size++] = *item;
+    }
 }
 
 

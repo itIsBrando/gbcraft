@@ -43,7 +43,7 @@ void ent_move_by(ent_t *ent, direction_t direction)
 
     u16 tx = x >> 4;
     u16 ty = y >> 4;
-    if(lvl_get_tile((level_t*)ent->level, tx, ty)->maypass(ent))
+    if(lvl_get_tile((level_t*)ent->level, tx, ty)->event->maypass(ent))
         ent->x = x, ent->y = y;
 }
 
@@ -82,7 +82,7 @@ static u16 __tiles[] = {
  * Holds the sizes of each entity
  */
 static const bounding_rect_t __rects[] = {
-    {3, 2, 2, 0}, // player
+    {3, 2, 3, 0}, // player
     {0, 0, 0, 0}, // slime
     {3, 2, 2, 0}, // zombie
 };
@@ -108,7 +108,6 @@ void ent_remove(level_t *lvl, ent_t *ent)
 {
     spr_free(ent->sprite);
 }
-
 
 
 inline const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent)
@@ -142,8 +141,8 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
         u16 tx = (x + dx[i] * w) >> 4;
         u16 ty = (y + dy[i] * h) >> 4;
         const tile_t *tile = lvl_get_tile(ent->level, tx, ty);
-        bool (*maypass)(ent_t*) = tile->maypass;
-        void (*ontouch)(ent_t*) = tile->ontouch;
+        bool (*maypass)(ent_t*) = tile->event->maypass;
+        void (*ontouch)(ent_t*) = tile->event->ontouch;
         
         if(ontouch)
             ontouch(ent);

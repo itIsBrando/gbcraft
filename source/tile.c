@@ -5,6 +5,35 @@
 #include "text.h"
 #include "bg.h"
 
+const tile_event_t tile_events[] = {
+    { // grass floor
+        .onhurt=NULL,
+        .ontouch=NULL,
+        .maypass=NULL,
+    },
+    { // water tile
+        .onhurt=NULL,
+        .ontouch=NULL,
+        .maypass=NULL,
+    },
+    { // tree tile
+        .onhurt=tile_tree_onhurt,
+        .ontouch=NULL,
+        .maypass=tile_no_pass,
+    },
+    { // wood plank
+        .onhurt=NULL,
+        .ontouch=NULL,
+        .maypass=tile_no_pass,
+        .interact=tile_wood_interact
+    },
+    { // rock
+        .onhurt=tile_rock_onhurt,
+        .ontouch=NULL,
+        .maypass=tile_no_pass,
+    }
+};
+
 
 const tile_t tile_tile_data[] = 
 {
@@ -12,42 +41,31 @@ const tile_t tile_tile_data[] =
         .type=TILE_GRASS,
         .tiling={1},              // tile base
         .indexing=TILE_INDEXING_SINGLE_8x8,// indexing mode
-        .onhurt=NULL, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=NULL, // maypass
+        .event=&tile_events[0],
     },
     { // water tile
         .type=TILE_WATER,
         .tiling={2},              // tile base
         .indexing=TILE_INDEXING_SINGLE_8x8,// indexing mode
-        .onhurt=NULL, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=NULL, // maypass
+        .event=&tile_events[1],
     },
     { // tree
         .type=TILE_TREE,
         .tiling={8},              // tile base
         .indexing=TILE_INDEXING_SINGLE_16x16,// indexing mode
-        .onhurt=tile_tree_onhurt, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=tile_no_pass, // maypass
+        .event=&tile_events[2]
     },
     { // wood plank
         .type=TILE_WOOD,
         .tiling={3},              // tile base
         .indexing=TILE_INDEXING_TOP_BOT,// indexing mode
-        .onhurt=NULL, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=tile_no_pass, // maypass
-        .interact=tile_wood_interact
+        .event=&tile_events[3]
     },
     { // rock
         .type=TILE_ROCK,  // type
         .tiling={3},                // tile base
         .indexing=TILE_INDEXING_9PT,// indexing mode
-        .onhurt=tile_rock_onhurt, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=tile_no_pass, // maypass
+        .event=&tile_events[4]
     },
 };
 

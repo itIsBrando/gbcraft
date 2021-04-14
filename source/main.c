@@ -109,9 +109,10 @@ int main(void) {
 					);
 			} else {
 				// else, try to break the item
-				void (*interact)(ent_t *, item_t *item, u16 x, u16 y) = lvl_get_tile(level, x, y)->interact;
-				if(interact)
-					interact(plr, NULL, x, y);
+				tile_event_t *events = lvl_get_tile(level, x, y)->event;
+				
+				if(events->interact)
+					events->interact(plr, NULL, x, y);
 			}
 		}
 

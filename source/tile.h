@@ -14,5 +14,6 @@ void tile_tree_onhurt(ent_t *e);
 bool tile_no_pass(ent_t *e);
 void tile_rock_onhurt(ent_t *e);
 
+void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y);
 
 #endif

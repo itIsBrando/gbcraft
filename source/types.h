@@ -113,6 +113,15 @@ typedef struct {
 } item_event_t;
 
 
+
+typedef struct tile_event_t {
+    void(*onhurt)(ent_t *);
+    void(*ontouch)(ent_t *);
+    bool(*maypass)(ent_t *);
+    void (*interact)(ent_t *, item_t *item, u16 x, u16 y);
+} tile_event_t;
+
+
 typedef struct item_t {
     u16 tile; // tile number of the inventory representation
     item_type_t type;
@@ -147,6 +156,7 @@ typedef struct {
     u8 invulnerableTime;
 } player_t;
 
+
 typedef struct {
     s8 health;
 } zombie_t;
@@ -175,10 +185,7 @@ typedef struct tile_t {
         u16 topRight; // for top-bottom indexing, single_8x8 & single_16x16
     } tiling;
     tile_indexing_mode_t indexing;
-    void(*onhurt)(ent_t *);
-    void(*ontouch)(ent_t *);
-    bool(*maypass)(ent_t *);
-    void (*interact)(ent_t *, item_t *item, u16 x, u16 y);
+    tile_event_t *event;
 } tile_t;
 
 

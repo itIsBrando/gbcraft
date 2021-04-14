@@ -2,7 +2,6 @@
 
 
 ### Features
-- [ ] Add `zombie_t`
 - [ ] Add terrain generation
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32
@@ -11,8 +10,9 @@
 - [ ] Add `hotbar.h`
 - [ ] Add player's health to the hotbar
 - [ ] Add the player's active item to the hotbar
-- [ ] prevent duplicates in inventory
 - [ ] Add `ent_remove(level_t *, ent_t *)`
+- [x] prevent duplicates in inventory
+- [x] Add `zombie_t`
 - [x] Add `inventory_t`
 - [x] Add `item_t`
 - [x] Support large GBA mapping mode
