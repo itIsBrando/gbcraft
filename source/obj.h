@@ -34,8 +34,14 @@ typedef enum {
 	SPR_SIZE_16x16 = 0b0001,
 	SPR_SIZE_32x32 = 0b0010,
 	SPR_SIZE_64x64 = 0b0011,
-	
 } spr_size_mask;
+
+typedef enum {
+    SPR_LOWEST_PRIORITY = 0,
+    SPR_LOW_PRIORITY = BIT(0xB),
+    SPR_HIGH_PRIORITY = BIT(0xA),
+    SPR_PRIORITY_HIGHEST = BIT(0xA) | BIT(0xB),
+} spr_priority_t;
 
 /**
  * @param x initial x position
@@ -44,7 +50,7 @@ typedef enum {
  * @note must be free with `spr_free`
  * @returns pointer to your new sprite. Most uninitalized too
  */
-obj_t *spr_alloc(const uint x, const uint y, const uint tile);
+obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile);
 void spr_free(obj_t *obj);
 
 /**
@@ -53,10 +59,34 @@ void spr_free(obj_t *obj);
 void spr_init();
 
 void spr_copy(obj_t *, const uint8_t index);
-void spr_move(obj_t *, const uint8_t, const uint8_t);
 
-void spr_set_tile(obj_t *obj, const uint tile);
+/**
+ * Copies all sprites to OAM
+ */
+void spr_copy_all();
+
+void spr_move(obj_t *, const u16, const u8);
+
+
+/**
+ * Sets paletting mode
+ * @param is8bpp true to use 256colors, false to use 16colors
+ */
+void spr_set_color_mode(obj_t *obj, const bool is8bpp);
+
+
+/**
+ * Sets the priority of a sprite.
+ * @param priority `spr_priority_t`. SPR_PRIORITY_...
+ */
+void spr_set_priority(obj_t *obj, spr_priority_t priority);
+
+
+void spr_set_tile(obj_t *obj, u16 tile);
 void spr_flip(obj_t *obj, const spr_flip_mask mask); // only compatible with regular sprites
+
+void spr_hide(obj_t *obj);
+void spr_show(obj_t *obj);
 
 /**
  * Sets the size of the sprite (SPR_SIZE_8x8, SPRITE_SIZE_16x8...)

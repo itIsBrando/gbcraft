@@ -17,9 +17,17 @@ typedef enum
 typedef enum {
     ENT_TYPE_PLAYER=0,
     ENT_TYPE_SLIME,
-    ENT_TYPE_SKELETON,
     ENT_TYPE_ZOMBIE,
+    ENT_TYPE_SKELETON,
 } ent_type_t;
+
+
+typedef enum {
+    ITEM_TYPE_WOOD,
+    ITEM_TYPE_STONE,
+    ITEM_TYPE_SAPLING,
+    ITEM_TYPE_CRAFTING_TABLE,
+} item_type_t;
 
 
 typedef enum {
@@ -56,17 +64,33 @@ typedef enum {
 
 
 typedef enum {
-    DIRECTION_LEFT = 1 << 7,
-    DIRECTION_RIGHT = 1 << 6,
-    DIRECTION_UP = 1 << 5,
-    DIRECTION_DOWN = 1 << 4,
-    DIRECTION_LEFT_UP = 1 << 3, 
-    DIRECTION_RIGHT_UP = 1 << 2,
-    DIRECTION_LEFT_DOWN = 1 << 1,
-    DIRECTION_RIGHT_DOWN = 1 << 0,
+    SURROUNDING_LEFT = 1 << 7,
+    SURROUNDING_RIGHT = 1 << 6,
+    SURROUNDING_UP = 1 << 5,
+    SURROUNDING_DOWN = 1 << 4,
+    SURROUNDING_LEFT_UP = 1 << 3, 
+    SURROUNDING_RIGHT_UP = 1 << 2,
+    SURROUNDING_LEFT_DOWN = 1 << 1,
+    SURROUNDING_RIGHT_DOWN = 1 << 0,
 } tile_surround_mask;
 
-typedef tile_surround_mask direction_t;
+typedef enum {
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT,
+    DIRECTION_UP,
+    DIRECTION_DOWN,
+    DIRECTION_LEFT_UP,
+    DIRECTION_RIGHT_UP,
+    DIRECTION_LEFT_DOWN,
+    DIRECTION_RIGHT_DOWN,
+} direction_t;
+
+typedef struct ent_t ent_t;
+typedef struct item_t item_t;
+typedef struct tile_t tile_t;
+typedef struct inventory_t inventory_t;
+typedef struct level_t level_t;
+
 
 typedef struct {
     void (*onhurt)(struct ent_t *, struct ent_t *);      // called when damage is received
@@ -77,20 +101,74 @@ typedef struct {
 } ent_event_t;
 
 
-typedef struct ent_t {
-    uint x, y;          // absolute X and Y coordinates of map
-    ent_type_t type;    // refers to the type of entity this is
-    // union {
-    //     player_t;
-    // } entity;
-    obj_t *sprite;       // refers to OAM sprite representing this entity
-    struct level_t *level;
-    
-    ent_event_t events;
-} ent_t;
+typedef struct {
+    bool (*interact)(
+        item_t *,   // reference to this item
+        ent_t *,    // player entity
+        const tile_t *,  // pointer to the tile in the map where the item that will be placed on
+        u16 x,      // absolute tile x of the tile 
+        u16 y      // absolute tile y of the tile
+    ); // called when a player presses `A` with this item in their inventory
+    bool (*canattack)(item_t *, ent_t *);
+} item_event_t;
+
+
+typedef struct item_t {
+    u16 tile; // tile number of the inventory representation
+    item_type_t type;
+    s8 count;
+    item_event_t *event;
+    inventory_t *parent;
+    const char *name;
+} item_t;
+
+
+typedef struct inventory_t {
+    u16 size;
+    item_t items[30];
+    ent_t *parent;
+} inventory_t;
+
+
+/**
+ * Used for collision
+ */
+typedef struct {
+    u16 sx, ex; // start and end X
+    u16 sy, ey; // start and end Y
+} bounding_rect_t;
 
 
 typedef struct {
+    s8 health;
+    s8 max_health;
+    item_t *activeItem;
+    inventory_t inventory;
+    u8 invulnerableTime;
+} player_t;
+
+typedef struct {
+    s8 health;
+} zombie_t;
+
+
+typedef struct ent_t {
+    u16 x, y;          // absolute X and Y coordinates of map
+    s8 xKnockback, yKnockback;
+    ent_type_t type;    // refers to the type of entity this is
+    union {
+        player_t player;
+        zombie_t zombie;
+    };
+    obj_t *sprite;       // refers to OAM sprite representing this entity
+    level_t *level;
+    direction_t dir;
+    
+    ent_event_t *events;
+} ent_t;
+
+
+typedef struct tile_t {
     tile_type_t type;
     union {
         u16 center;   // for 9pt indexing.
@@ -100,24 +178,25 @@ typedef struct {
     void(*onhurt)(ent_t *);
     void(*ontouch)(ent_t *);
     bool(*maypass)(ent_t *);
+    void (*interact)(ent_t *, item_t *item, u16 x, u16 y);
 } tile_t;
 
 
-#define LEVEL_WIDTH 32
-#define LEVEL_HEIGHT 32
+#define LEVEL_WIDTH 128
+#define LEVEL_HEIGHT 128
 #define LEVEL_SIZE (LEVEL_HEIGHT * LEVEL_WIDTH)
 
 
-typedef struct {
-    uint ent_size;  // number of entities in the `entities` table
+typedef struct level_t {
+    u16 ent_size;  // number of entities in the `entities` table
     ent_t entities[50]; // @todo allocate on heap
     tile_type_t map[LEVEL_SIZE];
-    uint layer;
+    u16 layer;
     struct level_t *parent;
 } level_t;
 
 
 
-extern BG_REGULAR main_background;
+extern BG_REGULAR *main_background;
 
 #endif

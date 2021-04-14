@@ -13,7 +13,7 @@ static BG_REGULAR *target_bg;
  * @param y absolute tile y
  * @returns the raw, stored tile at (x, y)
  */
-tile_type_t lvl_get_tile_type(const level_t *lvl, uint x, uint y)
+tile_type_t lvl_get_tile_type(const level_t *lvl, u16 x, u16 y)
 {
     return lvl->map[x + y * LEVEL_WIDTH];
 }
@@ -25,12 +25,12 @@ tile_type_t lvl_get_tile_type(const level_t *lvl, uint x, uint y)
  * @param y absolute tile y
  * @returns the details of a tile at (x, y)
  */
-const tile_t *lvl_get_tile(level_t *lvl, uint x, uint y)
+inline const tile_t *lvl_get_tile(level_t *lvl, u16 x, u16 y)
 {
-    return &tile_tile_data[lvl_get_tile_type(lvl, x, y)];
+    return tile_get(lvl_get_tile_type(lvl, x, y));
 }
 
-void lvl_set_tile(level_t *lvl, uint x, uint y, const tile_t *tile)
+void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile)
 {
     lvl->map[x + y * LEVEL_WIDTH] = tile->type;
     tile_render(target_bg, lvl, tile, x, y);
@@ -42,7 +42,7 @@ void lvl_set_tile(level_t *lvl, uint x, uint y, const tile_t *tile)
  * @returns a pointer to the new level FROM THE HEAP
  * @note must be freed
  */
-level_t *lvl_new(uint layer, level_t *parent)
+level_t *lvl_new(u16 layer, level_t *parent)
 {
     level_t *lvl = malloc(sizeof(level_t));
 
@@ -61,9 +61,9 @@ level_t *lvl_new(uint layer, level_t *parent)
 
 void lvl_blit(level_t *lvl)
 {
-    for(uint y = 0; y < (LEVEL_HEIGHT >> 1); y++)
+    for(u16 y = 0; y < (LEVEL_HEIGHT >> 1); y++)
     {
-        for(uint x = 0; x < (LEVEL_WIDTH >> 1); x++)
+        for(u16 x = 0; x < (LEVEL_WIDTH >> 1); x++)
         {
             const tile_t *tile = lvl_get_tile(lvl, x, y);
             tile_render(target_bg, lvl, tile, x, y);

@@ -5,21 +5,21 @@
 #include "text.h"
 
 
-inline u16 RGB15(uint r, uint g, uint b)
+inline u16 RGB15(u16 r, u16 g, u16 b)
 {
 	return r | (g << 5) | (b << 10);
 }
 
 
-int _dx[] = {-1, 1, 0, 0};
-int _dy[] = {0, 0, -1, 1};
+s16 _dx[] = {-1, 1, 0, 0, -1, 1, -1, 1};
+s16 _dy[] = {0, 0, -1, 1, -1, -1, 1, 1};
 
-inline int dir_get_x(direction_t direction)
+inline s16 dir_get_x(direction_t direction)
 {
     return _dx[direction];
 }
 
-inline int dir_get_y(direction_t direction)
+inline s16 dir_get_y(direction_t direction)
 {
     return _dy[direction];
 }
@@ -34,29 +34,37 @@ static vu16 *regs[][3] = {
 };
 
 
-uint bg_get_ssb(const uint tx, const uint ty)
+u16 bg_get_ssb(const u16 tx, const u16 ty)
 {
     return (ty >> 5) * 2;
 }
 
-
 void bg_move_by(BG_REGULAR *bg, const direction_t direction)
 {
-    bg->bgx += dir_get_x(direction);
-    bg->bgy += dir_get_y(direction);
-    *bg->BG_Y = bg->bgy;
-    *bg->BG_X = bg->bgx;
+    bg_move(bg,
+        bg->bgx + dir_get_x(direction),
+        bg->bgy + dir_get_y(direction)
+    );
 }
+
+#define toFixed(n) ((n) << 8)
 
 /**
  * Scrolls the background to (`x`, `y`)
  */
-void bg_move(BG_REGULAR *bg, const uint x, const uint y)
+void bg_move(BG_REGULAR *bg, const u16 x, const u16 y)
 {
-    *bg->BG_Y = y;
-    *bg->BG_X = x;
-    bg->bgx = x;
+    if(bg->is_affine)
+    {
+        *bg->x.aff = toFixed(x);
+        *bg->y.aff = toFixed(y);
+    } else {
+        *bg->x.reg = x;
+        *bg->y.reg = y;
+    }
+
     bg->bgy = y;
+    bg->bgx = x;
 }
 
 
@@ -79,12 +87,12 @@ inline u16 bg_get_scy(const BG_REGULAR *bg)
 
 
 /**
- * Adjust coordinates for block overflow
+ * Adjust coordinates for overflow on affine backgrounds
  */
-inline void bg_adjust_coordinates(uint *tx, uint *ty)
+inline void bg_clamp_coordinates(const BG_REGULAR *bg, u16 *tx, u16 *ty)
 {
-    *tx &= 0x1f;
-    *ty &= 0x1f;
+    *tx &= (1 << bg->width_bits)-1;
+    *ty &= (1 << bg->width_bits)-1;
 }
 
 
@@ -92,10 +100,9 @@ inline void bg_adjust_coordinates(uint *tx, uint *ty)
  * Gets the tile using absolute tile coordinates
  * @see bg_get_tile()
  */
-uint bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
+u16 bg_get_tile_absolute(const BG_REGULAR *bg, u16 tx, u16 ty)
 {
-    const uint tile = map_mem[bg->map_base + bg_get_ssb(tx, ty)][tx + (ty << 5)];
-    text_uint(*bg->BG_X, 0, 4);
+    const u16 tile = map_mem[bg->map_base + bg_get_ssb(tx, ty)][tx + (ty << 5)];
     return tile;
 }
 
@@ -105,83 +112,172 @@ uint bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
  * @param tx coordinate = tx + bgXoffset
  * @param ty coordinate = ty + bgYoffset
  */
-uint bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty)
+u16 bg_get_tile(const BG_REGULAR *bg, u16 tx, u16 ty)
 {
     return bg_get_tile_absolute(bg, tx + (bg_get_scx(bg) >> 3), ty + (bg_get_scy(bg) >> 3));
 }
 
 
-void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, uint tile)
+void bg_write_tile(const BG_REGULAR *bg, u16 x, u16 y, u16 tile)
 {
-	map_mem[bg->map_base + bg_get_ssb(x, y)][x + (y << 5)] = tile;
-}
-
-
-void bg_write16(const BG_REGULAR *bg, uint x, uint y, uint tile)
-{
-    const uint TILES_PER_ROW = 32;
-
-    bg_write_tile(bg, x, y, tile);
-    bg_write_tile(bg, x+1, y, tile+1);
-    bg_write_tile(bg, x, y+1, tile+TILES_PER_ROW);
-    bg_write_tile(bg, x+1, y+1, tile+TILES_PER_ROW+1);
-}
-
-
-void bg_rect(const BG_REGULAR *bg, const uint x, const uint y, const uint w, const uint h, uint16_t *data)
-{
-    vu16 *ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
-
-    for(uint j = y; j < y + h; j++)
+    if(bg->is_affine)
     {
-        for (uint i = x; i < x + w; i++)
-        {
-            *ptr++ = *data;
-            data++;
-        }
+        bg_clamp_coordinates(bg, &x, &y);
+        vu16 *ptr = map_mem[bg->map_base] + x + (y << 5);
+        tile = (x & 1) ? (tile << 8) | (*ptr & 0x00FF) : 
+         tile | (*ptr & 0xFF00);
+        *ptr = tile;
+    } else {
+	    map_mem[bg->map_base][x + (y << 5)] = tile;
+    }
+}
 
-        ptr += 32 - w;
+
+void bg_rect(const BG_REGULAR *bg, u16 x, u16 y, const u16 w, const u16 h, void *data)
+{
+    vu16 *ptr;
+    u16 i, j;
+    // @todo AFFINE BG ODD SIZES DO NOT WORK
+    if(bg->is_affine)
+    {
+        x >>= 1;
+        y >>= 1;
+        ptr = map_mem[bg->map_base] + (u32)(y << bg->width_bits) + x;
+        for(j = 0; j < h; j++)
+        {
+            for (i = 0; i < w >> 1; i++)
+            {
+                *ptr++ = *(u16*)data;
+                data += 2;
+            }
+            ptr += ((1 << bg->width_bits) - w) >> 1;
+        }
+    } else {
+        ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
+
+        for(j = y; j < y + h; j++)
+        {
+            for (i = x; i < x + w; i++)
+            {
+                *ptr++ = *(u16*)data;
+                data++;
+            }
+
+            ptr += 32 - w;
+        }
     }
     
 }
 
 
-void bg_fill(const BG_REGULAR *bg, const uint x, const uint y, uint w, uint h, uint tile)
+void bg_fill(const BG_REGULAR *bg, u16 x, u16 y, u16 w, u16 h, u16 tile)
 {
-    vu16 *ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
-    for(uint j = y; j < y + h; j++)
-    {
-        for (uint i = x; i < x + w; i++)
-        {
-            *ptr++ = tile;
-        }
+    vu16 *ptr;
+    u16 i, j;
 
-        ptr += 32 - w;
+    if(bg->is_affine)
+    {
+        tile |= tile << 8; // convert tile to 16bit
+        x >>= 1;
+        y >>= 1;
+        ptr = map_mem[bg->map_base] + (y << bg->width_bits) + x;
+        for(j = 0; j < h; j++)
+        {
+            for(i = 0; i < w >> 1; i++)
+            {
+                *ptr++ = tile;
+            }
+            ptr += ((1 << bg->width_bits) - w) >> 1;
+        }
+    } else {
+        ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
+        for(j = y; j < y + h; j++)
+        {
+            for(i = x; i < x + w; i++)
+            {
+                *ptr++ = tile;
+            }
+
+            ptr += 32 - w;
+        }
     }
     
 }
 
 
-void bg_load_tiles(const uint8_t charbank, const uint position, const unsigned char *data, const uint size)
+void bg_load_tiles(const uint8_t charbank, const u16 position, const unsigned char *data, const u16 size, const bool is8bpp)
 {
-	memcpy16((vu16*)tile_mem[charbank][position],
+	memcpy16((vu16*)tile_mem[charbank][position << is8bpp],
      (u16*)data, size >> 1);
+}
+
+
+void bg_set_size(BG_REGULAR *bg, bg_map_size_t size)
+{
+    *bg->BG_CNT = (*bg->BG_CNT & 0x3FFF) | (size << 0xE);
+    const u8 reg_widths[] = {5, 6, 5, 6};
+    const u8 aff_widths[] = {4, 5, 6, 7};
+    bg->width_bits = bg->is_affine ? aff_widths[size] : reg_widths[size];
+}
+
+
+void bg_affine_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num)
+{
+    bg->is_affine = true;
+
+    bg->map_base = mapBlock;
+    bg->tile_base = tileBlock;
+    bg->map_number = num;
+
+    bg->BG_CNT = (vu16*)(0x04000008 + (num << 1));
+    // initialize BG scroll registers
+    const u16 off = (0x10 * (num - 2));
+    bg->x.aff = (vs32*)(0x04000028 + off);
+    bg->y.aff = (vs32*)(0x0400002C + off);
+
+    *bg->BG_CNT = BG_256_COLOR | BG_SIZE_0 | BG_WRAP
+     | BG_MAP_BASE(mapBlock) | BG_TILE_BASE(tileBlock);
+
+    bg_move(bg, 0, 0);
+    bg_show(bg);
+
+    bg_set_size(bg, BG_SIZE_AFF_16x16);
 }
 
 
 void bg_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num)
 {
-    bg->width = 32;
     bg->map_base = mapBlock;
     bg->tile_base = tileBlock;
     bg->BG_CNT = regs[num][0]; // replace with 0x0400:0008 + 2*num
-    bg->BG_X = regs[num][2];   // replace with 0x0400:0010 + 4*num
-    bg->BG_Y = regs[num][1];   // replace with 0x0400:0012 + 4*num
+    bg->x.reg = regs[num][2];   // replace with 0x0400:0010 + 4*num
+    bg->y.reg = regs[num][1];   // replace with 0x0400:0012 + 4*num
+    bg->map_number = num;
+    bg->is_affine = false;
 
     *bg->BG_CNT = BG_16_COLOR | BG_SIZE_0
      | BG_MAP_BASE(mapBlock) | BG_TILE_BASE(tileBlock);
     
     bg_move(bg, 0, 0);
+    bg_show(bg);
 
-	REG_DISPCNT |= BG0_ON << num;
+    bg_set_size(bg, BG_SIZE_REG_32x32);
+}
+
+
+/**
+ * Visually shows a background
+ */
+inline void bg_show(const BG_REGULAR *bg)
+{
+	REG_DISPCNT |= BG0_ON << bg->map_number;
+}
+
+
+/**
+ * Visually hides a background
+ */
+inline void bg_hide(const BG_REGULAR *bg)
+{
+    REG_DISPCNT &= ~(BG0_ON << bg->map_number);
 }

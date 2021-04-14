@@ -4,6 +4,6 @@
 #include "defines.h"
 
 
-bool map_is_solid(uint tile);
+bool map_is_solid(u16 tile);
 
 #endif

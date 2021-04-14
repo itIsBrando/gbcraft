@@ -5,10 +5,10 @@
 
 extern const tile_t tile_tile_data[];
 
-tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, uint x, uint y);
+tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u16 y);
 const tile_t *tile_get(tile_type_t type);
 
-void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, uint x, uint y);
+void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u16 x, u16 y);
 
 void tile_tree_onhurt(ent_t *e);
 bool tile_no_pass(ent_t *e);

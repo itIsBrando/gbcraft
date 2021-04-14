@@ -1,22 +1,32 @@
 #include "text.h"
 
 static BG_REGULAR *target_background;
-static uint tile_offset;
+static u16 tile_offset;
 
 
-void text_print(char *string, uint x, uint y)
+inline void text_write_tile(u16 tile, const u16 x, const u16 y)
 {
-    while(*string) {
-        const uint tile = (uint)(*string++) + tile_offset - '.';
-        bg_write_tile(target_background, x++, y, tile);
-    }
+    bg_write_tile(target_background, x, y, tile);
 }
 
 
-void text_uint(uint num, uint x, uint y)
+static inline void text_write_char(char character, const u16 x, const u16 y)
+{
+    text_write_tile((u16)character + tile_offset - '+', x, y);
+}
+
+void text_print(char *string, u16 x, u16 y)
+{
+    while(*string)
+        text_write_char(*string++, x++, y);
+
+}
+
+
+void text_uint(u16 num, u16 x, u16 y)
 {
     char buffer[6];
-    uint i = 4;
+    u16 i = 4;
     do {
         buffer[i--] = (num % 10) + '0';
         num /= 10;
@@ -27,7 +37,14 @@ void text_uint(uint num, uint x, uint y)
 }
 
 
-void text_init(BG_REGULAR *bg, uint startTile)
+void text_int(s16 num, u16 x, u16 y)
+{
+    text_write_char(num < 0 ? '-' : '+', x, y);
+    text_uint(num < 0 ? -num : num, x + 1, y);
+}
+
+
+void text_init(BG_REGULAR *bg, u16 startTile)
 {
     target_background = bg;
     tile_offset = startTile;
