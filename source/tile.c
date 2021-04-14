@@ -1,5 +1,7 @@
 #include "level.h"
 #include "tile.h"
+#include "item.h"
+
 #include "text.h"
 #include "bg.h"
 
@@ -14,14 +16,6 @@ const tile_t tile_tile_data[] =
         .ontouch=NULL, // ontouch
         .maypass=NULL, // maypass
     },
-    { // rock
-        .type=TILE_ROCK,  // type
-        .tiling={3},                // tile base
-        .indexing=TILE_INDEXING_9PT,// indexing mode
-        .onhurt=tile_rock_onhurt, // onhurt
-        .ontouch=NULL, // ontouch
-        .maypass=tile_no_pass, // maypass
-    },
     { // water tile
         .type=TILE_WATER,
         .tiling={2},              // tile base
@@ -30,7 +24,7 @@ const tile_t tile_tile_data[] =
         .ontouch=NULL, // ontouch
         .maypass=NULL, // maypass
     },
-    { // tree floor
+    { // tree
         .type=TILE_TREE,
         .tiling={8},              // tile base
         .indexing=TILE_INDEXING_SINGLE_16x16,// indexing mode
@@ -43,6 +37,15 @@ const tile_t tile_tile_data[] =
         .tiling={3},              // tile base
         .indexing=TILE_INDEXING_TOP_BOT,// indexing mode
         .onhurt=NULL, // onhurt
+        .ontouch=NULL, // ontouch
+        .maypass=tile_no_pass, // maypass
+        .interact=tile_wood_interact
+    },
+    { // rock
+        .type=TILE_ROCK,  // type
+        .tiling={3},                // tile base
+        .indexing=TILE_INDEXING_9PT,// indexing mode
+        .onhurt=tile_rock_onhurt, // onhurt
         .ontouch=NULL, // ontouch
         .maypass=tile_no_pass, // maypass
     },
@@ -58,14 +61,14 @@ const tile_t tile_tile_data[] =
  * @param y absolute y
  * @todo add support for diagnol
  */
-tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, uint x, uint y)
+tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u16 y)
 {
     int dx[] = {-1, 1, 0, 0, 0, 0, 0, 0};
     int dy[] = {0, 0, -1, 1, 0, 0, 0, 0};
 
     tile_surround_mask mask = 0;
 
-    for(uint i = 0; i < 8; i++)
+    for(u16 i = 0; i < 8; i++)
     {
         mask <<= 1;
         if(type == lvl_get_tile_type(lvl, x + dx[i], y + dy[i]))
@@ -76,42 +79,42 @@ tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, uint x, 
 }
 
 
-static void tile_render_single_8x8(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, uint x, uint y)
+static void tile_render_single_8x8(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    bg_fill(bg, x << 1, y << 1, 2, 2, tile->tiling.center);
+    bg_fill(bg, x, y, 2, 2, tile->tiling.center);
 }
 
 
-static void tile_render_single_16x16(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, uint x, uint y)
+static void tile_render_single_16x16(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    u16 data[4] = {tile->tiling.topRight,
+    u8 data[4] = {tile->tiling.topRight,
         tile->tiling.topRight + 1,
         tile->tiling.topRight + 32,
         tile->tiling.topRight + 33};
-    bg_rect(bg, x << 1, y << 1, 2, 2, data);
+    bg_rect(bg, x, y, 2, 2, data);
 }
 
-static void tile_render_top_bot(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, uint x, uint y)
+static void tile_render_top_bot(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x, y);
+    tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x >> 1, y >> 1);
 
-    if(mask & DIRECTION_DOWN)
+    if(mask & SURROUNDING_DOWN)
     {
-        u16 data[4] = {tile->tiling.topRight,
+        u8 data[4] = {tile->tiling.topRight,
             tile->tiling.topRight + 1,
             tile->tiling.topRight,
             tile->tiling.topRight + 1};
-        bg_rect(bg, x << 1, y << 1, 2, 2, data);
+        bg_rect(bg, x, y, 2, 2, data);
     } else
         tile_render_single_16x16(bg, lvl, tile, x, y);
 
-    if(mask & DIRECTION_UP)
+    if(mask & SURROUNDING_UP)
         tile_render_top_bot(bg, lvl, tile, x, y - 1);
 }
 
 
 // @todo needs implmentation
-static void tile_render_9pt(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, uint x, uint y)
+static void tile_render_9pt(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
     bg_fill(bg, x, y, 2, 2, 0);
     text_error("INDEXING MODE NOT SUPPORTED");
@@ -119,17 +122,19 @@ static void tile_render_9pt(const BG_REGULAR *bg, const level_t *lvl, tile_t *ti
 
 
 /**
+ * @param x [0, LEVEL_WIDTH/2)
+ * @param y [0, LEVEL_HEIGHT/2)
  * @todo add support for TILE_INDEXING_9PT
  */
-void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, uint x, uint y)
+void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u16 x, u16 y)
 {
-    void (*table[])(const BG_REGULAR *, const level_t *, tile_t *, uint, uint) =
+    void (*table[])(const BG_REGULAR *, const level_t *, tile_t *, u16, u16) =
     {
         tile_render_9pt, tile_render_top_bot,
         tile_render_single_8x8, tile_render_single_16x16
     };
 
-    table[tile->indexing](bg, lvl, (tile_t*)tile, x, y);
+    table[tile->indexing](bg, lvl, (tile_t*)tile, x << 1, y << 1);
 }
 
 
@@ -150,12 +155,20 @@ void tile_tree_onhurt(ent_t *e)
     
 }
 
+
+void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    lvl_set_tile(ent->level, x, y, tile_get(TILE_GRASS));
+    item_add_to_inventory(&ITEM_WOOD, &ent->player.inventory);
+}
+
+
 /**
  * Gets a `tile_t` from a type
  */
 const tile_t *tile_get(tile_type_t type)
 {
-    for(uint i = 0; i < sizeof(tile_tile_data) / sizeof(tile_tile_data[0]); i++)
+    for(u16 i = 0; i < sizeof(tile_tile_data) / sizeof(tile_tile_data[0]); i++)
     {
         if(type == tile_tile_data[i].type)
             return &tile_tile_data[i];
