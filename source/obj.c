@@ -26,12 +26,14 @@ obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile)
 
 	spr_move(ptr, x, y);
 	spr_set_tile(ptr, tile);
+	spr_show(ptr);
 	return ptr;
 }
 
 
 void spr_free(obj_t *obj)
 {
+	spr_hide(obj);
 	for(u16 i = 0; i < sizeof(__spr_free_indexes) / sizeof(__spr_free_indexes[0]); i++)
 	{
 		if(obj == &__spr_buffer[i])

@@ -4,11 +4,10 @@
 //======================================================================
 //
 //	tiles16, 256x32@4, 
-//	Transparent color : F8,F8,F8
 //	+ 128 tiles not compressed
 //	Total size: 4096 = 4096
 //
-//	Time-stamp: 2021-04-13, 16:38:05
+//	Time-stamp: 2021-04-14, 21:24:05
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.16
 //	( http://www.coranac.com/projects/#grit )
 //

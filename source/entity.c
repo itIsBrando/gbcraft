@@ -99,6 +99,11 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
     ent->level = lvl;
     ent->sprite = spr_alloc(x, y, __tiles[type]);
 
+    if(type == ENT_TYPE_PLAYER)
+    {
+        ent->player.inventory.parent = ent;
+    }
+
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
     return ent;
 }
@@ -173,6 +178,28 @@ void ent_draw(const ent_t *ent)
     } else {
         spr_hide(ent->sprite);
     }
+}
+
+
+/**
+ * Hides all of the entities on the level
+ */
+void ent_hide_all(level_t *level)
+{
+    for(u16 i = 0; i < level->ent_size; i++)
+    {
+        spr_hide(level->entities[i].sprite);
+    }
+}
+
+
+/**
+ * Shows all of the entities that are on screen
+ */
+void ent_show_all(level_t *level)
+{
+    for(u16 i = 0; i < level->ent_size; i++)
+        ent_draw(&level->entities[i]);
 }
 
 

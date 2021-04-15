@@ -9,16 +9,16 @@ typedef enum
     TILE_GRASS,
     TILE_WATER,
     TILE_WOOD,
-    TILE_ROCK,
+    TILE_STONE,
     TILE_TREE,
-} tile_type_t;
+} tile_type_t; // order irrelevant
 
 
 typedef enum {
     ENT_TYPE_PLAYER=0,
     ENT_TYPE_SLIME,
     ENT_TYPE_ZOMBIE,
-    ENT_TYPE_SKELETON,
+    ENT_TYPE_SKELETON, // order irrelevant
 } ent_type_t;
 
 
@@ -26,8 +26,9 @@ typedef enum {
     ITEM_TYPE_WOOD,
     ITEM_TYPE_STONE,
     ITEM_TYPE_SAPLING,
-    ITEM_TYPE_CRAFTING_TABLE,
-} item_type_t;
+    ITEM_TYPE_TOOL,
+    ITEM_TYPE_FURNITURE,
+} item_type_t; // order relevant?
 
 
 typedef enum {
@@ -122,10 +123,24 @@ typedef struct tile_event_t {
 } tile_event_t;
 
 
+/**
+ * TOOL_TYPE_...
+ * - used in `item_t`
+ */
+typedef enum {
+    TOOL_TYPE_AXE,
+    TOOL_TYPE_PICKAXE,
+    TOOL_TYPE_SWORD
+} tooltype_t;
+
 typedef struct item_t {
     u16 tile; // tile number of the inventory representation
     item_type_t type;
-    s8 count;
+    tooltype_t tooltype;
+    union {
+        u8 level;   // used for tools
+        s8 count;   // used for all other resources
+    };
     item_event_t *event;
     inventory_t *parent;
     const char *name;
@@ -185,7 +200,7 @@ typedef struct tile_t {
         u16 topRight; // for top-bottom indexing, single_8x8 & single_16x16
     } tiling;
     tile_indexing_mode_t indexing;
-    tile_event_t *event;
+    const tile_event_t *event;
 } tile_t;
 
 

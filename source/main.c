@@ -24,6 +24,7 @@
 #include "entity.h"
 #include "terraingen.h"
 #include "item.h"
+#include "menu.h"
 
 
 BG_REGULAR *main_background;
@@ -43,6 +44,8 @@ int main(void) {
 	bg_load_tiles(0, 1, tilesetTiles, tilesetTilesLen, true); // load 8bpp tiles
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
+	background_palette_mem[0] = RGB15(2, 2, 2);
+
 	BG_REGULAR bg;
 	main_background = &bg;
 	bg_affine_init(main_background, 10, 0, 2);
@@ -53,9 +56,7 @@ int main(void) {
 	WIN_REGULAR window;
 	bg_init(&bg_win, 30, 0, 1);
 	win_init(&window, &bg_win, 0);
-	win_move(&window, 0, 160-24, 240, 24);
 	text_init(&bg_win, 526); // initialize our text generator
-	text_print("HOTBAR", 0, 0);
 
 	spr_init(); // initialize sprites
 
@@ -72,12 +73,20 @@ int main(void) {
 	bg_move(main_background, 30, 30);
 
 	ent_t *plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
+	plr->player.max_health = plr->player.health = 20;
+	mnu_draw_hotbar(plr);
+
 	ent_add(level, ENT_TYPE_ZOMBIE, 50, 50);
 
 	obj_t *cursor = spr_alloc(0, 0, 5);
 	spr_set_size(cursor, SPR_SIZE_16x16);
 
 	item_add_to_inventory(&ITEM_WOOD, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_AXE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_PICKAXE, &plr->player.inventory);
+	item_change_count(&plr->player.inventory.items[0], 5);
+
 	ent_player_set_active_item(plr, &plr->player.inventory.items[0]);
 
 	while (true) {
@@ -90,7 +99,6 @@ int main(void) {
 		}
 		if(keys & KEY_A)
 		{
-			const ent_t *plr = &level->entities[0];
 			u16 x = 120 + bg_get_scx(main_background),
 				y = 80  + bg_get_scy(main_background);
 			x>>=4, y>>=4;
@@ -109,11 +117,16 @@ int main(void) {
 					);
 			} else {
 				// else, try to break the item
-				tile_event_t *events = lvl_get_tile(level, x, y)->event;
-				
+				const tile_event_t *events = lvl_get_tile(level, x, y)->event;
 				if(events->interact)
 					events->interact(plr, NULL, x, y);
 			}
+		}
+
+		// show inventory
+		if(keys & KEY_START)
+		{
+			mnu_show_inventory(plr);
 		}
 
 		for(u16 i = 0; i < level->ent_size; i++)
@@ -123,7 +136,6 @@ int main(void) {
 				onupdate(&level->entities[i]);
 		}
 
-		text_int(bg_get_scx(main_background), 0, 1);
 		// cursor @todo move this elsewhere
 		u16 x = ((level->entities[0].x+8) >> 4) + dir_get_x(level->entities[0].dir);
 		u16 y = ((level->entities[0].y+8) >> 4) + dir_get_y(level->entities[0].dir);

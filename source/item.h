@@ -3,8 +3,10 @@
 
 #include "types.h"
 
-#define ITEM_WOOD   ALL_ITEMS[0]
-#define ITEM_STONE  ALL_ITEMS[1]
+#define ITEM_WOOD    ALL_ITEMS[0]
+#define ITEM_STONE   ALL_ITEMS[1]
+#define ITEM_AXE     ALL_ITEMS[2]
+#define ITEM_PICKAXE ALL_ITEMS[3]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -20,7 +22,7 @@ bool item_remove_from_inventory(item_t *item);
  * @param item does not need to outlive `inv`
  * @param inv inventory to add item to
  */
-void item_add_to_inventory(item_t *item, inventory_t *inv);
+void item_add_to_inventory(const item_t *item, inventory_t *inv);
 
 /**
  * Checks for an item in an inventory
@@ -38,5 +40,10 @@ void item_change_count(item_t *item, const s8 change);
 
 
 bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+
+bool item_can_attack_all(item_t *item, ent_t *ent);
+
+bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 
 #endif

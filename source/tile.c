@@ -28,9 +28,10 @@ const tile_event_t tile_events[] = {
         .interact=tile_wood_interact
     },
     { // rock
-        .onhurt=tile_rock_onhurt,
+        .onhurt=tile_stone_onhurt,
         .ontouch=NULL,
         .maypass=tile_no_pass,
+        .interact=tile_stone_interact,
     }
 };
 
@@ -62,8 +63,8 @@ const tile_t tile_tile_data[] =
         .event=&tile_events[3]
     },
     { // rock
-        .type=TILE_ROCK,  // type
-        .tiling={3},                // tile base
+        .type=TILE_STONE,  // type
+        .tiling={5},                // tile base
         .indexing=TILE_INDEXING_9PT,// indexing mode
         .event=&tile_events[4]
     },
@@ -134,7 +135,7 @@ static void tile_render_top_bot(const BG_REGULAR *bg, const level_t *lvl, tile_t
 // @todo needs implmentation
 static void tile_render_9pt(const BG_REGULAR *bg, const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    bg_fill(bg, x, y, 2, 2, 0);
+    bg_fill(bg, x, y, 2, 2, tile->tiling.center);
     text_error("INDEXING MODE NOT SUPPORTED");
 }
 
@@ -162,7 +163,7 @@ bool tile_no_pass(ent_t *e)
 }
 
 
-void tile_rock_onhurt(ent_t *e)
+void tile_stone_onhurt(ent_t *e)
 {
     
 }
@@ -173,11 +174,23 @@ void tile_tree_onhurt(ent_t *e)
     
 }
 
+void tile_stone_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    if(item->tooltype != TOOL_TYPE_PICKAXE)
+        return;
+
+    lvl_set_tile(ent->level, x, y, tile_get(TILE_GRASS));
+    item_add_to_inventory(&ITEM_STONE, &ent->player.inventory);
+}
+
 
 void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
-    lvl_set_tile(ent->level, x, y, tile_get(TILE_GRASS));
-    item_add_to_inventory(&ITEM_WOOD, &ent->player.inventory);
+    if(item->tooltype == TOOL_TYPE_AXE)
+    {
+        lvl_set_tile(ent->level, x, y, tile_get(TILE_GRASS));
+        item_add_to_inventory(&ITEM_WOOD, &ent->player.inventory);
+    }
 }
 
 

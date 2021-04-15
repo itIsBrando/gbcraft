@@ -9,7 +9,8 @@ const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent);
 bool ent_can_move(ent_t *ent, const direction_t direction);
 void ent_move(ent_t *ent, const direction_t direction);
 
-
+void ent_hide_all(level_t *level);
+void ent_show_all(level_t *level);
 void ent_draw(const ent_t *ent);
 
 bool ent_is_on_screen(const ent_t *ent);

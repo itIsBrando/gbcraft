@@ -50,7 +50,7 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
         spr = spr_alloc(0, 160-8, 0);
     
     plr->player.activeItem = item;
-    text_print(item ? item->name : "NONE", 1, 2);
+    text_print(item ? (char*)item->name : "NONE", 1, 2);
     spr_set_tile(spr, item ? item->tile : 0);
 }
 
