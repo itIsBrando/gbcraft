@@ -11,14 +11,17 @@ typedef enum
     TILE_WOOD,
     TILE_STONE,
     TILE_TREE,
+
+    TILE_NONE, // last tile
 } tile_type_t; // order irrelevant
 
 
+// order relevant
 typedef enum {
     ENT_TYPE_PLAYER=0,
     ENT_TYPE_SLIME,
     ENT_TYPE_ZOMBIE,
-    ENT_TYPE_SKELETON, // order irrelevant
+    ENT_TYPE_FURNITURE,
 } ent_type_t;
 
 
@@ -166,9 +169,12 @@ typedef struct {
 typedef struct {
     s8 health;
     s8 max_health;
+    s8 stamina;
+    s8 max_stamina;
     item_t *activeItem;
     inventory_t inventory;
-    u8 invulnerableTime;
+    u8 invulnerability;
+    u8 stamina_time;
 } player_t;
 
 
@@ -196,9 +202,10 @@ typedef struct ent_t {
 typedef struct tile_t {
     tile_type_t type;
     union {
-        u16 center;   // for 9pt indexing.
-        u16 topRight; // for top-bottom indexing, single_8x8 & single_16x16
+        u8 center;   // for 9pt indexing.
+        u8 topRight; // for top-bottom indexing, single_8x8 & single_16x16
     } tiling;
+    u8 connect_to;  // Another tile that connects visually (9pt indexing only)
     tile_indexing_mode_t indexing;
     const tile_event_t *event;
 } tile_t;
@@ -212,7 +219,9 @@ typedef struct tile_t {
 typedef struct level_t {
     u16 ent_size;  // number of entities in the `entities` table
     ent_t entities[50]; // @todo allocate on heap
-    tile_type_t map[LEVEL_SIZE];
+    u16 size; // must be a power of two. Rn it's only value is 64
+    tile_type_t map[LEVEL_SIZE]; // needs to be adapted to level.size @todo
+    u8 data[LEVEL_SIZE]; // holds tile damage @todo
     u16 layer;
     struct level_t *parent;
 } level_t;

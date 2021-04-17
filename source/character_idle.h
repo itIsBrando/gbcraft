@@ -4,11 +4,12 @@
 //======================================================================
 //
 //	character_idle, 128x32@4, 
+//	Transparent color : EB,FB,00
 //	+ palette 256 entries, not compressed
 //	+ 64 tiles not compressed
 //	Total size: 512 + 2048 = 2560
 //
-//	Time-stamp: 2021-04-14, 21:24:05
+//	Time-stamp: 2021-04-16, 22:43:37
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.16
 //	( http://www.coranac.com/projects/#grit )
 //

@@ -18,6 +18,9 @@ item_event_t ITEM_EVENTS[] =
     { // tools
         .canattack=item_can_attack_all,
         .interact=item_tool_interact
+    },
+    { // furniture
+        .interact=item_furniture_interact
     }
 };
 
@@ -62,6 +65,13 @@ const item_t ALL_ITEMS[] = {
         .tooltype=TOOL_TYPE_SWORD,
         .name="STONE SWORD",
     },
+    {  // crafting table
+        .tile=19, // placeholder @todo
+        .count=1,
+        .event=&ITEM_EVENTS[3],
+        .type=ITEM_TYPE_FURNITURE,
+        .name="CRAFTING BENCH",
+    }
 };
 
 
@@ -130,9 +140,14 @@ bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
     if(tile->type != TILE_GRASS)
         return false;
 
-    item_change_count(item, -1);
 
-    lvl_set_tile(plr->level, x, y, tile_get(TILE_STONE));
+    u16 px = (plr->x + 4 + bg_get_scx(main_background)) >> 4,
+        py = (plr->y + 4 + bg_get_scy(main_background)) >> 4;
+    if(!(px == x && py == y))
+    {   item_change_count(item, -1);
+        lvl_set_tile(plr->level, x, y, tile_get(TILE_STONE));
+    }
+
     return true;
 }
 
@@ -147,10 +162,26 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
+bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+{
+    // if(tile->event->maypass && !tile->event->maypass(plr))
+        // return false;
+
+    // create furniture item
+    ent_t *e = ent_add(plr->level, ENT_TYPE_FURNITURE, (x << 4) - bg_get_scx(main_background), (y << 4) - bg_get_scy(main_background));
+    spr_set_tile(e->sprite, 53);
+
+    item_change_count(item, -1);
+
+    return true;
+}
+
+
 bool item_can_attack_all(item_t *item, ent_t *ent)
 {
     return true;
 }
+
 
 /**
  * Increases or decreases the count of this `item_t`

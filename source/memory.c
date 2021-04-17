@@ -1,4 +1,4 @@
-#include "defines.h"
+#include "memory.h"
 
 
 void memcpy16(vu16 *dst, const u16 *src, u16 hwsize)
@@ -8,6 +8,13 @@ void memcpy16(vu16 *dst, const u16 *src, u16 hwsize)
 		*dst = *src;
 		dst++, src++;
 	}
+}
+
+
+void memset16(vu16 *dst, const u16 c, u16 hwsize)
+{
+	for(u16 i = 0; i < hwsize; i++)
+		*dst++ = c;
 }
 
 static int _rnd_seed;

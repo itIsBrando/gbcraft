@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "menu.h"
+#include "hotbar.h"
 #include "entity.h"
 
 
@@ -19,6 +20,7 @@ void mnu_show_inventory(ent_t *player)
 
     text_print("INVENTORY", 0, 0);
     bg_fill(win->background, 0, 1, 20, 10, 0);
+    ent_hide_all(player->level);
 
     for(uint i = 0; i < (160-32) >> 2; i++)
     {
@@ -44,8 +46,6 @@ void mnu_show_inventory(ent_t *player)
 
         icons[i] = spr_alloc(16, 24 + (i << 3), inv->items[i].tile);
     }
-
-    ent_hide_all(player->level);
 
     u16 key;
 
@@ -104,13 +104,8 @@ void mnu_draw_hotbar(ent_t *player)
     win_move(win_get_0(), 0, 160-24, 240, 24);
 	text_print("HOTBAR   ", 0, 0);
 
-    for(uint i = 0; i < player->player.max_health >> 1; i++)
-    {
-        bg_write_tile(win_get_0()->background, i, 1,
-            (i <= (player->player.health >> 1)) ? 513 : 514
-        );
-    }
-
+    bar_draw_health(player);
+    bar_draw_stamina(player);
     mnu_draw_item(player->player.activeItem, 1, 2);
 }
 

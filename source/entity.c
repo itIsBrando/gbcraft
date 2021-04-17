@@ -12,7 +12,7 @@
  * @param y absolute y
  * @returns NULL if none, or an array of pointers to entities allocated on the heap
  */
-ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u16 *outputSize)
+ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 {
     ent_t *buffer[50];
     
@@ -47,7 +47,7 @@ void ent_move_by(ent_t *ent, direction_t direction)
         ent->x = x, ent->y = y;
 }
 
-
+// order matters. Based on `ent_type_t`
 static ent_event_t events[] = {
     { // player
         .onhurt=NULL,
@@ -70,21 +70,41 @@ static ent_event_t events[] = {
         .ondeath=NULL,
         .onupdate=ent_zombie_update
     },
+    { // slime
+        .onhurt=NULL,
+        .doDamage=NULL,
+        .ontouch=NULL,
+        .ondeath=NULL,
+        .onupdate=NULL
+    },
+    { // furniture
+        .onhurt=ent_furniture_onhurt,
+        .doDamage=NULL,
+        .ontouch=NULL,
+        .ondeath=NULL,
+        .onupdate=ent_furniture_update
+    }
 };
 
+/**
+ * Order matters. Based on ent_type_t
+ */
 static u16 __tiles[] = {
     1,  // player
     0,  // slime
     1,  // zombie
+    0,  // furniture (set externally. see item_furniture_interact)
 };
 
 /**
- * Holds the sizes of each entity
+ * Holds the sizes of each entity.
+ * Order matters based on  ent_type_t
  */
 static const bounding_rect_t __rects[] = {
     {3, 2, 3, 0}, // player
     {0, 0, 0, 0}, // slime
     {3, 2, 2, 0}, // zombie
+    {3, 2, 4, 1}, // furniture
 };
 
 
@@ -128,8 +148,13 @@ inline const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent)
 bool ent_can_move(ent_t *ent, const direction_t direction)
 {
     const bounding_rect_t *rect = ent_get_bounding_rect(ent);
-    u16 x = ent->x + bg_get_scx(main_background) + dir_get_x(direction) * 2;
-    u16 y = ent->y + bg_get_scy(main_background) + dir_get_y(direction) * 2;
+    u16 x = ent->x + bg_get_scx(main_background);
+    u16 y = ent->y + bg_get_scy(main_background);
+    if(direction != -1)
+    {
+        x += dir_get_x(direction) * 2;
+        y += dir_get_y(direction) * 2; 
+    }
     x += rect->sx;
     y += rect->sy;
 
@@ -190,6 +215,7 @@ void ent_hide_all(level_t *level)
     {
         spr_hide(level->entities[i].sprite);
     }
+    spr_copy_all();
 }
 
 

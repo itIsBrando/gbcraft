@@ -16,7 +16,7 @@ inline static u16 spr_get_free_index()
 			__spr_free_indexes[i] = true;
 			return i;
 		}
-	return NULL;
+	return -1;
 }
 
 

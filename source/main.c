@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "defines.h"
 #include "main.h"
@@ -68,39 +69,40 @@ int main(void) {
 	lvl_set_target_background(main_background);
 	level_t *level = lvl_new(0, NULL);
 
+	win_move(&window, 0, 0, 240, 160);
 	gen_generate(level);
+	bg_move(main_background, 512, 512);
 	lvl_blit(level);
-	bg_move(main_background, 30, 30);
 
 	ent_t *plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 	plr->player.max_health = plr->player.health = 20;
+	plr->player.max_stamina = plr->player.stamina = 20;
 	mnu_draw_hotbar(plr);
 
 	ent_add(level, ENT_TYPE_ZOMBIE, 50, 50);
 
 	obj_t *cursor = spr_alloc(0, 0, 5);
-	spr_set_size(cursor, SPR_SIZE_16x16);
+	u8 curTime = 0;
 
 	item_add_to_inventory(&ITEM_WOOD, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_AXE, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_PICKAXE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
 	item_change_count(&plr->player.inventory.items[0], 5);
+	item_change_count(&plr->player.inventory.items[1], 15);
 
-	ent_player_set_active_item(plr, &plr->player.inventory.items[0]);
+	ent_player_set_active_item(plr, &plr->player.inventory.items[1]);
 
 	while (true) {
 		key_scan();
 		u16 keys = key_pressed_no_repeat();
 
-		if(keys & KEY_B)
-		{
-			spr_show(level->entities[1].sprite);
-		}
 		if(keys & KEY_A)
 		{
-			u16 x = 120 + bg_get_scx(main_background),
-				y = 80  + bg_get_scy(main_background);
+			u16 x = 124 + bg_get_scx(main_background),
+				y = 84  + bg_get_scy(main_background);
 			x>>=4, y>>=4;
 			x += dir_get_x(plr->dir);
 			y += dir_get_y(plr->dir);
@@ -115,12 +117,33 @@ int main(void) {
 						lvl_get_tile(level, x, y),
 						x, y
 					);
+
+				// check to see if we can interact with an entity
+				u8 s;
+				ent_t **ents = ent_get_all(plr->level, level->entities[0].x+4, level->entities[0].y+4, &s);
+				for(u16 i = 0; i < s; i++)
+				{
+					ent_t *e = ents[i];
+					if(e->events->onhurt)
+						e->events->onhurt(e, plr);
+				}
+
+				free(ents);
+				
 			} else {
 				// else, try to break the item
 				const tile_event_t *events = lvl_get_tile(level, x, y)->event;
 				if(events->interact)
 					events->interact(plr, NULL, x, y);
 			}
+
+			// cursor @todo move this elsewhere
+			x = (level->entities[0].x+4) + (dir_get_x(level->entities[0].dir) * 9);
+			y = (level->entities[0].y+4) + (dir_get_y(level->entities[0].dir) * 11);
+			spr_set_tile(cursor, plr->player.activeItem->tile);
+			curTime = 10;
+			spr_move(cursor, x, y);
+			spr_show(cursor);
 		}
 
 		// show inventory
@@ -136,11 +159,14 @@ int main(void) {
 				onupdate(&level->entities[i]);
 		}
 
-		// cursor @todo move this elsewhere
-		u16 x = ((level->entities[0].x+8) >> 4) + dir_get_x(level->entities[0].dir);
-		u16 y = ((level->entities[0].y+8) >> 4) + dir_get_y(level->entities[0].dir);
-		x <<= 4, y <<= 4;
-		spr_move(cursor, x - (bg_get_scx(main_background) & 0xf), y - (bg_get_scy(main_background) & 0xf));
+
+		if(curTime)
+		{
+			if(--curTime == 0)
+			{
+				spr_hide(cursor);
+			}
+		}
 		
 		VBlankIntrWait();
 		spr_copy_all();

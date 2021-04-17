@@ -12,7 +12,8 @@ inline void text_write_tile(u16 tile, const u16 x, const u16 y)
 
 static inline void text_write_char(char character, const u16 x, const u16 y)
 {
-    text_write_tile((u16)character + tile_offset - '+', x, y);
+    u16 c = character == ' ' ? 0 : (u16)character + tile_offset - '+';
+    text_write_tile(c, x, y);
 }
 
 void text_print(char *string, u16 x, u16 y)
@@ -53,6 +54,6 @@ void text_init(BG_REGULAR *bg, u16 startTile)
 
 void text_error(char *string)
 {
-    bg_fill(target_background, 0, 0, 320/8, 160/8, 0);
+    bg_fill(target_background, 0, 0, 320/8, 8, 0);
     text_print(string, 0, 0);
 }

@@ -1,14 +1,17 @@
 #include "entity.h"
 #include "tile.h"
 #include "level.h"
+#include "hotbar.h"
+#include "menu.h"
+#include "player.h"
 
 #include "keypad.h"
 #include "bg.h"
 #include "obj.h"
 #include "text.h"
 
-static void plr_move_by(ent_t *player, const direction_t direction);
 static void ent_move_all(level_t *lvl, const direction_t direction);
+
 
 /**
  * Called every frame
@@ -39,6 +42,37 @@ void ent_player_update(ent_t *plr)
         plr_move_by(plr, DIRECTION_DOWN);
     }
 
+
+    if(plr->player.stamina < plr->player.max_stamina)
+    {
+        if(plr->player.stamina_time++ >= 15)
+        {
+            plr->player.stamina++;
+            plr->player.stamina_time = 0;
+            bar_draw_stamina(plr);
+        }
+
+    }
+}
+
+
+/**
+ * Redraws hotbar and subtracts from player's health
+ * @returns true if player can pay the cost, otherwise false
+ */
+bool plr_pay_stamina(ent_t *plr, s8 amt)
+{
+    plr->player.stamina -= amt;
+
+    if(plr->player.stamina < 0)
+    {
+        plr->player.stamina_time = plr->player.stamina = 0;
+        return false;
+    }
+
+    bar_draw_stamina(plr);
+
+    return true;
 }
 
 
@@ -62,7 +96,7 @@ inline direction_t dir_get_opposite(direction_t direction)
 }
 
 
-static void plr_move_by(ent_t *player, const direction_t direction)
+void plr_move_by(ent_t *player, const direction_t direction)
 {
     if(ent_can_move(player, direction))
     {
@@ -87,9 +121,8 @@ static void ent_move_all(level_t *lvl, const direction_t direction)
         ent->x += dx;
         ent->y += dy;
 
-        // if(ent_is_on_screen(ent))
-        //     spr_show(ent->sprite);
-        // else
-        //     spr_hide(ent->sprite);
+        ent_draw(ent);
     }
+
+    text_uint(lvl->ent_size, 3, 1);
 }

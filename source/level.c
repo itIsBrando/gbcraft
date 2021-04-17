@@ -4,8 +4,15 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "keypad.h"
 
 static BG_REGULAR *target_bg;
+
+
+static inline u16 lvl_get_size(const level_t *lvl)
+{
+    return lvl->size;
+}
 
 /**
  * Unbounded check for a tile
@@ -15,7 +22,7 @@ static BG_REGULAR *target_bg;
  */
 tile_type_t lvl_get_tile_type(const level_t *lvl, u16 x, u16 y)
 {
-    return lvl->map[x + y * LEVEL_WIDTH];
+    return lvl->map[x + y * lvl_get_size(lvl)];
 }
 
 
@@ -30,9 +37,43 @@ inline const tile_t *lvl_get_tile(level_t *lvl, u16 x, u16 y)
     return tile_get(lvl_get_tile_type(lvl, x, y));
 }
 
+/**
+ * @returns the GBA's controllable player
+ */
+inline ent_t *lvl_get_player(const level_t *lvl)
+{
+    return &lvl->entities[0];
+}
+
+/**
+ * Unbounded check for a tile
+ * @param x absolute tile x
+ * @param y absolute tile y
+ * @returns the data of the tile at (x, y)
+ */
+inline u8 lvl_get_data(level_t *lvl, u16 x, u16 y)
+{
+    return lvl->data[x + y * lvl->size];
+}
+
+
+/**
+ * Unbounded check for a tile
+ * @param x absolute tile x
+ * @param y absolute tile y
+ * @param v 8-bit data value
+ */
+inline void lvl_set_data(level_t *lvl, u16 x, u16 y, u8 v)
+{
+    lvl->data[x + y * lvl->size] = v;
+}
+
+
 void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile)
 {
-    lvl->map[x + y * LEVEL_WIDTH] = tile->type;
+    u16 i = x + y * lvl_get_size(lvl);
+    lvl->map[i] = tile->type;
+    lvl->data[i] = 0;
     tile_render(target_bg, lvl, tile, x, y);
 }
 
@@ -50,10 +91,10 @@ level_t *lvl_new(u16 layer, level_t *parent)
         text_error("Could not allocate heap for level");
     lvl->layer = layer;
     lvl->parent = (struct level_t*)parent;
-
+    lvl->size = 64;
 
     // do map generation based on layer @todo
-    memset(lvl->map, TILE_GRASS, LEVEL_SIZE);
+    memset(lvl->data, 0, LEVEL_SIZE);
 
     return lvl;
 }
@@ -61,16 +102,19 @@ level_t *lvl_new(u16 layer, level_t *parent)
 
 void lvl_blit(level_t *lvl)
 {
-    for(u16 y = 0; y < (LEVEL_HEIGHT >> 1); y++)
+    text_print("RENDERING WORLD", 0, 2);
+    // tile_render_use_recursion(false);
+
+    for(u16 y = 0; y < lvl->size; y++)
     {
-        for(u16 x = 0; x < (LEVEL_WIDTH >> 1); x++)
+        for(u16 x = 0; x < lvl->size-1; x++)
         {
             const tile_t *tile = lvl_get_tile(lvl, x, y);
             tile_render(target_bg, lvl, tile, x, y);
-
         }
     }
 
+    tile_render_use_recursion(true);
 }
 
 /**

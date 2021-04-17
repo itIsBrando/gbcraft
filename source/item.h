@@ -7,6 +7,8 @@
 #define ITEM_STONE   ALL_ITEMS[1]
 #define ITEM_AXE     ALL_ITEMS[2]
 #define ITEM_PICKAXE ALL_ITEMS[3]
+#define ITEM_SWORD   ALL_ITEMS[4]
+#define ITEM_BENCH   ALL_ITEMS[5]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -38,12 +40,11 @@ item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv);
  */
 void item_change_count(item_t *item, const s8 change);
 
-
-bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-
 bool item_can_attack_all(item_t *item, ent_t *ent);
 
 bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 
 #endif

@@ -122,10 +122,13 @@ void bg_write_tile(const BG_REGULAR *bg, u16 x, u16 y, u16 tile)
 {
     if(bg->is_affine)
     {
-        bg_clamp_coordinates(bg, &x, &y);
-        vu16 *ptr = map_mem[bg->map_base] + x + (y << 5);
-        tile = (x & 1) ? (tile << 8) | (*ptr & 0x00FF) : 
-         tile | (*ptr & 0xFF00);
+        // bg_clamp_coordinates(bg, &x, &y);
+        vu16 *ptr = map_mem[bg->map_base] + (x >> 1) + ((y >> 1) << bg->width_bits);
+        if(y & 1) ptr += 1 << bg->width_bits >> 1;
+        if(x & 1)
+            tile = (tile << 8) | (*ptr & 0x00FF);
+        else
+            tile = (tile & 0x00FF) | (*ptr & 0xFF00);
         *ptr = tile;
     } else {
 	    map_mem[bg->map_base][x + (y << 5)] = tile;
@@ -177,10 +180,11 @@ void bg_fill(const BG_REGULAR *bg, u16 x, u16 y, u16 w, u16 h, u16 tile)
 
     if(bg->is_affine)
     {
+        tile &= 0x00FF;
         tile |= tile << 8; // convert tile to 16bit
         x >>= 1;
         y >>= 1;
-        ptr = map_mem[bg->map_base] + (y << bg->width_bits) + x;
+        ptr = map_mem[bg->map_base] + (u32)(y << bg->width_bits) + x;
         for(j = 0; j < h; j++)
         {
             for(i = 0; i < w >> 1; i++)
