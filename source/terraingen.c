@@ -32,8 +32,6 @@ terr_t *noise(u16 mapSize, u8 featureSize)
     terr_t *values = malloc(mapSize * mapSize * sizeof(terr_t));
     _values = values;
 
-    memset16(values, 0, (sizeof(values) / sizeof(values[0]) >> 1));
-
     u8 displacement = featureSize;
     u8 width = w - 1;
     // diamond step

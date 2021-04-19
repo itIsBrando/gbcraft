@@ -46,6 +46,7 @@ int main(void) {
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
+	sprite_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red
 
 	BG_REGULAR bg;
 	main_background = &bg;
@@ -79,21 +80,14 @@ int main(void) {
 	plr->player.max_stamina = plr->player.stamina = 20;
 	mnu_draw_hotbar(plr);
 
-	ent_add(level, ENT_TYPE_ZOMBIE, 50, 50);
+	ent_add(level, ENT_TYPE_SLIME, 50, 50);
 
 	obj_t *cursor = spr_alloc(0, 0, 5);
 	u8 curTime = 0;
 
-	item_add_to_inventory(&ITEM_WOOD, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_AXE, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_PICKAXE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
-	item_change_count(&plr->player.inventory.items[0], 5);
-	item_change_count(&plr->player.inventory.items[1], 15);
-
-	ent_player_set_active_item(plr, &plr->player.inventory.items[1]);
 
 	while (true) {
 		key_scan();
@@ -107,8 +101,9 @@ int main(void) {
 			x += dir_get_x(plr->dir);
 			y += dir_get_y(plr->dir);
 
+
 			if(plr->player.activeItem)
-			{
+			{ // interact with item
 				item_event_t *e = plr->player.activeItem->event;
 				if(e->interact)
 					e->interact(
@@ -117,25 +112,27 @@ int main(void) {
 						lvl_get_tile(level, x, y),
 						x, y
 					);
-
-				// check to see if we can interact with an entity
-				u8 s;
-				ent_t **ents = ent_get_all(plr->level, level->entities[0].x+4, level->entities[0].y+4, &s);
-				for(u16 i = 0; i < s; i++)
-				{
-					ent_t *e = ents[i];
-					if(e->events->onhurt)
-						e->events->onhurt(e, plr);
-				}
-
-				free(ents);
-				
-			} else {
-				// else, try to break the item
-				const tile_event_t *events = lvl_get_tile(level, x, y)->event;
-				if(events->interact)
-					events->interact(plr, NULL, x, y);
+			} else { // interact with tile
+				const tile_t *t = lvl_get_tile(level, x, y);
+				const tile_event_t *e = t->event;
+				if(e->interact)
+					e->interact(plr, NULL, x, y);
 			}
+
+			// check to see if we can interact with an entity
+			u8 s;
+			ent_t **ents = ent_get_all(plr->level, plr->x, plr->y, &s);
+			
+			for(u16 i = 0; i < s; i++)
+			{
+				ent_t *e = ents[i];
+				if(e == plr) continue;
+
+				if(e->events->onhurt)
+					e->events->onhurt(e, plr);
+			}
+
+			free(ents);
 
 			// cursor @todo move this elsewhere
 			x = (level->entities[0].x+4) + (dir_get_x(level->entities[0].dir) * 9);

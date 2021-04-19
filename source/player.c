@@ -20,6 +20,9 @@ void ent_player_update(ent_t *plr)
 {
     u16 keys = key_pressed();
 
+    if(plr->player.invulnerability)
+        plr->player.invulnerability--;
+
     if(keys & KEY_LEFT)
     {
         spr_flip(plr->sprite, SPR_FLIP_NONE);
@@ -35,17 +38,19 @@ void ent_player_update(ent_t *plr)
     if(keys & KEY_UP)
     {
         plr_move_by(plr, DIRECTION_UP);
+        spr_set_tile(plr->sprite, 5);
     }
 
     if(keys & KEY_DOWN)
     {
         plr_move_by(plr, DIRECTION_DOWN);
+        spr_set_tile(plr->sprite, 1);
     }
 
 
     if(plr->player.stamina < plr->player.max_stamina)
     {
-        if(plr->player.stamina_time++ >= 15)
+        if(plr->player.stamina_time++ >= 10)
         {
             plr->player.stamina++;
             plr->player.stamina_time = 0;
@@ -84,7 +89,7 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
         spr = spr_alloc(0, 160-8, 0);
     
     plr->player.activeItem = item;
-    text_print(item ? (char*)item->name : "NONE", 1, 2);
+    mnu_draw_item(item, 1, 2);
     spr_set_tile(spr, item ? item->tile : 0);
 }
 
@@ -123,6 +128,4 @@ static void ent_move_all(level_t *lvl, const direction_t direction)
 
         ent_draw(ent);
     }
-
-    text_uint(lvl->ent_size, 3, 1);
 }

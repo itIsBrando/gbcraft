@@ -3,12 +3,13 @@
 
 #include "types.h"
 
-#define ITEM_WOOD    ALL_ITEMS[0]
-#define ITEM_STONE   ALL_ITEMS[1]
-#define ITEM_AXE     ALL_ITEMS[2]
-#define ITEM_PICKAXE ALL_ITEMS[3]
-#define ITEM_SWORD   ALL_ITEMS[4]
-#define ITEM_BENCH   ALL_ITEMS[5]
+#define ITEM_WOOD           ALL_ITEMS[0]
+#define ITEM_STONE          ALL_ITEMS[1]
+#define ITEM_STONE_AXE      ALL_ITEMS[2]
+#define ITEM_STONE_PICKAXE  ALL_ITEMS[3]
+#define ITEM_STONE_SWORD    ALL_ITEMS[4]
+#define ITEM_PICKUP         ALL_ITEMS[5]
+#define ITEM_BENCH          ALL_ITEMS[6]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -19,6 +20,15 @@ extern const item_t ALL_ITEMS[];
 bool item_remove_from_inventory(item_t *item);
 
 
+
+/**
+ * @param type ITEM_TYPE_...
+ * @param data used for identifying tools (tooltype) or furniture (furniture_t). Use -1 to ignore
+ * @returns the data `item_t` based on the type of item, or NULL
+ */
+const item_t *item_get_from_type(item_type_t type, s16 data);
+
+
 /**
  * Adds an item to an inventory
  * @param item does not need to outlive `inv`
@@ -27,10 +37,19 @@ bool item_remove_from_inventory(item_t *item);
 void item_add_to_inventory(const item_t *item, inventory_t *inv);
 
 /**
+ * Checks for an item in an inventory, very precise
+ * @param item Item type and tooltype to match in inventory
+ * @returns NULL if not found
+ * @note more precise than `item_get_from_inventory()`
+ */
+item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *inv);
+
+/**
  * Checks for an item in an inventory
  * @param type item type to check
  * @param inv inventory to search in
  * @returns NULL if not found
+ * @warning cannot discern the difference between tools and furniture
  */
 item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv);
 

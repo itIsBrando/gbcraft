@@ -4,6 +4,11 @@
 #include "defines.h"
 #include "bg.h"
 
+/**
+ * Sets the palette number for all text operations
+ * @param pal_num palette number (0x0-0xF)
+ */
+void text_set_pal(u8 pal_num);
 
 /**
  * @param bg Background that we will target
@@ -29,6 +34,8 @@ void text_print(char *string, u16 x, u16 y);
  */
 void text_uint(u16 num, u16 x, u16 y);
 
+
+ void text_char(char character, const u16 x, const u16 y);
 
 /**
  * Prints a signed integer

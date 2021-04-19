@@ -67,6 +67,14 @@ typedef enum {
 } tile_indexing_mode_t;
 
 
+
+typedef enum {
+    FURNITURE_TYPE_CRAFTING,
+    FURNITURE_TYPE_CHEST,
+} furniture_t;
+
+
+
 typedef enum {
     SURROUNDING_LEFT = 1 << 7,
     SURROUNDING_RIGHT = 1 << 6,
@@ -87,6 +95,7 @@ typedef enum {
     DIRECTION_RIGHT_UP,
     DIRECTION_LEFT_DOWN,
     DIRECTION_RIGHT_DOWN,
+    DIRECTION_NONE,
 } direction_t;
 
 typedef struct ent_t ent_t;
@@ -100,6 +109,7 @@ typedef struct {
     void (*onhurt)(struct ent_t *, struct ent_t *);      // called when damage is received
     void (*doDamage)(struct ent_t *, struct ent_t *);    // called when damage is done
     void (*ontouch)(struct ent_t *, struct ent_t *);     // called when entity collides with this
+    bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
 } ent_event_t;
@@ -133,13 +143,17 @@ typedef struct tile_event_t {
 typedef enum {
     TOOL_TYPE_AXE,
     TOOL_TYPE_PICKAXE,
-    TOOL_TYPE_SWORD
+    TOOL_TYPE_SWORD,
+    TOOL_TYPE_PICKUP
 } tooltype_t;
 
 typedef struct item_t {
     u16 tile; // tile number of the inventory representation
     item_type_t type;
-    tooltype_t tooltype;
+    union {
+        tooltype_t tooltype;
+        furniture_t furniture;
+    };
     union {
         u8 level;   // used for tools
         s8 count;   // used for all other resources
@@ -156,6 +170,17 @@ typedef struct inventory_t {
     ent_t *parent;
 } inventory_t;
 
+
+typedef struct {
+    item_type_t item_type;
+    u8 required_amount;
+} cost_t;
+
+typedef struct {
+    const item_t *result;
+    u8 costs_num;
+    cost_t costs[4];
+} recipe_t;
 
 /**
  * Used for collision
@@ -182,6 +207,13 @@ typedef struct {
     s8 health;
 } zombie_t;
 
+typedef struct {
+    s8 health;
+    s8 jump_time;
+    s8 xAccel;
+    s8 yAccel;
+} slime_t;
+
 
 typedef struct ent_t {
     u16 x, y;          // absolute X and Y coordinates of map
@@ -190,6 +222,8 @@ typedef struct ent_t {
     union {
         player_t player;
         zombie_t zombie;
+        slime_t slime;
+        furniture_t furniture;
     };
     obj_t *sprite;       // refers to OAM sprite representing this entity
     level_t *level;

@@ -251,7 +251,7 @@ void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u
         tile_render_single_8x8, tile_render_single_16x16
     };
 
-    target_bg = bg;
+    target_bg = (BG_REGULAR*)bg;
 
     table[tile->indexing](lvl, (tile_t*)tile, x << 1, y << 1);
 }
@@ -286,15 +286,21 @@ void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
 }
 
+
 void tile_tree_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
-    if(item->tooltype != TOOL_TYPE_AXE || ent->type != ENT_TYPE_PLAYER)
+    if(!(!item || item->tooltype == TOOL_TYPE_AXE))
         return;
 
-    if(!plr_pay_stamina(ent, 3))
+    if(ent->type != ENT_TYPE_PLAYER)
         return;
 
-    tile_tree_hurt(ent->level, 5 + item->level, x, y);
+    if(!plr_pay_stamina(ent, 3 + (!item)))
+        return;
+
+    u8 bonus = item ? item->level : -1;
+
+    tile_tree_hurt(ent->level, 5 + bonus, x, y);
 }
 
 
@@ -317,7 +323,7 @@ void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
 void tile_stone_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
-    if(item->tooltype == TOOL_TYPE_PICKAXE && plr_pay_stamina(ent, 4))
+    if(item && item->tooltype == TOOL_TYPE_PICKAXE && plr_pay_stamina(ent, 4))
         tile_stone_hurt(ent->level, 6 + (item->level << 2), x, y);
 }
 
@@ -340,7 +346,7 @@ void tile_wood_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
 void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
-    if(item->tooltype == TOOL_TYPE_AXE && plr_pay_stamina(ent, 4 - item->level))
+    if(item && item->tooltype == TOOL_TYPE_AXE && plr_pay_stamina(ent, 4 - item->level))
     {
        tile_wood_hurt(ent->level, 5 + item->level, x, y);
     }
