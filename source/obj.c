@@ -131,6 +131,13 @@ void spr_set_priority(obj_t *obj, spr_priority_t priority)
 	obj->attr2 |= priority;
 }
 
+
+void spr_set_pal(obj_t *obj, u8 pal)
+{
+	obj->attr2 &= 0x0FFF;
+	obj->attr2 |= (pal & 0xF) << 0xC;
+}
+
 /**
  * @param tile bits 0-9
  */

@@ -13,6 +13,15 @@
 static void ent_move_all(level_t *lvl, const direction_t direction);
 
 
+void ent_player_init(ent_t *e)
+{
+    e->player.inventory.parent = e;
+    e->level->player = e;
+
+	e->player.max_health = e->player.health = 20;
+	e->player.max_stamina = e->player.stamina = 20;
+}
+
 /**
  * Called every frame
  */

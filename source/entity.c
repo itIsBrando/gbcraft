@@ -48,30 +48,30 @@ ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 // order matters. Based on `ent_type_t`
 static ent_event_t events[] = {
     { // player
+        .init=ent_player_init,
         .onhurt=NULL,
-        .doDamage=NULL,
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_player_update
     },
     { // slime
-        .onhurt=NULL,
-        .doDamage=NULL,
+        .init=ent_slime_init,
+        .onhurt=ent_slime_hurt,
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_slime_update
     },
     { // zombie
-        .onhurt=NULL,
-        .doDamage=NULL,
+        .init=ent_zombie_init,
+        .onhurt=ent_zombie_hurt,
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_zombie_update
     },
     { // furniture
-        .onhurt=ent_furniture_onhurt,
+        .init=NULL,
+        .onhurt=ent_furniture_interact,
         .maypass=ent_furniture_maypass,
-        .doDamage=NULL,
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_furniture_update
@@ -94,7 +94,7 @@ static u16 __tiles[] = {
  */
 static const bounding_rect_t __rects[] = {
     {3, 2, 3, 0}, // player
-    {0, 0, 0, 0}, // slime
+    {2, 2, 1, 3}, // slime
     {3, 2, 2, 0}, // zombie
     {3, 2, 4, 1}, // furniture
 };
@@ -111,9 +111,8 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
     ent->level = lvl;
     ent->sprite = spr_alloc(x, y, __tiles[type]);
 
-    if(type == ENT_TYPE_PLAYER) {
-        ent->player.inventory.parent = ent;
-    }
+    if(ent->events->init)
+        ent->events->init(ent);
 
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
     return ent;
@@ -146,6 +145,15 @@ void ent_remove(level_t *lvl, ent_t *ent)
     memcpy(&lvl->entities[index], &lvl->entities[index + 1], (lvl->ent_size - index) * sizeof(ent_t));
 
     lvl->ent_size--;
+}
+
+
+void ent_kill(ent_t *e)
+{
+    if(e->events->ondeath)
+        e->events->ondeath(e);
+
+    ent_remove(e->level, e);
 }
 
 
@@ -255,30 +263,29 @@ bool ent_move(ent_t *ent, const direction_t direction)
 }
 
 
-/**
- * @param ent entity to move
- * @param dx x displacement
- * @param dy y displacement
- * @returns true if entity was moved
- */
-bool ent_move_by(ent_t *ent, s16 dx, s16 dy)
+inline void _dec_magnitude(s8 *a)
 {
-    u16 oldx = ent->x, oldy = ent->y;
+    if(*a)
+        *a < 0 ? (*a)++ : (*a)--;
+}
 
-    ent->x += dx << 1;
-    ent->y += dy << 1;
+u8 _get_magnitude(s8 a)
+{
+    return a < 0 ? -a : a;
+}
 
-    if(!ent_can_move(ent, DIRECTION_NONE))
-    {
-        ent->x = oldx;
-        ent->y = oldy;
-        return false;
-    } else {
-        ent->x = oldx + dx;
-        ent->y = oldy + dy;
-        return true;
-    }
 
+void ent_apply_knockback(ent_t *e)
+{
+    direction_t d = dir_get(e->xKnockback, e->yKnockback);
+
+    // @todo the sum of the vectors is a weird way to do this.
+    //   it assumes the one component is 0
+    for(u8 i = 0; i < _get_magnitude(e->xKnockback) + _get_magnitude(e->yKnockback); i++)
+        ent_move(e, d);
+    
+    _dec_magnitude(&e->xKnockback);
+    _dec_magnitude(&e->yKnockback);
 }
 
 

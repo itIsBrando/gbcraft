@@ -17,7 +17,7 @@ const tile_event_t tile_events[] = {
     { // water tile
         .onhurt=NULL,
         .ontouch=NULL,
-        .maypass=NULL,
+        .maypass=tile_water_maypass,
     },
     { // tree tile
         .onhurt=NULL,
@@ -254,6 +254,15 @@ void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u
     target_bg = (BG_REGULAR*)bg;
 
     table[tile->indexing](lvl, (tile_t*)tile, x << 1, y << 1);
+}
+
+
+bool tile_water_maypass(ent_t *e)
+{
+    if(e->type == ENT_TYPE_PLAYER)
+        return true;
+    else
+        return false;
 }
 
 

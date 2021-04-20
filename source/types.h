@@ -106,8 +106,8 @@ typedef struct level_t level_t;
 
 
 typedef struct {
-    void (*onhurt)(struct ent_t *, struct ent_t *);      // called when damage is received
-    void (*doDamage)(struct ent_t *, struct ent_t *);    // called when damage is done
+    void (*onhurt)(ent_t *, ent_t *, s8);      // called when damage is received
+    void (*init)(ent_t *);    // called when damage is done
     void (*ontouch)(struct ent_t *, struct ent_t *);     // called when entity collides with this
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
@@ -205,6 +205,10 @@ typedef struct {
 
 typedef struct {
     s8 health;
+    u8 walk;
+    s8 xAccel;
+    s8 yAccel;
+    u8 invulernability;
 } zombie_t;
 
 typedef struct {
@@ -212,6 +216,7 @@ typedef struct {
     s8 jump_time;
     s8 xAccel;
     s8 yAccel;
+    u8 invulernability;
 } slime_t;
 
 
@@ -228,7 +233,6 @@ typedef struct ent_t {
     obj_t *sprite;       // refers to OAM sprite representing this entity
     level_t *level;
     direction_t dir;
-    
     ent_event_t *events;
 } ent_t;
 
@@ -253,9 +257,10 @@ typedef struct tile_t {
 typedef struct level_t {
     u16 ent_size;  // number of entities in the `entities` table
     ent_t entities[50]; // @todo allocate on heap
-    u16 size; // must be a power of two. Rn it's only value is 64
+    ent_t *player;
+    u16 size; // Width/height of map. Must be a power of two. Rn it's only value is 64
     tile_type_t map[LEVEL_SIZE]; // needs to be adapted to level.size @todo
-    u8 data[LEVEL_SIZE]; // holds tile damage @todo
+    u8 data[LEVEL_SIZE];
     u16 layer;
     struct level_t *parent;
 } level_t;

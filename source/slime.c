@@ -10,12 +10,19 @@ inline u16 absa(s16 a, s16 b)
     return (a < 0 ? -a : a) + (b < 0 ? -b : b);
 }
 
+
+void ent_slime_init(ent_t *e)
+{
+    e->slime.health = 10;
+}
+
+
 void ent_slime_update(ent_t *s)
 {
     slime_t *slime = &s->slime;
     direction_t d = dir_get(slime->xAccel, slime->yAccel);
 
-    if(!ent_move(s, d) || (rnd_random() & 0xF) == 0)
+    if(!ent_move(s, d) || (rnd_random() & 0x1F) == 0)
     {
         if(slime->jump_time <= -20)
         {
@@ -25,7 +32,7 @@ void ent_slime_update(ent_t *s)
             s16 xDist = plr->x - s->x;
             s16 yDist = plr->y - s->y;
 
-            if(absa(xDist, yDist) < 40)
+            if(absa(xDist, yDist) < 45)
             {
                 if(xDist) slime->xAccel = (xDist < 0) ? -1 : 1;
                 if(yDist) slime->yAccel = (yDist < 0) ? -1 : 1;
@@ -44,5 +51,35 @@ void ent_slime_update(ent_t *s)
     if(slime->jump_time == 0)
         slime->xAccel = slime->yAccel = 0;
 
+    if(slime->jump_time > 0)
+        spr_set_tile(s->sprite, 57);
+    else
+        spr_set_tile(s->sprite, 61);
+
+    ent_apply_knockback(s);
+    if(s->slime.invulernability)
+    {
+        s->slime.invulernability--;
+        spr_set_pal(s->sprite, slime->invulernability & 0x1);
+    }
+
     ent_draw(s);
+}
+
+
+void ent_slime_hurt(ent_t *e, ent_t *atker, s8 damage)
+{
+    if(e->slime.invulernability)
+        return;
+    
+    // set knockback
+    direction_t atk_dir = atker->dir;
+    e->xKnockback = dir_get_x(atk_dir) * 8;
+    e->yKnockback = dir_get_y(atk_dir) * 8;
+
+    e->slime.health -= damage;
+    e->slime.invulernability = 10;
+
+    if(e->slime.health <= 0)
+        ent_kill(e);
 }

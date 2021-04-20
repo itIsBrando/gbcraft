@@ -10,7 +10,7 @@ const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent);
 
 bool ent_can_move(ent_t *ent, const direction_t direction);
 bool ent_move(ent_t *ent, const direction_t direction);
-bool ent_move_by(ent_t *ent, s16 dx, s16 dy); // @todo remove
+void ent_apply_knockback(ent_t *e);
 
 void ent_hide_all(level_t *level);
 void ent_show_all(level_t *level);
@@ -19,14 +19,27 @@ void ent_draw(const ent_t *ent);
 bool ent_is_on_screen(const ent_t *ent);
 ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y);
 void ent_remove(level_t *lvl, ent_t *ent);
+
+/**
+ * Removes an entity from the level
+ * @param e entity
+ */
+void ent_kill(ent_t *e);
+
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize);
+
+void ent_slime_init(ent_t *e);
+void ent_zombie_init(ent_t *e);
+void ent_player_init(ent_t *e);
 
 void ent_player_update(ent_t *plr);
 void ent_slime_update(ent_t *s);
 void ent_zombie_update(ent_t *zombie);
 void ent_furniture_update(ent_t *e);
 
-void ent_furniture_onhurt(ent_t *f, ent_t *plr);
+void ent_furniture_interact(ent_t *, ent_t *, s8);
+void ent_slime_hurt(ent_t *, ent_t *, s8);
+void ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
 

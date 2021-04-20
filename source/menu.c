@@ -260,7 +260,7 @@ void mnu_open_crafting(ent_t *plr)
     } while(key != KEY_B);
 
 
-    mnu_free_item_list(icons, plr->player.inventory.size);
+    mnu_free_item_list(icons, CRAFTING_RECIPES_SIZE);
 
     // clear cost sprite icons
     for(u16 i = 0; i < 4; i++)

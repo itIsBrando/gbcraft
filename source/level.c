@@ -42,7 +42,7 @@ inline const tile_t *lvl_get_tile(level_t *lvl, u16 x, u16 y)
  */
 inline ent_t *lvl_get_player(const level_t *lvl)
 {
-    return (ent_t *)&lvl->entities[0];
+    return lvl->player;
 }
 
 /**

@@ -102,6 +102,15 @@ const item_t *item_get_from_type(item_type_t type, s16 data)
 }
 
 
+bool item_can_attack(const item_t *item)
+{
+    if(item == NULL || item->type == ITEM_TYPE_TOOL)
+        return true;
+
+    return false;
+}
+
+
 void item_add_to_inventory(const item_t *item, inventory_t *inv)
 {
     item_t *i = item_get_from_inventory(item->type, inv);
@@ -225,6 +234,7 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 
     return true;
 }
+
 
 // @todo prevent item from being placed on solid tile
 bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)

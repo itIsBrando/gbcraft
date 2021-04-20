@@ -76,11 +76,10 @@ int main(void) {
 	lvl_blit(level);
 
 	ent_t *plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
-	plr->player.max_health = plr->player.health = 20;
-	plr->player.max_stamina = plr->player.stamina = 20;
 	mnu_draw_hotbar(plr);
 
 	ent_add(level, ENT_TYPE_SLIME, 50, 50);
+	ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
 
 	obj_t *cursor = spr_alloc(0, 0, 5);
 	u8 curTime = 0;
@@ -121,7 +120,9 @@ int main(void) {
 
 			// check to see if we can interact with an entity
 			u8 s;
-			ent_t **ents = ent_get_all(plr->level, plr->x, plr->y, &s);
+			u8 	 px = plr->x + (dir_get_x(plr->dir) << 3) + 8,
+				py = plr->y + (dir_get_y(plr->dir) << 3) + 8;
+			ent_t **ents = ent_get_all(plr->level, px, py, &s);
 			
 			for(u16 i = 0; i < s; i++)
 			{
@@ -129,7 +130,7 @@ int main(void) {
 				if(e == plr) continue;
 
 				if(e->events->onhurt)
-					e->events->onhurt(e, plr);
+					e->events->onhurt(e, plr, 2);
 			}
 
 			free(ents);
@@ -156,13 +157,9 @@ int main(void) {
 				onupdate(&level->entities[i]);
 		}
 
-
-		if(curTime)
+		if(curTime && --curTime == 0)
 		{
-			if(--curTime == 0)
-			{
-				spr_hide(cursor);
-			}
+			spr_hide(cursor);
 		}
 		
 		VBlankIntrWait();

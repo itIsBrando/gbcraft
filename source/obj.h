@@ -82,6 +82,12 @@ void spr_set_color_mode(obj_t *obj, const bool is8bpp);
 void spr_set_priority(obj_t *obj, spr_priority_t priority);
 
 
+/**
+ * Sets the palette number for a sprite in 4BPP.
+ * @param pal 0x00-0x0F
+ */
+void spr_set_pal(obj_t *obj, u8 pal);
+
 void spr_set_tile(obj_t *obj, u16 tile);
 void spr_flip(obj_t *obj, const spr_flip_mask mask); // only compatible with regular sprites
 

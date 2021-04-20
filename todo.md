@@ -8,11 +8,12 @@
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Add `interrupt.h`
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
-- [ ] Add `hotbar.h`
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Add tile drops
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
-- [ ] Add slime tile
+- [ ] Allow players to *interact* with entities, in addition to attack
+- [x] Add `hotbar.h`
+- [x] Add slime tile
 - [x] Add slime entity
 - [x] Subtract from stamina upon using a tool
 - [x] Add player back sprite
@@ -47,6 +48,7 @@
 - [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
 - [ ] Animate player
+- [ ] Entity death animaton
 - [ ] Prevent furniture from being able to be placed in the water
 - [ ] Add indication that a tile is being destroyed
 - [ ] Add inner-corner tiles for `9pt indexing`
@@ -57,6 +59,7 @@
 
 ### Bug
 - [ ] Confirm functional collision with other entities
+- [ ] **Fix weird & fast zombie movement**
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Entities are visible above the hotbar
@@ -65,5 +68,6 @@
 - [ ] Cursor position does not line up with tile placement
 - [ ] Game crashes opening inventory menu with no items
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
-- [x] **Crafting table does not open**
+- [x] Some sprites appear as ghosts on the menus
+- [x] Crafting table does not open
 - [x] Fix weird cursor positioning

@@ -22,6 +22,13 @@ bool item_remove_from_inventory(item_t *item);
 
 
 /**
+ * Checks to see if an item can be used for attacking
+ * @returns true if the item can attack another entity
+ */
+bool item_can_attack(const item_t *item);
+
+
+/**
  * @param type ITEM_TYPE_...
  * @param data used for identifying tools (tooltype) or furniture (furniture_t). Use -1 to ignore
  * @returns the data `item_t` based on the type of item, or NULL

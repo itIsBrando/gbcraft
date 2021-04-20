@@ -60,7 +60,7 @@ void ent_furniture_update(ent_t *e)
 
 
 
-void ent_furniture_onhurt(ent_t *f, ent_t *plr)
+void ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
 {
     if(f->furniture == FURNITURE_TYPE_CRAFTING)
     {
