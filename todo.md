@@ -8,11 +8,11 @@
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Add `interrupt.h`
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
-- [ ] Add `hotbar.h`
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Add tile drops
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Add slime tile
+- [x] Add `hotbar.h`
 - [x] Add slime entity
 - [x] Subtract from stamina upon using a tool
 - [x] Add player back sprite

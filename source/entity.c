@@ -75,8 +75,17 @@ static ent_event_t events[] = {
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_furniture_update
-    }
+    },
+    { // item entity
+        .onhurt=NULL,
+        .maypass=NULL,
+        .doDamage=NULL,
+        .ontouch=ent_item_ontouch,
+        .ondeath=NULL,
+        .onupdate=ent_item_update,
+    },
 };
+
 
 /**
  * Order matters. Based on ent_type_t
@@ -86,7 +95,9 @@ static u16 __tiles[] = {
     0,  // slime
     1,  // zombie
     0,  // furniture (set externally. see item_furniture_interact)
+    0,  // item entity (set exeternally. See `ent_item_new()`)
 };
+
 
 /**
  * Holds the sizes of each entity.
@@ -97,6 +108,7 @@ static const bounding_rect_t __rects[] = {
     {0, 0, 0, 0}, // slime
     {3, 2, 2, 0}, // zombie
     {3, 2, 4, 1}, // furniture
+    {0, 8, 0, 8}, // item
 };
 
 

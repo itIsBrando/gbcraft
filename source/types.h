@@ -22,6 +22,7 @@ typedef enum {
     ENT_TYPE_SLIME,
     ENT_TYPE_ZOMBIE,
     ENT_TYPE_FURNITURE,
+    ENT_TYPE_ITEM_ENTITY,
 } ent_type_t;
 
 
@@ -108,7 +109,7 @@ typedef struct level_t level_t;
 typedef struct {
     void (*onhurt)(struct ent_t *, struct ent_t *);      // called when damage is received
     void (*doDamage)(struct ent_t *, struct ent_t *);    // called when damage is done
-    void (*ontouch)(struct ent_t *, struct ent_t *);     // called when entity collides with this
+    void (*ontouch)(ent_t *, ent_t *, u16, u16);     // called when entity collides with this
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
@@ -215,6 +216,14 @@ typedef struct {
 } slime_t;
 
 
+typedef struct {
+    s8 dx;
+    s8 dy;
+    u16 frames_alive;
+    item_t *item;
+} itemEntity_t;
+
+
 typedef struct ent_t {
     u16 x, y;          // absolute X and Y coordinates of map
     s8 xKnockback, yKnockback;
@@ -224,6 +233,7 @@ typedef struct ent_t {
         zombie_t zombie;
         slime_t slime;
         furniture_t furniture;
+        itemEntity_t itemEntity;
     };
     obj_t *sprite;       // refers to OAM sprite representing this entity
     level_t *level;
