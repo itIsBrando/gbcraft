@@ -239,8 +239,6 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 // @todo prevent item from being placed on solid tile
 bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
-    // if(tile->event->maypass && !tile->event->maypass(plr))
-        // return false;
 
     // create furniture item
     x = (x << 4) - bg_get_scx(main_background);
@@ -250,7 +248,13 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
 
     ent_t *e = ent_add(plr->level, ENT_TYPE_FURNITURE, x, y);
     e->furniture = item->furniture;
-    spr_set_tile(e->sprite, 53);
+    spr_set_tile(e->sprite, 53);  // @todo tile number will change based on furniture used
+
+    if(tile->event->maypass && !tile->event->maypass(e))
+    {
+        ent_remove(plr->level, e);
+        return false;
+    }
 
     item_change_count(item, -1);
 

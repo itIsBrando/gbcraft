@@ -36,12 +36,15 @@ void ent_player_update(ent_t *plr);
 void ent_slime_update(ent_t *s);
 void ent_zombie_update(ent_t *zombie);
 void ent_furniture_update(ent_t *e);
+void ent_item_update(ent_t *e);
 
 void ent_furniture_interact(ent_t *, ent_t *, s8);
 void ent_slime_hurt(ent_t *, ent_t *, s8);
 void ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
+
+void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
 
 void ent_player_set_active_item(ent_t *plr, item_t *item);
 #endif
