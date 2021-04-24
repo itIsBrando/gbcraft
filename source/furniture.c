@@ -3,11 +3,42 @@
 #include "item.h"
 
 #include "obj.h"
+#include "text.h"
 #include "memory.h"
 
-
+// sizes changes here need to be reflected in `furniture.h`
 const recipe_t CRAFTING_RECIPES[] = {
-    { // stone axe crafting
+    { // wood axe crafting
+        .result=&ITEM_WOOD_AXE,
+        .costs_num=1,
+        .costs = {
+            {
+                .item_type=ITEM_TYPE_WOOD,
+                .required_amount=8,
+            }
+        }
+    },
+    { // wood pickaxe
+        .result=&ITEM_WOOD_PICKAXE,
+        .costs_num=1,
+        .costs = {
+            {
+                .item_type=ITEM_TYPE_WOOD,
+                .required_amount=10,
+            }
+        }
+    },
+    { // wood sword
+        .result=&ITEM_WOOD_SWORD,
+        .costs_num=1,
+        .costs = {
+            {
+                .item_type=ITEM_TYPE_WOOD,
+                .required_amount=5,
+            }
+        }
+    },
+    { // stone axe
         .result=&ITEM_STONE_AXE,
         .costs_num=2,
         .costs = {
@@ -17,7 +48,7 @@ const recipe_t CRAFTING_RECIPES[] = {
             },
             {
                 .item_type=ITEM_TYPE_WOOD,
-                .required_amount=8,
+                .required_amount=5,
             }
         }
     },
@@ -31,7 +62,7 @@ const recipe_t CRAFTING_RECIPES[] = {
             },
             {
                 .item_type=ITEM_TYPE_WOOD,
-                .required_amount=10,
+                .required_amount=5,
             }
         }
     },
@@ -49,6 +80,16 @@ const recipe_t CRAFTING_RECIPES[] = {
             }
         }
     },
+    { // chest
+        .result=&ITEM_CHEST,
+        .costs_num=1,
+        .costs = {
+            {
+                .item_type=ITEM_TYPE_WOOD,
+                .required_amount=20,
+            }
+        }
+    },
 };
 
 
@@ -62,9 +103,17 @@ void ent_furniture_update(ent_t *e)
 
 void ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
 {
-    if(f->furniture == FURNITURE_TYPE_CRAFTING)
+    switch (f->furniture.type)
     {
+    case FURNITURE_TYPE_CRAFTING:
         mnu_open_crafting(plr);
+        break;
+    case FURNITURE_TYPE_CHEST:
+        mnu_open_chest(f, plr);
+        break;
+    default:
+        text_error("Unknown furniture type");
+        break;
     }
 }
 

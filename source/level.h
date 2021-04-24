@@ -16,6 +16,8 @@ void lvl_set_data(level_t *lvl, u16 x, u16 y, u8 v);
 
 void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile);
 
+u16 lvl_to_pixel_x(level_t *lvl, u16 tx);
+u16 lvl_to_pixel_y(level_t *lvl, u16 ty);
 
 void lvl_blit(level_t *lvl);
 

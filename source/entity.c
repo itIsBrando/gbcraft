@@ -123,8 +123,9 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
     ent->level = lvl;
     ent->sprite = spr_alloc(x, y, __tiles[type]);
 
-    if(ent->events->init)
+    if(ent->events->init) {
         ent->events->init(ent);
+    }
 
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
     return ent;
@@ -204,13 +205,9 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
         u16 tx = (x + dx[i]) >> 4;
         u16 ty = (y + dy[i]) >> 4;
         const tile_t *tile = lvl_get_tile(ent->level, tx, ty);
-        bool (*maypass)(ent_t*) = tile->event->maypass;
-        void (*ontouch)(ent_t*) = tile->event->ontouch;
-        
-        if(ontouch)
-            ontouch(ent);
+        const tile_event_t *events = tile->event;
 
-        if(maypass && !maypass(ent))
+        if(events->maypass && !events->maypass(ent))
             return false;
     }
 
@@ -224,17 +221,22 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
 
     for(u16 i = 0; i < s; i++)
     {
-        if(e[i]->events->maypass && !e[i]->events->maypass(e[i], ent))
+        const ent_event_t *events = e[i]->events;
+        if(events->maypass && !events->maypass(e[i], ent))
         {
             free(e);
             return false;
         }
+
+        if(events->ontouch)
+            events->ontouch(e[i], ent, px, py);
     }
 
     free(e);
 
     return true;
 }
+
 
 /**
  * @note both dx and dy != 0
@@ -290,10 +292,11 @@ u8 _get_magnitude(s8 a)
 void ent_apply_knockback(ent_t *e)
 {
     direction_t d = dir_get(e->xKnockback, e->yKnockback);
+    const int xMag = _get_magnitude(e->xKnockback);
+    const int yMag = _get_magnitude(e->yKnockback);
+    int dist = xMag != 0 ? xMag : yMag;
 
-    // @todo the sum of the vectors is a weird way to do this.
-    //   it assumes the one component is 0
-    for(u8 i = 0; i < _get_magnitude(e->xKnockback) + _get_magnitude(e->yKnockback); i++)
+    for(uint i = 0; i < dist; i++)
         ent_move(e, d);
     
     _dec_magnitude(&e->xKnockback);

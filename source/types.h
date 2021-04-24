@@ -72,7 +72,8 @@ typedef enum {
 typedef enum {
     FURNITURE_TYPE_CRAFTING,
     FURNITURE_TYPE_CHEST,
-} furniture_t;
+    FURNITURE_TYPE_FURNITURE,
+} furniture_type_t;
 
 
 
@@ -104,18 +105,14 @@ typedef struct item_t item_t;
 typedef struct tile_t tile_t;
 typedef struct inventory_t inventory_t;
 typedef struct level_t level_t;
+typedef struct furniture_t furniture_t;
 
 
 typedef struct {
-<<<<<<< HEAD
     void (*onhurt)(ent_t *, ent_t *, s8);      // called when damage is received
     void (*init)(ent_t *);    // called when damage is done
-    void (*ontouch)(struct ent_t *, struct ent_t *);     // called when entity collides with this
-=======
-    void (*onhurt)(struct ent_t *, struct ent_t *);      // called when damage is received
-    void (*doDamage)(struct ent_t *, struct ent_t *);    // called when damage is done
-    void (*ontouch)(ent_t *, ent_t *, u16, u16);     // called when entity collides with this
->>>>>>> school
+    void (*doDamage)(ent_t *, ent_t *);    // called when damage is done
+    void (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y */
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
@@ -139,7 +136,7 @@ typedef struct tile_event_t {
     void(*onhurt)(ent_t *);
     void(*ontouch)(ent_t *);
     bool(*maypass)(ent_t *);
-    void (*interact)(ent_t *, item_t *item, u16 x, u16 y);
+    void (*interact)(ent_t *, item_t *item, u16 x, u16 y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
 } tile_event_t;
 
 
@@ -154,12 +151,13 @@ typedef enum {
     TOOL_TYPE_PICKUP
 } tooltype_t;
 
+
 typedef struct item_t {
     u16 tile; // tile number of the inventory representation
     item_type_t type;
     union {
         tooltype_t tooltype;
-        furniture_t furniture;
+        furniture_type_t furnituretype;
     };
     union {
         u8 level;   // used for tools
@@ -176,6 +174,12 @@ typedef struct inventory_t {
     item_t items[30];
     ent_t *parent;
 } inventory_t;
+
+
+typedef struct furniture_t {
+    furniture_type_t type;
+    inventory_t inventory;
+} furniture_t;
 
 
 typedef struct {
@@ -231,6 +235,7 @@ typedef struct {
     s8 dx;
     s8 dy;
     u16 frames_alive;
+    u8 count;
     item_t *item;
 } itemEntity_t;
 

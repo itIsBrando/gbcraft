@@ -32,7 +32,7 @@ void text_print(char *string, u16 x, u16 y);
  * @param x tile x
  * @param y tile y
  */
-void text_uint(u16 num, u16 x, u16 y);
+void text_uint(u16 num, uint x, uint y);
 
 
  void text_char(char character, const u16 x, const u16 y);

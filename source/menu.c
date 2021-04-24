@@ -66,21 +66,23 @@ void mnu_free_item_list(obj_t **icons, u8 size)
 
 /**
  * @param size number of items in the list
+ * @param tx tile x to start drawing list (2)
+ * @param ty tile y to start drawing list (2)
  * @returns a pointer to must be passed to `mnu_free_item_list`
  */
-obj_t **mnu_draw_item_list(item_t *items, u8 size)
+obj_t **mnu_draw_item_list(item_t *items, u8 size, uint tx, uint ty)
 {
     obj_t **icons = malloc(sizeof(obj_t *) * size);
 
     // init all items in inventory
-    for(u16 i = 0; i < size; i++)
+    for(uint i = 0; i < size; i++)
     {
-        text_print((char*)items[i].name, 2, 2 + i);
+        text_print((char*)items[i].name, tx, ty + i);
 
         if(items[i].type != ITEM_TYPE_TOOL)
-            text_uint(items[i].count, 12, 2 + i);
+            text_uint(items[i].count, tx + 10, 2 + i);
 
-        icons[i] = spr_alloc(16, 24 + (i << 3), items[i].tile);
+        icons[i] = item_new_icon(&items[i], (tx << 3), 8 + ((ty + i) << 3));
     }
 
     return icons;
@@ -92,7 +94,7 @@ void mnu_show_inventory(ent_t *player)
     WIN_REGULAR *win = win_get_0();
 
     text_print("INVENTORY", 0, 0);
-    bg_fill(win->background, 0, 1, 20, 10, 0);
+    bg_fill(win->background, 0, 1, 28, 10, 0);
     ent_hide_all(player->level);
 
     mnu_scroll_up();    
@@ -102,7 +104,7 @@ void mnu_show_inventory(ent_t *player)
 
     u16 key;
 
-    obj_t **icons = mnu_draw_item_list(inv->items, inv_size);
+    obj_t **icons = mnu_draw_item_list(inv->items, inv_size, 2, 2);
 
     obj_t *cursor = spr_alloc(8, 24, 16);
     u8 curY = 0;
@@ -116,7 +118,7 @@ void mnu_show_inventory(ent_t *player)
         else if((key & KEY_DOWN) && curY < inv_size-1)
             curY++;
 
-        if(key == KEY_A)
+        if(key == KEY_A && inv_size)
         {
             ent_player_set_active_item(player, &inv->items[curY]);
             break;
@@ -151,28 +153,35 @@ static void _crafting_draw_costs(const recipe_t *recipe, obj_t **icons, ent_t *p
 
     item_t *c = item_get_from_inventory_matching(recipe->result, &plr->player.inventory);
     text_print("YOU HAVE:", x, y + 5);
-    text_uint(c ? c->count : 0, x + 1, y + 6);
+    text_uint(c ? (recipe->result->type == ITEM_TYPE_TOOL ? 1 : c->count) : 0, x + 1, y + 6);
 
-    for(u16 i = 0; i < recipe->costs_num; i++)
+    for(uint i = 0; i < recipe->costs_num; i++)
     {
         const cost_t *cost = &recipe->costs[i];
         item_t *in_possession = item_get_from_inventory(cost->item_type, &plr->player.inventory);
         u8 count = in_possession ? in_possession->count : 0;
 
         spr_move(icons[i], 8 + (x << 3), 8 + ((y + i) << 3));
-        spr_set_tile(icons[i], item_get_from_type(cost->item_type, -1)->tile);
+        item_set_icon(icons[i], item_get_from_type(cost->item_type, -1));
         
         if(count < cost->required_amount)
             text_set_pal(1); // set text to red
         else
             text_set_pal(0); // otherwise set to blue
+            
         text_uint(count, x + 1, y + i);
         text_uint(cost->required_amount, x+4, y + i);
         text_char('/', x + 3, y + i);
     }
 
+    for(uint i = recipe->costs_num; i < 4; i++)
+    {
+        spr_hide(icons[i]);
+    }
+
     text_set_pal(0);
 }
+
 
 /**
  * Checks to see if an inventory can craft a recipe
@@ -198,7 +207,7 @@ void mnu_open_crafting(ent_t *plr)
     WIN_REGULAR *win = win_get_0();
 
     text_print("CRAFTING", 0, 0);
-    bg_fill(win->background, 0, 1, 20, 10, 0);
+    bg_fill(win->background, 0, 1, 28, 10, 0);
 
     ent_hide_all(plr->level);
 
@@ -211,7 +220,7 @@ void mnu_open_crafting(ent_t *plr)
         items[i] = *CRAFTING_RECIPES[i].result;
     }
 
-    obj_t **icons = mnu_draw_item_list(items, CRAFTING_RECIPES_SIZE);
+    obj_t **icons = mnu_draw_item_list(items, CRAFTING_RECIPES_SIZE, 2, 2);
     u16 key;
 
     obj_t **costIcons = malloc(4 * sizeof(obj_t *));
@@ -244,11 +253,13 @@ void mnu_open_crafting(ent_t *plr)
             // if we can actually craft
             if(item_can_craft(r, &plr->player.inventory))
             {
-                for(u8 i = 0; i < r->costs_num; i++)
+                // remove costs from inventory
+                for(uint i = 0; i < r->costs_num; i++)
                 {
                     item_t *item = item_get_from_inventory(r->costs[i].item_type, &plr->player.inventory);
                     item_change_count(item, -r->costs[i].required_amount);
                 }
+
                 item_add_to_inventory(r->result, &plr->player.inventory);
                 _crafting_draw_costs(&CRAFTING_RECIPES[curY], costIcons, plr);
             }
@@ -278,6 +289,91 @@ void mnu_open_crafting(ent_t *plr)
 
 
 /**
+ * Opens the menu for a chest
+ * @param e chest entity
+ * @param plr player entity who opened chest
+ */
+void mnu_open_chest(ent_t *e, ent_t *plr)
+{
+    WIN_REGULAR *win = win_get_0();
+
+    bg_fill(win->background, 0, 0, 28, 10, 0);
+    text_print("INVENTORY", 0, 0);
+    text_print("CHEST", 23, 0);
+
+    ent_hide_all(plr->level);
+
+    mnu_scroll_up();
+
+    inventory_t *plr_inv = &plr->player.inventory;
+    inventory_t *chst_inv= &e->furniture.inventory;
+    inventory_t *invs[] = {plr_inv, chst_inv};
+
+    // store all of the item icons in a list
+    obj_t **plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 2, 2);
+    obj_t **chest_icons = mnu_draw_item_list(chst_inv->items, chst_inv->size, 16, 2);
+    u16 key;
+
+    uint xCur = 0, yCur = 0;
+    obj_t *cursor = spr_alloc(8, 24, 16);
+
+    do {
+        key_scan();
+        key = key_pressed_no_repeat();
+
+        if((key & KEY_UP) && yCur > 0)
+            yCur--;
+        else if((key & KEY_DOWN) && yCur < invs[xCur]->size - 1)
+            yCur++;
+        
+        if(key & KEY_LEFT)
+            yCur = xCur = 0;
+        else if(key & KEY_RIGHT)
+            yCur = 0, xCur = 1;
+
+        // switch inventory stuff
+        if(key & KEY_A)
+        {
+            inventory_t *curInv = invs[xCur];
+            inventory_t *otherInv = invs[!xCur];
+            const item_t *item = &curInv->items[yCur];
+
+            if(curInv->size) {
+                mnu_free_item_list(plr_icons, plr_inv->size);
+                mnu_free_item_list(chest_icons, chst_inv->size);
+                
+                item_add_to_inventory(item, otherInv);
+                item_remove_from_inventory((item_t *)item);
+
+                bg_fill(win->background, 0, 1, 30, 10, 0);
+                plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 2, 2);
+                chest_icons = mnu_draw_item_list(chst_inv->items, chst_inv->size, 16, 2);
+
+                // prevent overflow
+                if(yCur == curInv->size && yCur)
+                    yCur--;
+            }
+        }
+
+        spr_move(cursor, 8 + (xCur * 14 * 8), 24 + (yCur << 3));
+
+        VBlankIntrWait();
+        spr_copy_all();
+    } while(key != KEY_B);
+
+    mnu_free_item_list(plr_icons, plr_inv->size);
+    mnu_free_item_list(chest_icons, chst_inv->size);
+    spr_free(cursor);
+    spr_copy_all();
+
+    mnu_scroll_down();
+    ent_show_all(plr->level);
+    mnu_draw_hotbar(plr);
+}
+
+
+
+/**
  * Draws the player's hotbar
  */
 void mnu_draw_hotbar(ent_t *player)
@@ -297,7 +393,7 @@ void mnu_draw_hotbar(ent_t *player)
  * @param x tile x
  * @param y tile y
  */
-void mnu_draw_item(item_t *item, u16 x, u16 y)
+void mnu_draw_item(item_t *item, uint x, uint y)
 {
     text_print(item ? (char*)item->name : "NONE", x, y);
     text_uint(item->count, x + 10, y);

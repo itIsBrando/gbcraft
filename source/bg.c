@@ -118,7 +118,7 @@ u16 bg_get_tile(const BG_REGULAR *bg, u16 tx, u16 ty)
 }
 
 
-void bg_write_tile(const BG_REGULAR *bg, u16 x, u16 y, u16 tile)
+void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, u16 tile)
 {
     if(bg->is_affine)
     {
@@ -136,7 +136,7 @@ void bg_write_tile(const BG_REGULAR *bg, u16 x, u16 y, u16 tile)
 }
 
 
-void bg_rect(const BG_REGULAR *bg, u16 x, u16 y, const u16 w, const u16 h, void *data)
+void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, void *data)
 {
     vu16 *ptr;
     u16 i, j;
@@ -145,7 +145,7 @@ void bg_rect(const BG_REGULAR *bg, u16 x, u16 y, const u16 w, const u16 h, void 
     {
         x >>= 1;
         y >>= 1;
-        ptr = map_mem[bg->map_base] + (u32)(y << bg->width_bits) + x;
+        ptr = map_mem[bg->map_base] + (y << bg->width_bits) + x;
         for(j = 0; j < h; j++)
         {
             for (i = 0; i < w >> 1; i++)
@@ -173,7 +173,7 @@ void bg_rect(const BG_REGULAR *bg, u16 x, u16 y, const u16 w, const u16 h, void 
 }
 
 
-void bg_fill(const BG_REGULAR *bg, u16 x, u16 y, u16 w, u16 h, u16 tile)
+void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
 {
     vu16 *ptr;
     u16 i, j;

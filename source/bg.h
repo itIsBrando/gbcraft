@@ -35,7 +35,7 @@ void bg_hide(const BG_REGULAR *bg);
 /**
  * Fills the rectangle from (x, y) to (w, h) with `tile`
  */
-void bg_fill(const BG_REGULAR *bg, u16 x, u16 y, u16 w, u16 h, u16 tile);
+void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile);
 
 
 /**
@@ -45,7 +45,7 @@ void bg_fill(const BG_REGULAR *bg, u16 x, u16 y, u16 w, u16 h, u16 tile);
  * @param x unclipped tile y position
  * @param tile tile
  */
-void bg_write_tile(const BG_REGULAR *bg, u16 x, u16 y, u16 tile);
+void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, u16 tile);
 
 void bg_move_by(BG_REGULAR *bg, const direction_t direction);
 
@@ -68,7 +68,7 @@ void bg_set_size(BG_REGULAR *bg, bg_map_size_t size);
  * @param h height of data
  * @param data u16 pointer to tile data. If affine, then it must be u8 pointer
  */
-void bg_rect(const BG_REGULAR *bg, u16 x, u16 y, const u16 w, const u16 h, void *data);
+void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, void *data);
 
 
 void bg_move(BG_REGULAR *bg, const u16 x, const u16 y);

@@ -35,7 +35,9 @@ int main(void) {
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
-	memcpy16(SPRITE_PALETTE, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16(sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16(sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16(sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen >> 1);
 	memcpy16(background_palette_mem, (u16*)tilesetPal, tilesetPalLen >> 1);
 
 	// copy sprite to tile 1 in tileblock 4
@@ -46,7 +48,9 @@ int main(void) {
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
-	sprite_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red
+	background_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red
+	sprite_palette_mem[16 + 2] = RGB15(0xd, 8, 07); // set color brown (for wood tools)
+	sprite_palette_mem[32 + 2] = RGB15(29, 29, 28); // set color cream (for iron tools)
 
 	BG_REGULAR bg;
 	main_background = &bg;
@@ -87,6 +91,7 @@ int main(void) {
 	item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 	item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
+	item_add_to_inventory(&ITEM_CHEST, &plr->player.inventory);
 
 	while (true) {
 		key_scan();

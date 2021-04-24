@@ -61,9 +61,9 @@ terr_t *noise(u16 mapSize, u8 featureSize)
         }
 
         // do square step
-        for(u8 y = 0; y < h-1; y += halfSize)
+        for(uint y = 0; y < h-1; y += halfSize)
         {
-            for(u8 x = 0; x < w-1; x += halfSize)
+            for(uint x = 0; x < w-1; x += halfSize)
             {
                 terr_t avg1 = getSample(x, y)
                 + getSample(x + width, y)
@@ -105,7 +105,7 @@ void gen_generate(level_t *lvl)
 {
     terr_t *n1 = noise(lvl->size, 32);
 
-    for(u16 index = 0; index < LEVEL_SIZE; index++)
+    for(uint index = 0; index < LEVEL_SIZE; index++)
     {
             u8 tile = TILE_WATER;
 

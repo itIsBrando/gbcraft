@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "text.h"
+#include "obj.h"
 
 #include "menu.h"
 #include "item.h"
@@ -43,25 +44,25 @@ const item_t ALL_ITEMS[] = {
         .type=ITEM_TYPE_STONE,
         .name="STONE",
     },
-    { // axe
+    { // axe (STONE)
         .tile=17,
-        .level=1,
+        .level=2,
         .event=&ITEM_EVENTS[2],
         .type=ITEM_TYPE_TOOL,
         .tooltype=TOOL_TYPE_AXE,
         .name="STONE AXE",
     },
-    { // pickaxe
+    { // pickaxe (STONE)
         .tile=19,
-        .level=1,
+        .level=2,
         .event=&ITEM_EVENTS[2],
         .type=ITEM_TYPE_TOOL,
         .tooltype=TOOL_TYPE_PICKAXE,
         .name="STONE PICK",
     },
-    { // sword
+    { // sword (STONE)
         .tile=18,
-        .level=1,
+        .level=2,
         .event=&ITEM_EVENTS[2],
         .type=ITEM_TYPE_TOOL,
         .tooltype=TOOL_TYPE_SWORD,
@@ -79,8 +80,41 @@ const item_t ALL_ITEMS[] = {
         .tile=34,
         .count=1,
         .event=&ITEM_EVENTS[3],
+        .furnituretype=FURNITURE_TYPE_CRAFTING,
         .type=ITEM_TYPE_FURNITURE,
         .name="BENCH",
+    },
+    { // axe (WOOD)
+        .tile=17,
+        .level=1,
+        .event=&ITEM_EVENTS[2],
+        .type=ITEM_TYPE_TOOL,
+        .tooltype=TOOL_TYPE_AXE,
+        .name="WOOD AXE",
+    },
+    { // pickaxe (WOOD)
+        .tile=19,
+        .level=1,
+        .event=&ITEM_EVENTS[2],
+        .type=ITEM_TYPE_TOOL,
+        .tooltype=TOOL_TYPE_PICKAXE,
+        .name="WOOD PICK",
+    },
+    { // sword (WOOD)
+        .tile=18,
+        .level=1,
+        .event=&ITEM_EVENTS[2],
+        .type=ITEM_TYPE_TOOL,
+        .tooltype=TOOL_TYPE_SWORD,
+        .name="WOOD SWORD",
+    },
+    {  // chest
+        .tile=33,
+        .count=1,
+        .event=&ITEM_EVENTS[3],
+        .furnituretype=FURNITURE_TYPE_CHEST,
+        .type=ITEM_TYPE_FURNITURE,
+        .name="CHEST",
     }
 };
 
@@ -113,9 +147,9 @@ bool item_can_attack(const item_t *item)
 
 void item_add_to_inventory(const item_t *item, inventory_t *inv)
 {
-    item_t *i = item_get_from_inventory(item->type, inv);
+    item_t *i = item_get_from_inventory_matching(item, inv);
     // check if we already have this item in our inventory
-    if(i && i->type != ITEM_TYPE_TOOL) {
+    if(i) {
         i->count += item->count;
     } else {
         item_t *inv_item = &inv->items[inv->size++];
@@ -134,7 +168,7 @@ bool item_remove_from_inventory(item_t *item)
 
     for(u16 i = 0; i < inv->size; i++)
     {
-        if(inv->items[i].type == item->type)
+        if(&inv->items[i] == item)
         {
             memcpy(&inv->items[i], &inv->items[i + 1], (30 - i) * sizeof(item_t));
             inv->size--;
@@ -151,7 +185,15 @@ item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *
     for(u16 i = 0; i < inv->size; i++)
     {
         if(inv->items[i].type == item->type && inv->items[i].tooltype == item->tooltype)
+        {
+            // make sure the tool levels are equal
+            if(item->type == ITEM_TYPE_TOOL && item->level != inv->items[i].level)
+                break;
+            else if(item->type == ITEM_TYPE_FURNITURE && item->furnituretype != inv->items[i].furnituretype)
+                break;
+            
             return (item_t*)&inv->items[i];
+        }
     }
 
     return NULL;
@@ -201,24 +243,28 @@ bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
 }
 
 
+static const item_t *_furn_items[] = {
+    &ITEM_BENCH,
+    &ITEM_CHEST,
+};
+
 
 bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
+
     // pick up furniture entities
     if(item->tooltype == TOOL_TYPE_PICKUP)
     {
-        x <<= 4, y <<= 4;
-        x -= bg_get_scx(main_background);
-        y -= bg_get_scy(main_background);
+        x = lvl_to_pixel_x(plr->level, x);
+        y = lvl_to_pixel_y(plr->level, y);
         u8 s;
         ent_t **e = ent_get_all(plr->level, x, y, &s);
 
-        for(u16 i = 0; i < s; i++)
+        for(uint i = 0; i < s; i++)
         {
             if(e[i]->type == ENT_TYPE_FURNITURE)
             {
-                // @todo allow the type of furniture item to depend on the type of entity
-                item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
+                item_add_to_inventory(_furn_items[e[i]->furniture.type], &plr->player.inventory);
                 ent_remove(e[i]->level, e[i]);
                 free(e);
                 return true;
@@ -236,7 +282,9 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-// @todo prevent item from being placed on solid tile
+// sprite indexes for 16x16 furniture sprites
+static const u8 _fur_spr[] = {53, 49};
+
 bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
 
@@ -247,8 +295,8 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
     y += dir_get_y(plr->dir);
 
     ent_t *e = ent_add(plr->level, ENT_TYPE_FURNITURE, x, y);
-    e->furniture = item->furniture;
-    spr_set_tile(e->sprite, 53);  // @todo tile number will change based on furniture used
+    e->furniture.type = item->furnituretype;
+    spr_set_tile(e->sprite, _fur_spr[item->furnituretype]);  // @todo tile number will change based on furniture used
 
     if(tile->event->maypass && !tile->event->maypass(e))
     {
@@ -291,4 +339,33 @@ void item_change_count(item_t *item, const s8 change)
     }
 
 
+}
+
+/** palette numbers for tools
+ * - wood
+ * - stone
+ * - iron
+ * - gold
+ * - gem
+*/
+static const u16 _pals[] = {1, 0, 0};
+
+
+obj_t *item_new_icon(item_t *item , u16 x, u16 y)
+{
+    obj_t *s = spr_alloc(x, y, item->tile);
+    item_set_icon(s, item);
+    
+    return s;
+}
+
+
+/** @see item_new_icon */
+void item_set_icon(obj_t *obj, const item_t *item)
+{
+    spr_set_tile(obj, item->tile);
+    spr_show(obj);
+
+    if(item->type == ITEM_TYPE_TOOL)
+        spr_set_pal(obj, _pals[item->level-1]);
 }

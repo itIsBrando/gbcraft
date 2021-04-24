@@ -100,10 +100,35 @@ level_t *lvl_new(u16 layer, level_t *parent)
 }
 
 
+/**
+ * Converts an absolute tile x coordinate to a pixel x coordinate
+ * @returns x coordinate between 0-320
+ */
+inline u16 lvl_to_pixel_x(level_t *lvl, u16 tx)
+{
+    tx <<= 4;
+    tx -= bg_get_scx(main_background);
+    return tx;
+}
+
+
+/**
+ * Converts an absolute tile y coordinate to a pixel y coordinate
+ * @returns y coordinate between 0-240
+ */
+inline u16 lvl_to_pixel_y(level_t *lvl, u16 ty)
+{
+    ty <<= 4;
+    ty -= bg_get_scy(main_background);
+    return ty;
+}
+
+
+
 void lvl_blit(level_t *lvl)
 {
     text_print("RENDERING WORLD", 0, 2);
-    // tile_render_use_recursion(false);
+    tile_render_use_recursion(false);
 
     for(u16 y = 0; y < lvl->size; y++)
     {

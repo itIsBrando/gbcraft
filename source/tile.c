@@ -2,6 +2,7 @@
 #include "tile.h"
 #include "item.h"
 #include "player.h"
+#include "entity.h"
 
 #include "text.h"
 #include "bg.h"
@@ -96,7 +97,7 @@ tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u
 
     tile_surround_mask mask = 0;
 
-    for(u16 i = 0; i < 8; i++)
+    for(uint i = 0; i < 8; i++)
     {
         mask <<= 1;
         if(type == lvl_get_tile_type(lvl, x + dx[i], y + dy[i]))
@@ -208,7 +209,7 @@ void tile_render_nearby(tile_surround_mask mask, const level_t *lvl, const tile_
     if(!_use_recursion)
         return;
 
-    for(u8 i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
     {
         s16 xx = x + (dir_get_x(i) << 1),
             yy = y + (dir_get_y(i) << 1);
@@ -287,7 +288,7 @@ void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
     if(dmg > 20)
     {
         lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-        item_add_to_inventory(&ITEM_WOOD, &lvl_get_player(lvl)->player.inventory);
+        ent_item_new(lvl, lvl_to_pixel_x(lvl, x), lvl_to_pixel_y(lvl, y), (item_t*)&ITEM_WOOD, 2);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
@@ -322,7 +323,7 @@ void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
     if(dmg > 20)
     {
         lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-        item_add_to_inventory(&ITEM_STONE, &lvl_get_player(lvl)->player.inventory);
+                ent_item_new(lvl, lvl_to_pixel_x(lvl, x), lvl_to_pixel_y(lvl, y), (item_t*)&ITEM_STONE, 2);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
@@ -367,7 +368,7 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
  */
 const tile_t *tile_get(tile_type_t type)
 {
-    for(u16 i = 0; i < sizeof(tile_tile_data) / sizeof(tile_tile_data[0]); i++)
+    for(uint i = 0; i < sizeof(tile_tile_data) / sizeof(tile_tile_data[0]); i++)
     {
         if(type == tile_tile_data[i].type)
             return &tile_tile_data[i];

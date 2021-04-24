@@ -4,7 +4,7 @@
 #include "types.h"
 
 
-#define CRAFTING_RECIPES_SIZE 3
+#define CRAFTING_RECIPES_SIZE 7
 
 extern const recipe_t CRAFTING_RECIPES[];
 

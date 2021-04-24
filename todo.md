@@ -4,14 +4,23 @@
 ### Features
 - [ ] Add real player tracking to zombie
 - [ ] Add player side sprite
-- [ ] Add chest
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Add `interrupt.h`
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
-- [ ] Add tile drops
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
+- [ ] Create stairs
+- [ ] Create generation for caves
+- [ ] Add iron
+- [ ] Add coal
+- [ ] Add gold
+- [ ] Add gem
+- [ ] Add furnace
+- [ ] Add wood floor
+- [ ] Add seed selection
+- [x] Add chest
+- [x] Add tile drops
 - [x] Add `hotbar.h`
 - [x] Add slime tile
 - [x] Add slime entity
@@ -48,9 +57,10 @@
 - [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
 - [ ] Animate player
+- [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
 - [ ] Prevent furniture from being able to be placed in the water
-- [ ] Add indication that a tile is being destroyed
+- [ ] **Add indication that a tile is being destroyed**
 - [ ] Add inner-corner tiles for `9pt indexing`
 - [ ] Create a modified version of `ent_get_all` that uses the stack instead of the heap
 - [x] Allow `A` button for exiting inventory
@@ -58,16 +68,19 @@
 
 
 ### Bug
-- [ ] Confirm functional collision with other entities
 - [ ] **Fix weird & fast zombie movement**
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Entities are visible above the hotbar
 - [ ] Grass does not connect to tree
 - [ ] Entities are drawn above the hotbar
-- [ ] Cursor position does not line up with tile placement
-- [ ] Game crashes opening inventory menu with no items
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
+- [x] Confirm functional collision with other entities
+- [x] Pick up tool does not work
+- [x] Cursor position does not line up with tile placement
+- [x] Game crashes opening inventory menu with no items
+- [x] Crafting cost sprites are not properly hidden when switching between items
+- [x] `pick up` tool counts as a wood axe?!
 - [x] Some sprites appear as ghosts on the menus
 - [x] Crafting table does not open
 - [x] Fix weird cursor positioning

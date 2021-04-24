@@ -30,7 +30,7 @@ void text_print(char *string, u16 x, u16 y)
 }
 
 
-void text_uint(u16 num, u16 x, u16 y)
+void text_uint(u16 num, uint x, uint y)
 {
     char buffer[6];
     u16 i = 4;

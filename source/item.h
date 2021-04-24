@@ -10,6 +10,10 @@
 #define ITEM_STONE_SWORD    ALL_ITEMS[4]
 #define ITEM_PICKUP         ALL_ITEMS[5]
 #define ITEM_BENCH          ALL_ITEMS[6]
+#define ITEM_WOOD_AXE       ALL_ITEMS[7]
+#define ITEM_WOOD_PICKAXE   ALL_ITEMS[8]
+#define ITEM_WOOD_SWORD     ALL_ITEMS[9]
+#define ITEM_CHEST          ALL_ITEMS[10]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -60,6 +64,22 @@ item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *
  */
 item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv);
 
+
+/**
+ * Creates a sprite that shows the graphical representation of an item
+ * @param item item used for the icon
+ * @param x pixel x coordinate
+ * @param y pixel y coordinate
+ */
+obj_t *item_new_icon(item_t *item , u16 x, u16 y);
+
+
+/**
+ * Same as `item_new_icon()` but does not create a new sprite
+ * @param obj sprite
+ * @param item item
+ */
+void item_set_icon(obj_t *obj, const item_t *item);
 
 /**
  * Updates an entity's position if it is on screen

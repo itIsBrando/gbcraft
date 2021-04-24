@@ -108,7 +108,7 @@ inline void spr_hide(obj_t *obj)
 
 
 /**
- * Shows a sprite
+ * Shows a sprite. Default is shown
  */
 inline void spr_show(obj_t *obj)
 {

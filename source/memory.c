@@ -41,7 +41,7 @@ u16 rnd_random()
  * @note from Tonc
  * @warning (max - min) < 0x8000
  */
-inline s16 rnd_random_bounded(s16 min, s16 max)
+inline int rnd_random_bounded(int min, int max)
 {
 	return (rnd_random()*(max-min)>>15)+min;
 }

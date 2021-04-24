@@ -69,7 +69,7 @@ void spr_move(obj_t *, const u16, const u8);
 
 
 /**
- * Sets paletting mode
+ * Sets paletting mode. Defaults to 4BPP
  * @param is8bpp true to use 256colors, false to use 16colors
  */
 void spr_set_color_mode(obj_t *obj, const bool is8bpp);
@@ -83,7 +83,7 @@ void spr_set_priority(obj_t *obj, spr_priority_t priority);
 
 
 /**
- * Sets the palette number for a sprite in 4BPP.
+ * Sets the palette number for a sprite in 4BPP. Default is 0
  * @param pal 0x00-0x0F
  */
 void spr_set_pal(obj_t *obj, u8 pal);
