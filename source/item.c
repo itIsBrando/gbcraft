@@ -12,111 +12,61 @@
 // order does matter. Just append to end
 item_event_t ITEM_EVENTS[] = 
 {
-    { // wood
+    [0]={ // wood
         .interact=item_wood_interact
     },
-    { // stone
+    [1]={ // stone
         .interact=item_stone_interact
     },
-    { // tools
+    [2]={ // tools
         .canattack=item_can_attack_all,
         .interact=item_tool_interact
     },
-    { // furniture
+    [3]={ // furniture
         .interact=item_furniture_interact
+    },
+    [4]={ // ore & gem
+        
     }
 };
 
+/**
+ * @param name name of the item 
+ * @param tile tile index of item
+ * @param type item_type_t
+ * @param eventNum index of the events in ITEM_EVENTS
+ * @param level Should be 1 for regular items or equal to the level of a tool if the item is a tool
+ * @param __VA_ARGS__ extra properties
+ */
+#define DEFINE_ITEM(_name, _tile, _type, _eventNum, _level, ...) { \
+ .tile=(_tile),\
+ .count=(_level),\
+ .event=&ITEM_EVENTS[_eventNum],\
+ .type=_type,\
+ .name=_name,\
+ __VA_ARGS__\
+}
 
 /** @note these can be in any order, so long as indexes are changed in `item.h` **/
 const item_t ALL_ITEMS[] = {
-    { // wood
-        .tile=9,
-        .count=1,
-        .event=&ITEM_EVENTS[0],
-        .type=ITEM_TYPE_WOOD,
-        .name="WOOD",
-    },
-    { // stone
-        .tile=10,
-        .count=1,
-        .event=&ITEM_EVENTS[1],
-        .type=ITEM_TYPE_STONE,
-        .name="STONE",
-    },
-    { // axe (STONE)
-        .tile=17,
-        .level=2,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_AXE,
-        .name="STONE AXE",
-    },
-    { // pickaxe (STONE)
-        .tile=19,
-        .level=2,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_PICKAXE,
-        .name="STONE PICK",
-    },
-    { // sword (STONE)
-        .tile=18,
-        .level=2,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_SWORD,
-        .name="STONE SWORD",
-    },
-    { // pickup tool
-        .tile=20,
-        .level=1,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_PICKUP,
-        .name="PICKUP TOOL",
-    },
-    {  // crafting table
-        .tile=34,
-        .count=1,
-        .event=&ITEM_EVENTS[3],
-        .furnituretype=FURNITURE_TYPE_CRAFTING,
-        .type=ITEM_TYPE_FURNITURE,
-        .name="BENCH",
-    },
-    { // axe (WOOD)
-        .tile=17,
-        .level=1,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_AXE,
-        .name="WOOD AXE",
-    },
-    { // pickaxe (WOOD)
-        .tile=19,
-        .level=1,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_PICKAXE,
-        .name="WOOD PICK",
-    },
-    { // sword (WOOD)
-        .tile=18,
-        .level=1,
-        .event=&ITEM_EVENTS[2],
-        .type=ITEM_TYPE_TOOL,
-        .tooltype=TOOL_TYPE_SWORD,
-        .name="WOOD SWORD",
-    },
-    {  // chest
-        .tile=33,
-        .count=1,
-        .event=&ITEM_EVENTS[3],
-        .furnituretype=FURNITURE_TYPE_CHEST,
-        .type=ITEM_TYPE_FURNITURE,
-        .name="CHEST",
-    }
+    DEFINE_ITEM("WOOD", 9, ITEM_TYPE_WOOD, 0, 1),
+    DEFINE_ITEM("STONE", 10, ITEM_TYPE_STONE, 1, 1),
+    DEFINE_ITEM("STONE AXE", 17, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_AXE),
+    DEFINE_ITEM("STONE PICK", 19, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_PICKAXE),
+    DEFINE_ITEM("STONE SWORD", 18, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_SWORD),
+    DEFINE_ITEM("PICKUP TOOL", 20, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKUP),
+    DEFINE_ITEM("BENCH", 34, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CRAFTING),
+    DEFINE_ITEM("WOOD AXE", 17, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_AXE),
+    DEFINE_ITEM("WOOD PICK", 19, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKAXE),
+    DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD),
+    DEFINE_ITEM("CHEST", 33, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CHEST),
+    DEFINE_ITEM("IRON ORE", 2, ITEM_TYPE_IRON_ORE, 4, 1), // @todo add tile numbers
+    DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
+    DEFINE_ITEM("IRON", 2, ITEM_TYPE_IRON, 4, 1),
+    DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
+    DEFINE_ITEM("FURNACE", 44, ITEM_TYPE_FURNITURE, 2, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
 };
+
 
 const char *item_lookup_name(item_t *item)
 {

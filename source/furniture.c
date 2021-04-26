@@ -6,88 +6,71 @@
 #include "text.h"
 #include "memory.h"
 
+#define CREATE_COST(itemType, amt) {\
+ .item_type=(itemType),\
+ .required_amount=amt,\
+}
+
+
 // sizes changes here need to be reflected in `furniture.h`
 const recipe_t CRAFTING_RECIPES[] = {
     { // wood axe crafting
         .result=&ITEM_WOOD_AXE,
         .costs_num=1,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=8,
-            }
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
         }
     },
     { // wood pickaxe
         .result=&ITEM_WOOD_PICKAXE,
         .costs_num=1,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=10,
-            }
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
     },
     { // wood sword
         .result=&ITEM_WOOD_SWORD,
         .costs_num=1,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=5,
-            }
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
     },
     { // stone axe
         .result=&ITEM_STONE_AXE,
         .costs_num=2,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_STONE,
-                .required_amount=6,
-            },
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=5,
-            }
+            CREATE_COST(ITEM_TYPE_STONE, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
         }
     },
     { // stone pickaxe
         .result=&ITEM_STONE_PICKAXE,
         .costs_num=2,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_STONE,
-                .required_amount=6,
-            },
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=5,
-            }
+            CREATE_COST(ITEM_TYPE_STONE, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
     },
     { // stone sword
         .result=&ITEM_STONE_SWORD,
         .costs_num=2,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_STONE,
-                .required_amount=6,
-            },
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=10,
-            }
+            CREATE_COST(ITEM_TYPE_STONE, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
         }
     },
     { // chest
         .result=&ITEM_CHEST,
         .costs_num=1,
         .costs = {
-            {
-                .item_type=ITEM_TYPE_WOOD,
-                .required_amount=20,
-            }
+            CREATE_COST(ITEM_TYPE_WOOD, 20),
+        }
+    },
+    {
+        .result=&ITEM_FURNITURE,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_STONE, 20),
         }
     },
 };
@@ -95,7 +78,6 @@ const recipe_t CRAFTING_RECIPES[] = {
 
 void ent_furniture_update(ent_t *e)
 {
-
     ent_draw(e);
 }
 
@@ -110,6 +92,9 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
         break;
     case FURNITURE_TYPE_CHEST:
         mnu_open_chest(f, plr);
+        break;
+    case FURNITURE_TYPE_FURNACE:
+        mnu_open_crafting(plr);
         break;
     default:
         text_error("Unknown furniture type");

@@ -32,6 +32,12 @@ typedef enum {
     ITEM_TYPE_SAPLING,
     ITEM_TYPE_TOOL,
     ITEM_TYPE_FURNITURE,
+    ITEM_TYPE_COAL,
+    ITEM_TYPE_IRON_ORE,
+    ITEM_TYPE_GOLD_ORE,
+    ITEM_TYPE_IRON,
+    ITEM_TYPE_GOLD,
+    ITEM_TYPE_GEM,
 } item_type_t; // order relevant?
 
 
@@ -72,7 +78,7 @@ typedef enum {
 typedef enum {
     FURNITURE_TYPE_CRAFTING,
     FURNITURE_TYPE_CHEST,
-    FURNITURE_TYPE_FURNITURE,
+    FURNITURE_TYPE_FURNACE,
 } furniture_type_t;
 
 
@@ -109,8 +115,8 @@ typedef struct furniture_t furniture_t;
 
 
 typedef struct {
-    bool (*onhurt)(ent_t *, ent_t *, s8);      // called when damage is received
-    void (*init)(ent_t *);    // called when damage is done
+    bool (*onhurt)(ent_t *, ent_t *, s8); /** called when damage is received @param dmg amount of damage to subtract from ent's health @returns true if the entity dies, otherwises false*/
+    void (*init)(ent_t *);    /** Called when entity is created. @param ent entity */
     void (*doDamage)(ent_t *, ent_t *);    // called when damage is done
     void (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y */
     bool (*maypass)(ent_t *, ent_t *);

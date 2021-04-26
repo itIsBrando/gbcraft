@@ -14,6 +14,11 @@
 #define ITEM_WOOD_PICKAXE   ALL_ITEMS[8]
 #define ITEM_WOOD_SWORD     ALL_ITEMS[9]
 #define ITEM_CHEST          ALL_ITEMS[10]
+#define ITEM_IRON_ORE       ALL_ITEMS[11]
+#define ITEM_GOLD_ORE       ALL_ITEMS[12]
+#define ITEM_IRON           ALL_ITEMS[13]
+#define ITEM_GOLD           ALL_ITEMS[14]
+#define ITEM_FURNITURE      ALL_ITEMS[15]
 
 extern const item_t ALL_ITEMS[];
 /**
