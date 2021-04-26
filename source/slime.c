@@ -67,10 +67,10 @@ void ent_slime_update(ent_t *s)
 }
 
 
-void ent_slime_hurt(ent_t *e, ent_t *atker, s8 damage)
+bool ent_slime_hurt(ent_t *e, ent_t *atker, s8 damage)
 {
     if(e->slime.invulernability)
-        return;
+        return false;;
     
     // set knockback
     direction_t atk_dir = atker->dir;
@@ -80,6 +80,10 @@ void ent_slime_hurt(ent_t *e, ent_t *atker, s8 damage)
     e->slime.health -= damage;
     e->slime.invulernability = 10;
 
-    if(e->slime.health <= 0)
+    if(e->slime.health <= 0) {
         ent_kill(e);
+        return true;
+    }
+
+    return false;
 }

@@ -33,6 +33,14 @@ bool item_can_attack(const item_t *item);
 
 
 /**
+ * Looks up the name of an item based on its type and other properties
+ * @note used in loading save data bc pointers decay
+ * @todo very inefficient. improve!!!
+ * @returns pointer to string
+ */
+const char *item_lookup_name(item_t *item);
+
+/**
  * @param type ITEM_TYPE_...
  * @param data used for identifying tools (tooltype) or furniture (furniture_t). Use -1 to ignore
  * @returns the data `item_t` based on the type of item, or NULL

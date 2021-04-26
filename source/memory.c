@@ -19,6 +19,9 @@ void memset16(vu16 *dst, const u16 c, u16 hwsize)
 
 static int _rnd_seed;
 
+/**
+ * Sets the RNG seed
+ */
 void rnd_seed(int seed)
 {
 	_rnd_seed = seed;
@@ -28,7 +31,7 @@ void rnd_seed(int seed)
  * @note code borrowed from Tonc's documentation
  * @returns random number between [0, 0x8000)
  */
-u16 rnd_random()
+int rnd_random()
 {
 	_rnd_seed *= 1664525;
 	_rnd_seed += 1013904223;

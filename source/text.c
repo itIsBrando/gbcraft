@@ -1,4 +1,5 @@
 #include "text.h"
+#include <gba_systemcalls.h>
 
 static BG_REGULAR *target_background;
 static u16 tile_offset;
@@ -62,4 +63,8 @@ void text_error(char *string)
 {
     bg_fill(target_background, 0, 0, 320/8, 8, 0);
     text_print(string, 0, 0);
+
+    for (uint i = 0; i < 68; i++)
+        VBlankIntrWait();
+    
 }

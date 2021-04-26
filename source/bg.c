@@ -225,6 +225,13 @@ void bg_set_size(BG_REGULAR *bg, bg_map_size_t size)
 }
 
 
+void bg_set_priority(BG_REGULAR *bg, bg_priority_t p)
+{
+    *bg->BG_CNT &= 0xFFFC;
+    *bg->BG_CNT |= p & 0x3;
+}
+
+
 void bg_affine_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num)
 {
     bg->is_affine = true;

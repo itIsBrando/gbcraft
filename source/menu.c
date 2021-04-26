@@ -4,6 +4,7 @@
 #include "window.h"
 #include "keypad.h"
 #include <gba_systemcalls.h>
+#include "memory.h"
 #include <stdlib.h>
 
 #include "menu.h"
@@ -12,6 +13,8 @@
 #include "entity.h"
 #include "furniture.h"
 
+
+#define EMPTY_TILE_INDEX 517
 
 static void mnu_scroll_up()
 {
@@ -54,9 +57,11 @@ static void mnu_scroll_down()
  */
 void mnu_free_item_list(obj_t **icons, u8 size)
 {
-        // clean up sprites
-    for(u16 i = 0; i < size; i++)
-    {
+    if(!size)
+        return;
+    
+    // clean up sprites
+    for(u16 i = 0; i < size; i++) {
         spr_free(icons[i]);
     }
 
@@ -72,6 +77,10 @@ void mnu_free_item_list(obj_t **icons, u8 size)
  */
 obj_t **mnu_draw_item_list(item_t *items, u8 size, uint tx, uint ty)
 {
+    // do nothing if there are no items
+    if(!size)
+        return NULL;
+
     obj_t **icons = malloc(sizeof(obj_t *) * size);
 
     // init all items in inventory
@@ -94,7 +103,7 @@ void mnu_show_inventory(ent_t *player)
     WIN_REGULAR *win = win_get_0();
 
     text_print("INVENTORY", 0, 0);
-    bg_fill(win->background, 0, 1, 28, 10, 0);
+    bg_fill(win->background, 0, 1, 28, 10, EMPTY_TILE_INDEX);
     ent_hide_all(player->level);
 
     mnu_scroll_up();    
@@ -149,7 +158,7 @@ static void _crafting_draw_costs(const recipe_t *recipe, obj_t **icons, ent_t *p
 {
     const u16 x = 16, y = 2;
 
-    bg_fill(win_get_0()->background, x, y, 6, 4, 0); // clear background
+    bg_fill(win_get_0()->background, x, y, 6, 4, EMPTY_TILE_INDEX); // clear background
 
     item_t *c = item_get_from_inventory_matching(recipe->result, &plr->player.inventory);
     text_print("YOU HAVE:", x, y + 5);
@@ -206,8 +215,9 @@ void mnu_open_crafting(ent_t *plr)
 {
     WIN_REGULAR *win = win_get_0();
 
+    ent_player_set_active_item(plr, NULL);
     text_print("CRAFTING", 0, 0);
-    bg_fill(win->background, 0, 1, 28, 10, 0);
+    bg_fill(win->background, 0, 1, 28, 10, EMPTY_TILE_INDEX);
 
     ent_hide_all(plr->level);
 
@@ -270,7 +280,6 @@ void mnu_open_crafting(ent_t *plr)
         spr_copy_all();
     } while(key != KEY_B);
 
-
     mnu_free_item_list(icons, CRAFTING_RECIPES_SIZE);
 
     // clear cost sprite icons
@@ -297,7 +306,8 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
 {
     WIN_REGULAR *win = win_get_0();
 
-    bg_fill(win->background, 0, 0, 28, 10, 0);
+    ent_player_set_active_item(plr, NULL);
+    bg_fill(win->background, 0, 0, 28, 10, EMPTY_TILE_INDEX);
     text_print("INVENTORY", 0, 0);
     text_print("CHEST", 23, 0);
 
@@ -345,7 +355,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
                 item_add_to_inventory(item, otherInv);
                 item_remove_from_inventory((item_t *)item);
 
-                bg_fill(win->background, 0, 1, 30, 10, 0);
+                bg_fill(win->background, 0, 1, 30, 10, EMPTY_TILE_INDEX);
                 plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 2, 2);
                 chest_icons = mnu_draw_item_list(chst_inv->items, chst_inv->size, 16, 2);
 
@@ -378,7 +388,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
  */
 void mnu_draw_hotbar(ent_t *player)
 {
-    bg_fill(win_get_0()->background, 0, 0, 20, 10, 0);
+    bg_fill(win_get_0()->background, 0, 0, 20, 10, EMPTY_TILE_INDEX);
     win_move(win_get_0(), 0, 160-24, 240, 24);
 	text_print("HOTBAR   ", 0, 0);
 
@@ -396,5 +406,51 @@ void mnu_draw_hotbar(ent_t *player)
 void mnu_draw_item(item_t *item, uint x, uint y)
 {
     text_print(item ? (char*)item->name : "NONE", x, y);
-    text_uint(item->count, x + 10, y);
+    if(item)
+        text_uint(item->count, x + 10, y);
+}
+
+
+/**
+ * Shows the main menu
+ * @returns cursor position
+ */
+uint mnu_open_main()
+{
+    WIN_REGULAR *win = win_get_0();
+
+    bg_fill(win->background, 0, 0, 240/8, 160/8, EMPTY_TILE_INDEX);
+    text_print("GBACRAFT", 0, 0);
+    text_print("PLAY", 2, 4);
+    text_print("LOAD", 2, 5);
+    win_move(win, 0, 0, 240, 160);
+
+    uint key;
+
+    *TME0CNT = 128; // enable timer 0
+
+    obj_t *cur = spr_alloc(8, 32, 16);
+
+    uint yCur = 0;
+
+    do {
+        key_scan();
+        key = key_pressed_no_repeat();
+
+        if((key & KEY_DOWN) && yCur < 2)
+            yCur++;
+        else if((key & KEY_UP) && yCur)
+            yCur--;
+
+        spr_move(cur, 8, 32 + (yCur << 3));
+
+        VBlankIntrWait();
+        spr_copy(cur, 0);
+    } while(key != KEY_A);
+
+    spr_free(cur);
+    // set RNG seed
+    rnd_seed(*TME0DATA);
+
+    return yCur;
 }

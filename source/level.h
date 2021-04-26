@@ -19,6 +19,10 @@ void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile);
 u16 lvl_to_pixel_x(level_t *lvl, u16 tx);
 u16 lvl_to_pixel_y(level_t *lvl, u16 ty);
 
+bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y);
+void lvl_try_spawn(level_t *level, uint tries);
+
+
 void lvl_blit(level_t *lvl);
 
 #endif

@@ -30,8 +30,10 @@ void win_init(WIN_REGULAR *win, BG_REGULAR *bg, bool num)
 
 /**
  * Moves the window to (x, y) and sets its width and height too
+ * @param x pixel x coordinate [0, 320)
+ * @param y pixel y coordinate [0, 240)
  */
-void win_move(WIN_REGULAR *win, u8 x, u8 y, u8 w, u8 h)
+void win_move(WIN_REGULAR *win, uint x, uint y, uint w, uint h)
 {
     REG_WIN0H = (u16)(x << 8) | (x + w);
     REG_WIN0V = (u16)(y << 8) | (y + h);
@@ -56,7 +58,7 @@ void win_move_by(WIN_REGULAR *win, direction_t direction)
 }
 
 
-inline void win_set_size(WIN_REGULAR *win, u8 w, u8 h)
+inline void win_set_size(WIN_REGULAR *win, uint w, uint h)
 {
     win_move(win, win->x, win->y, w, h);
 }

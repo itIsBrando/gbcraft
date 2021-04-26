@@ -21,6 +21,14 @@ typedef enum {
 } bg_map_size_t;
 
 
+typedef enum {
+    BG_PRIORITY_LOWEST,
+    BG_PRIORITY_LOW,
+    BG_PRIORITY_HIGH,
+    BG_PRIORITY_HIGHEST,
+} bg_priority_t;
+
+
 typedef struct {
     u8 map_base;   // block referring to the base of the map
     u8 tile_base; // block referring to the tileset
@@ -55,6 +63,20 @@ typedef u16 screen_block[1024]; // size of a VRAM block
 #define map_mem ((volatile screen_block*)(VRAM))
 #define sprite_palette_mem ((vu16 *)(0x05000200))
 #define background_palette_mem ((vu16 *)(0x05000000))
+
+
+// #include "gba.h"
+
+// timers
+#define TME0CNT ((volatile u16*)0x04000102)
+#define TME1CNT ((volatile u16*)0x04000106)
+#define TME2CNT ((volatile u16*)0x0400010A)
+#define TME3CNT ((volatile u16*)0x0400010E)
+
+#define TME0DATA ((volatile u16*)0x04000100)
+#define TME1DATA ((volatile u16*)0x04000104)
+#define TME2DATA ((volatile u16*)0x04000108)
+#define TME3DATA ((volatile u16*)0x0400010C)
 
 
 #endif

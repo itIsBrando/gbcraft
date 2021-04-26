@@ -88,12 +88,11 @@ const tile_t tile_tile_data[] =
  * @param type tile to check for matching nearby
  * @param x absolute x
  * @param y absolute y
- * @todo add support for diagnol
  */
 tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u16 y)
 {
-    int dx[] = {-1, 1, 0, 0, 0, 0, 0, 0};
-    int dy[] = {0, 0, -1, 1, 0, 0, 0, 0};
+    int dx[] = {-1, 1, 0, 0, -1, 1, -1, 1};
+    int dy[] = {0, 0, -1, 1, -1, -1, 1, 1};
 
     tile_surround_mask mask = 0;
 
@@ -162,6 +161,10 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
     bool u = mask & SURROUNDING_UP;
     bool d = mask & SURROUNDING_DOWN;
 
+    bool dl = mask & SURROUNDING_LEFT_DOWN;
+    bool ul = mask & SURROUNDING_LEFT_UP;
+    bool dr = mask & SURROUNDING_RIGHT_DOWN;
+
     u8 corners[] = {t - 33, t - 31, t + 31, t + 33};
     
     // draw top left tile
@@ -195,6 +198,15 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
         corners[3] = t + 32; // bottom tile
     else if(d)
         corners[3] = t + 1; // left tile
+
+    if(!dl && d && l)
+        corners[2] = t + 63; // down left
+
+    if(!dr && d && r)
+        corners[3] = t + 64; // down right
+
+    if(!ul && u && l)
+        corners[0] = t + 65; // up left
     
     bg_rect(target_bg, x, y, 2, 2, corners);
 

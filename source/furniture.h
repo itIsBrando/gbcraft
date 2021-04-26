@@ -8,5 +8,4 @@
 
 extern const recipe_t CRAFTING_RECIPES[];
 
-
 #endif

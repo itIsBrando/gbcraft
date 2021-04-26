@@ -4,8 +4,7 @@
 #include "defines.h"
 #include "obj.h"
 
-typedef enum
-{
+enum {
     TILE_GRASS,
     TILE_WATER,
     TILE_WOOD,
@@ -13,8 +12,9 @@ typedef enum
     TILE_TREE,
 
     TILE_NONE, // last tile
-} tile_type_t; // order irrelevant
+}; // order irrelevant
 
+typedef uint8_t tile_type_t;
 
 // order relevant
 typedef enum {
@@ -109,7 +109,7 @@ typedef struct furniture_t furniture_t;
 
 
 typedef struct {
-    void (*onhurt)(ent_t *, ent_t *, s8);      // called when damage is received
+    bool (*onhurt)(ent_t *, ent_t *, s8);      // called when damage is received
     void (*init)(ent_t *);    // called when damage is done
     void (*doDamage)(ent_t *, ent_t *);    // called when damage is done
     void (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y */
@@ -276,13 +276,14 @@ typedef struct tile_t {
 
 
 typedef struct level_t {
-    u16 ent_size;  // number of entities in the `entities` table
+    uint ent_size;  // number of entities in the `entities` table
     ent_t entities[50]; // @todo allocate on heap
     ent_t *player;
-    u16 size; // Width/height of map. Must be a power of two. Rn it's only value is 64
+    uint size; // Width/height of map. Must be a power of two. Rn it's only value is 64
     tile_type_t map[LEVEL_SIZE]; // needs to be adapted to level.size @todo
     u8 data[LEVEL_SIZE];
-    u16 layer;
+    u8 mob_density;
+    uint layer;
     struct level_t *parent;
 } level_t;
 

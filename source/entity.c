@@ -1,6 +1,8 @@
 #include "entity.h"
 #include "level.h"
+
 #include "bg.h"
+#include "obj.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +11,34 @@
 inline u8 abss(u8 a, u8 b)
 {
     return a > b ? a - b : b - a;
+}
+
+
+/**
+ * @param lvl level to inspect
+ * @param buffer buffer of entities to fill
+ * @param x relative pixel x
+ * @param y relative pixel y
+ * @param maxSize max number of entities that the buffer can hold
+ * @returns NULL if none, or an array of pointers to entities allocated on the heap
+ */
+uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize)
+{
+    uint index = 0;
+
+    for(u16 i = 0; i < lvl->ent_size; i++)
+    {
+        ent_t *e = &lvl->entities[i];
+
+        if((x >= e->x) && (x <= e->x + 16) && (y >= e->y) && (y <= e->y + 16))
+        {
+            buffer[index++] = e;
+            if(index >= maxSize)
+                return maxSize;
+        }
+    }
+    
+    return index;
 }
 
 
@@ -98,6 +128,10 @@ static u16 __tiles[] = {
     0,  // item entity (set exeternally. See `ent_item_new()`)
 };
 
+uint ent_get_tile(const ent_t *e) {
+    return __tiles[e->type];
+}
+
 
 /**
  * Holds the sizes of each entity.
@@ -112,8 +146,14 @@ static const bounding_rect_t __rects[] = {
 };
 
 
+/**
+ * @returns NULL if unable to create
+ */
 ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
 {
+    if(lvl->ent_size >= 50)
+        return NULL;
+    
     ent_t *ent = &lvl->entities[lvl->ent_size++];
 
     ent->type = type;
@@ -121,27 +161,31 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
     ent->y = y;
     ent->events = &events[type];
     ent->level = lvl;
-    ent->sprite = spr_alloc(x, y, __tiles[type]);
+    ent->sprite = spr_alloc(x, y, ent_get_tile(ent));
 
     if(ent->events->init) {
         ent->events->init(ent);
     }
 
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
+    spr_set_priority(ent->sprite, SPR_PRIORITY_HIGH);
     return ent;
 }
 
 
 void ent_remove(level_t *lvl, ent_t *ent)
 {
-    u16 index = -1;
-    for(u16 i = 0; i < lvl->ent_size; i++)
+    int index = -1;
+    for(uint i = 0; i < lvl->ent_size; i++)
     {
         if(&lvl->entities[i] == ent) {
             index = i;
             break;
         }
     }
+
+    if(ent->type == ENT_TYPE_SLIME || ent->type == ENT_TYPE_ZOMBIE)
+        lvl->mob_density--;
 
     spr_free(ent->sprite);
 

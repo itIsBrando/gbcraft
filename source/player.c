@@ -56,7 +56,6 @@ void ent_player_update(ent_t *plr)
         spr_set_tile(plr->sprite, 1);
     }
 
-
     if(plr->player.stamina < plr->player.max_stamina)
     {
         if(plr->player.stamina_time++ >= 10)
@@ -92,6 +91,9 @@ bool plr_pay_stamina(ent_t *plr, s8 amt)
 
 static obj_t *spr = NULL;
 
+/**
+ * @param item item that is part of its inventory, or can be null
+ */
 void ent_player_set_active_item(ent_t *plr, item_t *item)
 {
     if(!spr)

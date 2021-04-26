@@ -20,6 +20,7 @@
 #include "tileset.h"
 #include "text.h"
 
+#include "save.h"
 #include "level.h"
 #include "tile.h"
 #include "entity.h"
@@ -27,9 +28,9 @@
 #include "item.h"
 #include "menu.h"
 
-
+extern const char FLASH_ID_TEXT[];
+extern void foo(const char *); // @todo remove the need for this
 BG_REGULAR *main_background;
-
 
 int main(void) {
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
@@ -47,8 +48,13 @@ int main(void) {
 	bg_load_tiles(0, 1, tilesetTiles, tilesetTilesLen, true); // load 8bpp tiles
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
+	// set first tile to be non-transparent black
+	memset16((u16*)&tile_mem[0][0], 0x4444, 16);
+
 	background_palette_mem[0] = RGB15(2, 2, 2);
 	background_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red
+	background_palette_mem[16 + 4] = RGB15(6, 6, 6); // set bg color to darkish-black for pal 1
+	sprite_palette_mem[16 + 12] = RGB15(0xff, 0xff, 0xff);
 	sprite_palette_mem[16 + 2] = RGB15(0xd, 8, 07); // set color brown (for wood tools)
 	sprite_palette_mem[32 + 2] = RGB15(29, 29, 28); // set color cream (for iron tools)
 
@@ -70,34 +76,49 @@ int main(void) {
 	irqInit();
 	irqEnable(IRQ_VBLANK);
 
+	uint menuOption = mnu_open_main();
+
 	// generate our level
 	lvl_set_target_background(main_background);
 	level_t *level = lvl_new(0, NULL);
 
 	win_move(&window, 0, 0, 240, 160);
-	gen_generate(level);
 	bg_move(main_background, 512, 512);
+	bg_set_priority(window.background, BG_PRIORITY_LOWEST);
+	bg_set_priority(main_background, BG_PRIORITY_HIGH);
+
+	ent_t *plr;
+
+	if(menuOption == 0)
+	{
+		gen_generate(level);
+		plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
+
+		ent_add(level, ENT_TYPE_SLIME, 50, 50);
+		ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
+
+		item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_CHEST, &plr->player.inventory);
+	} else {
+		sve_load_from_persistant(level);
+		plr = lvl_get_player(level);
+		ent_player_set_active_item(plr, NULL); // active item pointer probs decayed
+	}
+
 	lvl_blit(level);
-
-	ent_t *plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 	mnu_draw_hotbar(plr);
+	foo(FLASH_ID_TEXT); // @todo remove this unnecessary function
 
-	ent_add(level, ENT_TYPE_SLIME, 50, 50);
-	ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
-
-	obj_t *cursor = spr_alloc(0, 0, 5);
+	obj_t *cursor = spr_alloc(0, 0, 0);
 	u8 curTime = 0;
-
-	item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
-	item_add_to_inventory(&ITEM_CHEST, &plr->player.inventory);
 
 	while (true) {
 		key_scan();
 		u16 keys = key_pressed_no_repeat();
 
-		if(keys & KEY_A)
+		if((keys & KEY_A) && !curTime)
 		{
 			u16 x = 124 + bg_get_scx(main_background),
 				y = 84  + bg_get_scy(main_background);
@@ -124,26 +145,25 @@ int main(void) {
 			}
 
 			// check to see if we can interact with an entity
-			u8 s;
-			u8 	 px = plr->x + (dir_get_x(plr->dir) << 3) + 8,
-				py = plr->y + (dir_get_y(plr->dir) << 3) + 8;
-			ent_t **ents = ent_get_all(plr->level, px, py, &s);
-			
-			for(u16 i = 0; i < s; i++)
+	
+			u8 px = plr->x + (dir_get_x(plr->dir) << 3) + 8,
+			   py = plr->y + (dir_get_y(plr->dir) << 3) + 8;
+			ent_t *ents[5];
+			uint s = ent_get_all_stack(plr->level, ents, px, py, 5);
+
+			for(uint i = 0; i < s; i++)
 			{
 				ent_t *e = ents[i];
 				if(e == plr) continue;
 
-				if(e->events->onhurt)
-					e->events->onhurt(e, plr, 2);
+				if(e->events->onhurt && e->events->onhurt(e, plr, 2))
+					break;
 			}
 
-			free(ents);
-
 			// cursor @todo move this elsewhere
-			x = (level->entities[0].x+4) + (dir_get_x(level->entities[0].dir) * 9);
-			y = (level->entities[0].y+4) + (dir_get_y(level->entities[0].dir) * 11);
-			spr_set_tile(cursor, plr->player.activeItem->tile);
+			x = (plr->x+4) + (dir_get_x(plr->dir) * 9);
+			y = (plr->y+4) + (dir_get_y(plr->dir) * 11);
+			item_set_icon(cursor, plr->player.activeItem);
 			curTime = 10;
 			spr_move(cursor, x, y);
 			spr_show(cursor);
@@ -153,14 +173,19 @@ int main(void) {
 		if(keys & KEY_START)
 		{
 			mnu_show_inventory(plr);
+		} else if(keys == KEY_SELECT)
+		{
+			sve_save_level(level);
 		}
 
-		for(u16 i = 0; i < level->ent_size; i++)
+		for(int i = level->ent_size - 1; i >= 0; i--)
 		{
 			const void (*onupdate)(ent_t *) = level->entities[i].events->onupdate;
 			if(onupdate)
 				onupdate(&level->entities[i]);
 		}
+
+		lvl_try_spawn(level, 2);
 
 		if(curTime && --curTime == 0)
 		{

@@ -7,6 +7,7 @@ direction_t dir_get(const s16 dx, const s16 dy);
 
 
 const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent);
+uint ent_get_tile(const ent_t *e);
 
 bool ent_can_move(ent_t *ent, const direction_t direction);
 bool ent_move(ent_t *ent, const direction_t direction);
@@ -27,6 +28,10 @@ void ent_remove(level_t *lvl, ent_t *ent);
 void ent_kill(ent_t *e);
 
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize);
+uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize);
+
+void ent_furniture_set_tile(ent_t *e);;
+
 
 void ent_slime_init(ent_t *e);
 void ent_zombie_init(ent_t *e);
@@ -38,9 +43,9 @@ void ent_zombie_update(ent_t *zombie);
 void ent_furniture_update(ent_t *e);
 void ent_item_update(ent_t *e);
 
-void ent_furniture_interact(ent_t *, ent_t *, s8);
-void ent_slime_hurt(ent_t *, ent_t *, s8);
-void ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
+bool ent_furniture_interact(ent_t *, ent_t *, s8);
+bool ent_slime_hurt(ent_t *, ent_t *, s8);
+bool ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
 

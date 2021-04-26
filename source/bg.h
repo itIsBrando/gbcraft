@@ -59,6 +59,13 @@ u16 bg_get_tile(const BG_REGULAR *bg, u16 tx, u16 ty);
  */
 void bg_set_size(BG_REGULAR *bg, bg_map_size_t size);
 
+
+/**
+ * Sets the priority of the background. Higher numbers drawn first
+ * @param p BG_PRIORITY_...
+ */
+void bg_set_priority(BG_REGULAR *bg, bg_priority_t p);
+
 /**
  * Copies data to the background
  * @param bg background struct

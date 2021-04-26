@@ -2,7 +2,6 @@
 
 
 ### Features
-- [ ] Add real player tracking to zombie
 - [ ] Add player side sprite
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Add `interrupt.h`
@@ -10,6 +9,7 @@
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
+- [ ] **Enemy spawning**
 - [ ] Create stairs
 - [ ] Create generation for caves
 - [ ] Add iron
@@ -17,8 +17,17 @@
 - [ ] Add gold
 - [ ] Add gem
 - [ ] Add furnace
+- [ ] Add attack bonus for swords (and axes?)
 - [ ] Add wood floor
 - [ ] Add seed selection
+- [ ] Add slime tile drop
+- [ ] Add support for player healing
+- [ ] Add apple
+- [ ] Add player swimming
+- [ ] Add real player tracking to zombie
+- [x] Saving
+- [x] Loading
+- [x] Main menu
 - [x] Add chest
 - [x] Add tile drops
 - [x] Add `hotbar.h`
@@ -57,24 +66,33 @@
 - [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
 - [ ] Animate player
+- [ ] New tree sprite
+- [ ] Furniture snap to grid?
+- [ ] Have `spr_copy_all()` only copy the number of allocated sprites, not all 128
 - [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
-- [ ] Prevent furniture from being able to be placed in the water
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Add inner-corner tiles for `9pt indexing`
-- [ ] Create a modified version of `ent_get_all` that uses the stack instead of the heap
+- [ ] Document `onhurt` function for entity events. return value is true if entity died
+- [ ] Prevent enemies from spawning on top of water & other entities
+- [x] Create a modified version of `ent_get_all` that uses the stack instead of the heap
+- [x] Prevent furniture from being able to be placed in the water
 - [x] Allow `A` button for exiting inventory
 - [x] Hide entities that leave visible screen
 
 
 ### Bug
 - [ ] **Fix weird & fast zombie movement**
+- [ ] Spontaneously crashes (jumps to address 00000000). Maybe zombie out of bounds?
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Entities are visible above the hotbar
 - [ ] Grass does not connect to tree
 - [ ] Entities are drawn above the hotbar
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
+- [ ] Weird & occasional screen shake when attacking with many mobs spawned
+- [x] Opening a chest with no items in it caused a crash. Happened immediately following the opening of the crafting bench (*fixed*, caused by crafting/removing active item from player)
+- [x] Crafting an item that was not actively held would not remove it from the inventory
 - [x] Confirm functional collision with other entities
 - [x] Pick up tool does not work
 - [x] Cursor position does not line up with tile placement

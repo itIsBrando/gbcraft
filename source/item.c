@@ -118,6 +118,17 @@ const item_t ALL_ITEMS[] = {
     }
 };
 
+const char *item_lookup_name(item_t *item)
+{
+    inventory_t inv;
+
+    inv.size = sizeof(ALL_ITEMS) / sizeof(ALL_ITEMS[0]);
+    for(uint i = 0; i < inv.size; i++) {
+        inv.items[i] = ALL_ITEMS[i];
+    }
+
+    return item_get_from_inventory_matching(item, &inv)->name;
+}
 
 const item_t *item_get_from_type(item_type_t type, s16 data)
 {
@@ -257,8 +268,8 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
     {
         x = lvl_to_pixel_x(plr->level, x);
         y = lvl_to_pixel_y(plr->level, y);
-        u8 s;
-        ent_t **e = ent_get_all(plr->level, x, y, &s);
+        ent_t *e[5];
+        uint s = ent_get_all_stack(plr->level, e, x, y, 5);
 
         for(uint i = 0; i < s; i++)
         {
@@ -266,12 +277,10 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
             {
                 item_add_to_inventory(_furn_items[e[i]->furniture.type], &plr->player.inventory);
                 ent_remove(e[i]->level, e[i]);
-                free(e);
                 return true;
             }
         }
 
-        free(e);
         return false;
     }
 
@@ -282,12 +291,8 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-// sprite indexes for 16x16 furniture sprites
-static const u8 _fur_spr[] = {53, 49};
-
 bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
-
     // create furniture item
     x = (x << 4) - bg_get_scx(main_background);
     y = (y << 4) - bg_get_scy(main_background);
@@ -296,7 +301,7 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
 
     ent_t *e = ent_add(plr->level, ENT_TYPE_FURNITURE, x, y);
     e->furniture.type = item->furnituretype;
-    spr_set_tile(e->sprite, _fur_spr[item->furnituretype]);  // @todo tile number will change based on furniture used
+    ent_furniture_set_tile(e);
 
     if(tile->event->maypass && !tile->event->maypass(e))
     {
@@ -334,10 +339,11 @@ void item_change_count(item_t *item, const s8 change)
             mnu_draw_item(item, 1, 2);
         } else {
             ent_player_set_active_item(item->parent->parent, NULL);
-            item_remove_from_inventory(item);
         }
     }
 
+    if(item->count <= 0)
+        item_remove_from_inventory(item);
 
 }
 
@@ -363,9 +369,13 @@ obj_t *item_new_icon(item_t *item , u16 x, u16 y)
 /** @see item_new_icon */
 void item_set_icon(obj_t *obj, const item_t *item)
 {
-    spr_set_tile(obj, item->tile);
+    spr_set_tile(obj,  item ? item->tile : 15);
+    spr_set_size(obj, SPR_SIZE_8x8);
+    spr_set_priority(obj, SPR_PRIORITY_LOWEST);
     spr_show(obj);
 
     if(item->type == ITEM_TYPE_TOOL)
         spr_set_pal(obj, _pals[item->level-1]);
+    else
+        spr_set_pal(obj, 0);
 }

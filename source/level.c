@@ -1,10 +1,12 @@
 #include "level.h"
 #include "tile.h"
-#include "text.h"
+#include "entity.h"
 
+#include "text.h"
 #include <stdlib.h>
 #include <string.h>
 #include "keypad.h"
+#include "memory.h"
 
 static BG_REGULAR *target_bg;
 
@@ -92,6 +94,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
     lvl->layer = layer;
     lvl->parent = (struct level_t*)parent;
     lvl->size = 64;
+    lvl->mob_density = 0;
 
     // do map generation based on layer @todo
     memset(lvl->data, 0, LEVEL_SIZE);
@@ -124,6 +127,63 @@ inline u16 lvl_to_pixel_y(level_t *lvl, u16 ty)
 }
 
 
+/**
+ * Tries to get a valid spawn position for enemies
+ * @param x pointer to x coordinate. Will be updated to a random position
+ * @param y pointer to y coordinate. Will be updated to a random position
+ * @returns true if in a spawnable range. if false, x and y coordinates are still modified
+ */
+bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
+{
+    ent_t *plr = lvl_get_player(lvl);
+    *x = rnd_random_bounded(0, LEVEL_WIDTH) << 4;
+    *y = rnd_random_bounded(0, LEVEL_HEIGHT) << 4;
+
+    int px = plr->x + bg_get_scx(main_background);
+    int py = plr->y + bg_get_scy(main_background);
+    
+    if(abs(px - *x) + abs(py - *y) > 80)
+        return false;
+
+    const tile_t *t = lvl_get_tile(lvl, *x >> 4, *y >> 4);
+    if(t->event->maypass && !t->event->maypass(plr))
+        return false;
+
+    // prevent too many mobs
+    if(lvl->mob_density > 8)
+        return false;
+
+    lvl->mob_density++;
+
+    return true;
+}
+
+/**
+ * Tries to spawn enemies
+ * @param tries number of spawns to try
+ */
+void lvl_try_spawn(level_t *level, uint tries)
+{
+    for(uint i = 0; i < tries; i++)
+    {
+        uint x, y;
+
+        // if we cannot find a spawn location, then do not add
+        if(!lvl_try_spawn_position(level, &x, &y))
+            continue;
+        // center coordinates based on top left rather than screen
+        x -= bg_get_scx(main_background);
+        y -= bg_get_scy(main_background);
+
+        if((rnd_random() & 0x3) == 0)
+        {
+		    ent_add(level, ENT_TYPE_ZOMBIE, x, y);
+        } else {
+            ent_add(level, ENT_TYPE_SLIME, x, y);
+        }
+    }
+}
+
 
 void lvl_blit(level_t *lvl)
 {
@@ -141,6 +201,7 @@ void lvl_blit(level_t *lvl)
 
     tile_render_use_recursion(true);
 }
+
 
 /**
  * Dictates which background should be used for drawing

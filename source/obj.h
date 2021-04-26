@@ -37,9 +37,9 @@ typedef enum {
 } spr_size_mask;
 
 typedef enum {
-    SPR_LOWEST_PRIORITY = 0,
-    SPR_LOW_PRIORITY = BIT(0xB),
-    SPR_HIGH_PRIORITY = BIT(0xA),
+    SPR_PRIORITY_LOWEST = 0,
+    SPR_PRIORITY_LOW = BIT(0xB),
+    SPR_PRIORITY_HIGH = BIT(0xA),
     SPR_PRIORITY_HIGHEST = BIT(0xA) | BIT(0xB),
 } spr_priority_t;
 

@@ -101,7 +101,7 @@ void ent_furniture_update(ent_t *e)
 
 
 
-void ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
+bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
 {
     switch (f->furniture.type)
     {
@@ -115,10 +115,20 @@ void ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
         text_error("Unknown furniture type");
         break;
     }
+
+    return false;
 }
 
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e)
 {
     return false;
+}
+
+
+// sprite indexes for 16x16 furniture sprites
+static const u8 _fur_spr[] = {53, 49};
+
+void ent_furniture_set_tile(ent_t *e) {
+    spr_set_tile(e->sprite, _fur_spr[e->furniture.type]);
 }
