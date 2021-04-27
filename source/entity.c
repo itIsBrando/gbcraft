@@ -26,7 +26,7 @@ uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize)
 {
     uint index = 0;
 
-    for(u16 i = 0; i < lvl->ent_size; i++)
+    for(uint i = 0; i < lvl->ent_size; i++)
     {
         ent_t *e = &lvl->entities[i];
 
@@ -347,6 +347,7 @@ void ent_apply_knockback(ent_t *e)
 void ent_draw(const ent_t *ent)
 {
     spr_move(ent->sprite, ent->x, ent->y);
+    
     if(ent_is_on_screen(ent)) {
         spr_show(ent->sprite);
     } else {
@@ -370,6 +371,7 @@ void ent_hide_all(level_t *level)
 
 /**
  * Shows all of the entities that are on screen
+ * @param level pointer to level with entities
  */
 void ent_show_all(level_t *level)
 {

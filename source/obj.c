@@ -4,9 +4,9 @@
 #include <gba_video.h>
 #include <string.h>
 
-#define SPRITE_NUM (sizeof(__spr_free_indexes) / sizeof(__spr_free_indexes[0]))
-static obj_t __spr_buffer[128];
-static bool __spr_free_indexes[128];
+#define SPRITE_NUM 128
+static obj_t __spr_buffer[SPRITE_NUM];
+static bool __spr_free_indexes[SPRITE_NUM];
 static uint highest_index = 0;
 
 
@@ -65,16 +65,19 @@ void spr_free(obj_t *obj)
 	}
 }
 
+
 void spr_init()
 {
 	memset(__spr_free_indexes, 0, sizeof(__spr_free_indexes));
 	REG_DISPCNT |= OBJ_ON | OBJ_1D_MAP;
 }
 
+
 void spr_copy(obj_t *obj, const uint index)
 {
-	memcpy16((u16*)&oam_mem[index], (u16*)obj, 4);
+	oam_mem[index] = *obj;
 }
+
 
 void spr_copy_all()
 {
@@ -94,7 +97,7 @@ void spr_move(obj_t *obj, const uint x, const uint y)
 	obj->attr1 |= x & 0x01FF;
 
 	obj->attr0 &= 0xFF00;
-	obj->attr0 |= y;
+	obj->attr0 |= y & 0xFF;
 }
 
 
@@ -163,7 +166,7 @@ void spr_set_pal(obj_t *obj, u8 pal)
 }
 
 /**
- * @param tile bits 0-9
+ * @param tile bits 0-9 (0-1FF)
  */
 inline void spr_set_tile(obj_t *obj, u16 tile)
 {

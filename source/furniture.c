@@ -100,7 +100,8 @@ const recipe_t FURNACE_RECIPES[] = {
 
 void ent_furniture_update(ent_t *e)
 {
-    spr_move(e->sprite, e->x, e->y);
+    if(ent_is_on_screen(e))
+        spr_move(e->sprite, e->x, e->y);
 }
 
 

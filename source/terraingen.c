@@ -99,9 +99,9 @@ terr_t *noise(u16 mapSize, u8 featureSize)
 
 
 /**
- * Uses diamond square to generate a map
+ * Uses diamond square to generate the underworld map
  */
-void gen_generate(level_t *lvl)
+void gen_generate_overworld(level_t *lvl)
 {
     terr_t *n1 = noise(lvl->size, 32);
 
@@ -115,6 +115,28 @@ void gen_generate(level_t *lvl)
                 tile = TILE_TREE;
             else if(n1[index] > 50)
                 tile = TILE_GRASS;
+            
+            lvl->map[index] = tile;
+    }
+
+    free(n1);
+}
+
+
+/**
+ * Uses diamond square to generate a map
+ * @param lvl pointer to map of level+
+ */
+void gen_generate_underworld(level_t *lvl)
+{
+    terr_t *n1 = noise(lvl->size, 16);
+
+    for(uint index = 0; index < LEVEL_SIZE; index++)
+    {
+            u8 tile = TILE_STONE;
+
+            if(n1[index] > 1500)
+                tile = TILE_WATER;
             
             lvl->map[index] = tile;
     }

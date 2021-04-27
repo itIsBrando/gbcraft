@@ -58,7 +58,7 @@ typedef u32 tile_4bpp[8];
 typedef tile_4bpp tile_block[512];
 typedef u16 screen_block[1024]; // size of a VRAM block
 
-#define oam_mem ((volatile OBJATTR *)OAM)
+#define oam_mem ((volatile obj_t*)OAM)
 #define tile_mem ((volatile tile_block*)VRAM)
 #define map_mem ((volatile screen_block*)(VRAM))
 #define sprite_palette_mem ((vu16 *)(0x05000200))

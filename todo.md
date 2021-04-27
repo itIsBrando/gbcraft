@@ -21,8 +21,9 @@
 - [ ] Add slime tile drop
 - [ ] Add support for player healing
 - [ ] Add apple
-- [ ] Add player swimming
 - [ ] Add bonus damage to sword
+- [ ] Add player swimming animation
+- [x] Add player swimming
 - [x] Add furnace
 - [x] Enemy spawning
 - [x] Add real player tracking to zombie
@@ -74,9 +75,9 @@
 - [ ] Entity death animaton
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Add inner-corner tiles for `9pt indexing`
-- [ ] Document `onhurt` function for entity events. return value is true if entity died
-- [ ] Prevent enemies from spawning on top of water & other entities
 - [ ] Redo font
+- [x] Document `onhurt` function for entity events. return value is true if entity died
+- [x] Prevent enemies from spawning on top of water & other entities
 - [x] Create a modified version of `ent_get_all` that uses the stack instead of the heap
 - [x] Prevent furniture from being able to be placed in the water
 - [x] Allow `A` button for exiting inventory
@@ -84,14 +85,14 @@
 
 
 ### Bug
-- [ ] **Fix weird & fast zombie movement**
 - [ ] Spontaneously crashes (jumps to address 00000000). Maybe zombie out of bounds?
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Entities are visible above the hotbar
 - [ ] Grass does not connect to tree
-- [ ] Entities are drawn above the hotbar
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
+- [x] Entities are drawn above the hotbar
+- [x] **Fix weird & fast zombie movement**
 - [x] Weird & occasional screen shake when attacking with many mobs spawned
 - [x] Opening a chest with no items in it caused a crash. Happened immediately following the opening of the crafting bench (*fixed*, caused by crafting/removing active item from player)
 - [x] Crafting an item that was not actively held would not remove it from the inventory

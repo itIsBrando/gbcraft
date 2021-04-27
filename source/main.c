@@ -91,7 +91,7 @@ int main(void) {
 
 	if(menuOption == 0)
 	{
-		gen_generate(level);
+		gen_generate_overworld(level);
 		plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 
 		ent_add(level, ENT_TYPE_SLIME, 50, 50);

@@ -11,7 +11,6 @@
 #include "item.h"
 #include "hotbar.h"
 #include "entity.h"
-#include "furniture.h"
 
 
 #define EMPTY_TILE_INDEX 517
