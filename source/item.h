@@ -18,7 +18,7 @@
 #define ITEM_GOLD_ORE       ALL_ITEMS[12]
 #define ITEM_IRON           ALL_ITEMS[13]
 #define ITEM_GOLD           ALL_ITEMS[14]
-#define ITEM_FURNITURE      ALL_ITEMS[15]
+#define ITEM_FURNACE      ALL_ITEMS[15]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -57,8 +57,9 @@ const item_t *item_get_from_type(item_type_t type, s16 data);
  * Adds an item to an inventory
  * @param item does not need to outlive `inv`
  * @param inv inventory to add item to
+ * @returns pointer to the newly added item
  */
-void item_add_to_inventory(const item_t *item, inventory_t *inv);
+item_t *item_add_to_inventory(const item_t *item, inventory_t *inv);
 
 /**
  * Checks for an item in an inventory, very precise

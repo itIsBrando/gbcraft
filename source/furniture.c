@@ -67,7 +67,7 @@ const recipe_t CRAFTING_RECIPES[] = {
         }
     },
     {
-        .result=&ITEM_FURNITURE,
+        .result=&ITEM_FURNACE,
         .costs_num=1,
         .costs = {
             CREATE_COST(ITEM_TYPE_STONE, 20),
@@ -76,11 +76,39 @@ const recipe_t CRAFTING_RECIPES[] = {
 };
 
 
+const recipe_t FURNACE_RECIPES[] = {
+    {
+        .result=&ITEM_IRON,
+        .amount=5,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_IRON_ORE, 5),
+            CREATE_COST(ITEM_TYPE_COAL, 1),
+        }
+    },
+    {
+        .result=&ITEM_GOLD,
+        .amount=5,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_GOLD_ORE, 5),
+            CREATE_COST(ITEM_TYPE_COAL, 1),
+        }
+    }
+};
+
+
 void ent_furniture_update(ent_t *e)
 {
-    ent_draw(e);
+    spr_move(e->sprite, e->x, e->y);
 }
 
+
+void ent_furniture_init(ent_t *e)
+{
+    e->furniture.inventory.size = 0;
+    e->furniture.inventory.parent = e;
+}
 
 
 bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
@@ -88,13 +116,13 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
     switch (f->furniture.type)
     {
     case FURNITURE_TYPE_CRAFTING:
-        mnu_open_crafting(plr);
+        mnu_open_crafting(plr, CRAFTING_RECIPES, sizeof(CRAFTING_RECIPES) / sizeof(CRAFTING_RECIPES[0]));
         break;
     case FURNITURE_TYPE_CHEST:
         mnu_open_chest(f, plr);
         break;
     case FURNITURE_TYPE_FURNACE:
-        mnu_open_crafting(plr);
+        mnu_open_crafting(plr, FURNACE_RECIPES, sizeof(FURNACE_RECIPES) / sizeof(FURNACE_RECIPES[0]));
         break;
     default:
         text_error("Unknown furniture type");
@@ -112,7 +140,7 @@ bool ent_furniture_maypass(ent_t *f, ent_t *e)
 
 
 // sprite indexes for 16x16 furniture sprites
-static const u8 _fur_spr[] = {53, 49};
+static const u8 _fur_spr[] = {53, 49, 45};
 
 void ent_furniture_set_tile(ent_t *e) {
     spr_set_tile(e->sprite, _fur_spr[e->furniture.type]);

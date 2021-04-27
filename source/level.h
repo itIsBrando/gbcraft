@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+extern uint lvl_ticks;
+
 level_t *lvl_new(u16 layer, level_t *parent);
 void lvl_set_target_background(BG_REGULAR *bg);
 

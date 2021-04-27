@@ -99,7 +99,7 @@ static ent_event_t events[] = {
         .onupdate=ent_zombie_update
     },
     { // furniture
-        .init=NULL,
+        .init=ent_furniture_init,
         .onhurt=ent_furniture_interact,
         .maypass=ent_furniture_maypass,
         .ontouch=NULL,
@@ -169,6 +169,7 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
 
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
     spr_set_priority(ent->sprite, SPR_PRIORITY_HIGH);
+    spr_set_pal(ent->sprite, 0);
     return ent;
 }
 
@@ -227,8 +228,8 @@ inline const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent)
 bool ent_can_move(ent_t *ent, const direction_t direction)
 {
     const bounding_rect_t *rect = ent_get_bounding_rect(ent);
-    u16 x = ent->x + bg_get_scx(main_background);
-    u16 y = ent->y + bg_get_scy(main_background);
+    uint x = ent->x + bg_get_scx(main_background);
+    uint y = ent->y + bg_get_scy(main_background);
 
     x += dir_get_x(direction) * 2;
     y += dir_get_y(direction) * 2; 
@@ -236,18 +237,18 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
     x += rect->sx;
     y += rect->sy;
 
-    const u16 w = 16 - rect->sx - rect->ex,
+    const uint w = 16 - rect->sx - rect->ex,
      h = 16 - rect->sy - rect->ey;
 
-    const u16 dx[] = {0, w, 0, w};
-    const u16 dy[] = {0, 0, h, h};
+    const uint dx[] = {0, w, 0, w};
+    const uint dy[] = {0, 0, h, h};
 
     ent->dir = direction;
 
-    for(u16 i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
     {
-        u16 tx = (x + dx[i]) >> 4;
-        u16 ty = (y + dy[i]) >> 4;
+        uint tx = (x + dx[i]) >> 4;
+        uint ty = (y + dy[i]) >> 4;
         const tile_t *tile = lvl_get_tile(ent->level, tx, ty);
         const tile_event_t *events = tile->event;
 
@@ -256,27 +257,22 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
     }
 
     // make sure that we don't collide into any solid entities
-    u8 s;
-    u16 px = ent->x + 8;
-    u16 py = ent->y + 8;
+    uint px = ent->x + 8;
+    uint py = ent->y + 8;
     px += dir_get_x(direction) << 3, py += dir_get_y(direction) << 3;
     
-    ent_t **e = ent_get_all(ent->level, px, py, &s);
+    ent_t *e[3];
+    uint s = ent_get_all_stack(ent->level, e, px, py, 3);
 
-    for(u16 i = 0; i < s; i++)
+    for(uint i = 0; i < s; i++)
     {
         const ent_event_t *events = e[i]->events;
         if(events->maypass && !events->maypass(e[i], ent))
-        {
-            free(e);
             return false;
-        }
 
         if(events->ontouch)
             events->ontouch(e[i], ent, px, py);
     }
-
-    free(e);
 
     return true;
 }

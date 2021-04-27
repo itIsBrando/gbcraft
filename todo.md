@@ -9,14 +9,12 @@
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
-- [ ] **Enemy spawning**
 - [ ] Create stairs
 - [ ] Create generation for caves
 - [ ] Add iron
 - [ ] Add coal
 - [ ] Add gold
 - [ ] Add gem
-- [ ] Add furnace
 - [ ] Add attack bonus for swords (and axes?)
 - [ ] Add wood floor
 - [ ] Add seed selection
@@ -24,7 +22,10 @@
 - [ ] Add support for player healing
 - [ ] Add apple
 - [ ] Add player swimming
-- [ ] Add real player tracking to zombie
+- [ ] Add bonus damage to sword
+- [x] Add furnace
+- [x] Enemy spawning
+- [x] Add real player tracking to zombie
 - [x] Saving
 - [x] Loading
 - [x] Main menu
@@ -75,6 +76,7 @@
 - [ ] Add inner-corner tiles for `9pt indexing`
 - [ ] Document `onhurt` function for entity events. return value is true if entity died
 - [ ] Prevent enemies from spawning on top of water & other entities
+- [ ] Redo font
 - [x] Create a modified version of `ent_get_all` that uses the stack instead of the heap
 - [x] Prevent furniture from being able to be placed in the water
 - [x] Allow `A` button for exiting inventory
@@ -90,7 +92,7 @@
 - [ ] Grass does not connect to tree
 - [ ] Entities are drawn above the hotbar
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
-- [ ] Weird & occasional screen shake when attacking with many mobs spawned
+- [x] Weird & occasional screen shake when attacking with many mobs spawned
 - [x] Opening a chest with no items in it caused a crash. Happened immediately following the opening of the crafting bench (*fixed*, caused by crafting/removing active item from player)
 - [x] Crafting an item that was not actively held would not remove it from the inventory
 - [x] Confirm functional collision with other entities

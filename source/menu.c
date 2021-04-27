@@ -198,7 +198,7 @@ static void _crafting_draw_costs(const recipe_t *recipe, obj_t **icons, ent_t *p
  */
 bool item_can_craft(const recipe_t *r, const inventory_t *inv)
 {
-    for(u8 i = 0; i < r->costs_num; i++)
+    for(uint i = 0; i < r->costs_num; i++)
     {
         item_t *item = item_get_from_inventory(r->costs[i].item_type, inv);
         if(!item || item->count < r->costs[i].required_amount)
@@ -211,7 +211,7 @@ bool item_can_craft(const recipe_t *r, const inventory_t *inv)
 }
 
 
-void mnu_open_crafting(ent_t *plr)
+void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_size)
 {
     WIN_REGULAR *win = win_get_0();
 
@@ -224,20 +224,22 @@ void mnu_open_crafting(ent_t *plr)
     mnu_scroll_up();
 
     // store all of the item icons in a list
-    item_t items[CRAFTING_RECIPES_SIZE];
-    for(u16 i = 0; i < CRAFTING_RECIPES_SIZE; i++)
+    item_t items[recipe_size];
+    for(uint i = 0; i < recipe_size; i++)
     {
-        items[i] = *CRAFTING_RECIPES[i].result;
+        items[i] = *recipes[i].result;
+        if(recipes[i].amount)
+            items[i].count = recipes[i].amount;
     }
 
-    obj_t **icons = mnu_draw_item_list(items, CRAFTING_RECIPES_SIZE, 2, 2);
+    obj_t **icons = mnu_draw_item_list(items, recipe_size, 2, 2);
     u16 key;
 
     obj_t **costIcons = malloc(4 * sizeof(obj_t *));
     for(u16 i = 0; i < 4; i++)
         costIcons[i] = spr_alloc(0, 0, 0);
 
-    _crafting_draw_costs(&CRAFTING_RECIPES[0], costIcons, plr);
+    _crafting_draw_costs(recipes, costIcons, plr);
 
     // init cursor
     obj_t *cursor = spr_alloc(8, 24, 16);
@@ -250,16 +252,16 @@ void mnu_open_crafting(ent_t *plr)
         // handle cursor movement
         if((key & KEY_UP) && curY > 0) {
             curY--;
-            _crafting_draw_costs(&CRAFTING_RECIPES[curY], costIcons, plr);
-        } else if((key & KEY_DOWN) && curY < CRAFTING_RECIPES_SIZE-1) {
+            _crafting_draw_costs(&recipes[curY], costIcons, plr);
+        } else if((key & KEY_DOWN) && curY < recipe_size-1) {
             curY++;
-            _crafting_draw_costs(&CRAFTING_RECIPES[curY], costIcons, plr);
+            _crafting_draw_costs(&recipes[curY], costIcons, plr);
         }
 
         // check if we can craft
         if(key & KEY_A)
         {
-            const recipe_t *r = &CRAFTING_RECIPES[curY];
+            const recipe_t *r = &recipes[curY];
             // if we can actually craft
             if(item_can_craft(r, &plr->player.inventory))
             {
@@ -270,8 +272,11 @@ void mnu_open_crafting(ent_t *plr)
                     item_change_count(item, -r->costs[i].required_amount);
                 }
 
-                item_add_to_inventory(r->result, &plr->player.inventory);
-                _crafting_draw_costs(&CRAFTING_RECIPES[curY], costIcons, plr);
+                item_change_count(
+                    item_add_to_inventory(r->result, &plr->player.inventory),
+                    r->amount
+                );
+                _crafting_draw_costs(&recipes[curY], costIcons, plr);
             }
         }
 
@@ -280,7 +285,7 @@ void mnu_open_crafting(ent_t *plr)
         spr_copy_all();
     } while(key != KEY_B);
 
-    mnu_free_item_list(icons, CRAFTING_RECIPES_SIZE);
+    mnu_free_item_list(icons, recipe_size);
 
     // clear cost sprite icons
     for(u16 i = 0; i < 4; i++)

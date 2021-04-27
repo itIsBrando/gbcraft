@@ -56,7 +56,14 @@ void ent_player_update(ent_t *plr)
         spr_set_tile(plr->sprite, 1);
     }
 
-    if(plr->player.stamina < plr->player.max_stamina)
+    if(plr->player.is_swimming) {
+        if(plr->player.stamina && (lvl_ticks & 0x3F) == 0x3F) {
+            plr->player.stamina--;
+            bar_draw_stamina(plr);
+        }
+        // if(!plr->player.stamina)
+        //     plr->events->onhurt(plr, NULL, 1);
+    } else if(plr->player.stamina < plr->player.max_stamina)
     {
         if(plr->player.stamina_time++ >= 10)
         {
@@ -126,17 +133,18 @@ static void ent_move_all(level_t *lvl, const direction_t direction)
 {
     const int dx = dir_get_x(direction);
     const int dy = dir_get_y(direction);
+    ent_t *ent = lvl->entities;
 
-    for(u16 i = 0; i < lvl->ent_size; i++)
+    for(uint i = 0; i < lvl->ent_size; i++)
     {
-        ent_t *ent = &lvl->entities[i];
-
-        if(ent->type == ENT_TYPE_PLAYER)
+        if(ent->type == ENT_TYPE_PLAYER) {
+            ent++;
             continue;
+        }
         
         ent->x += dx;
         ent->y += dy;
 
-        ent_draw(ent);
+        ent_draw(ent++);
     }
 }

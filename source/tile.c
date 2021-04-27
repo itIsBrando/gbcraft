@@ -13,7 +13,7 @@ const tile_event_t tile_events[] = {
     { // grass floor
         .onhurt=NULL,
         .ontouch=NULL,
-        .maypass=NULL,
+        .maypass=tile_grass_maypass,
     },
     { // water tile
         .onhurt=NULL,
@@ -39,6 +39,10 @@ const tile_event_t tile_events[] = {
         .interact=tile_stone_interact,
     }
 };
+
+
+// @todo add this
+#define CREATE_TILE() {}
 
 
 const tile_t tile_tile_data[] = 
@@ -272,10 +276,22 @@ void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u
 
 bool tile_water_maypass(ent_t *e)
 {
-    if(e->type == ENT_TYPE_PLAYER)
+    if(e->type == ENT_TYPE_PLAYER) {
+        e->player.is_swimming = true;
         return true;
+    }
     else
         return false;
+}
+
+
+bool tile_grass_maypass(ent_t *e)
+{
+    if(e->type == ENT_TYPE_PLAYER) {
+        e->player.is_swimming = false;
+    }
+    
+    return true;
 }
 
 

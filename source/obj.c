@@ -4,25 +4,34 @@
 #include <gba_video.h>
 #include <string.h>
 
-
+#define SPRITE_NUM (sizeof(__spr_free_indexes) / sizeof(__spr_free_indexes[0]))
 static obj_t __spr_buffer[128];
 static bool __spr_free_indexes[128];
+static uint highest_index = 0;
 
-inline static u16 spr_get_free_index()
+
+static uint spr_get_free_index()
 {
-	for(u16 i = 0; i < sizeof(__spr_free_indexes) / sizeof(__spr_free_indexes[0]); i++)
+	for(uint i = 0; i < SPRITE_NUM; i++) {
 		if(!__spr_free_indexes[i])
 		{
 			__spr_free_indexes[i] = true;
 			return i;
 		}
+	}
+
 	return -1;
 }
 
 
 obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile)
 {
-	obj_t *ptr = &__spr_buffer[spr_get_free_index()];
+	uint index = spr_get_free_index();
+
+	if(index > highest_index)
+		highest_index = index;
+
+	obj_t *ptr = &__spr_buffer[index];
 
 	spr_move(ptr, x, y);
 	spr_set_tile(ptr, tile);
@@ -31,13 +40,28 @@ obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile)
 }
 
 
+// local routine useful to speed up spr_copy_all()
+static void _spr_find_highest_index()
+{
+	for(uint i = 0; i < SPRITE_NUM; i++)
+		if(__spr_free_indexes[i])
+			highest_index = i;
+}
+
+
 void spr_free(obj_t *obj)
 {
 	spr_hide(obj);
-	for(u16 i = 0; i < sizeof(__spr_free_indexes) / sizeof(__spr_free_indexes[0]); i++)
+	for(uint i = 0; i < SPRITE_NUM; i++)
 	{
 		if(obj == &__spr_buffer[i])
+		{
+			spr_copy(obj, i);
 			__spr_free_indexes[i] = false;
+			if(highest_index == i)
+				_spr_find_highest_index();
+			return;
+		}
 	}
 }
 
@@ -47,24 +71,24 @@ void spr_init()
 	REG_DISPCNT |= OBJ_ON | OBJ_1D_MAP;
 }
 
-void spr_copy(obj_t *obj, const uint8_t index)
+void spr_copy(obj_t *obj, const uint index)
 {
-	memcpy16((vu16*)(&oam_mem[index]), (u16*)obj, 4);
+	memcpy16((u16*)&oam_mem[index], (u16*)obj, 4);
 }
 
 void spr_copy_all()
 {
 	// @todo only copy created sprites
-	memcpy16((vu16*)oam_mem, (u16*)__spr_buffer, 64 << 2);
+	memcpy16((u16*)oam_mem, (u16*)__spr_buffer, (highest_index+1) << 2);
 }
 
 
 /**
  * @param obj sprite
- * @param x absolute x position
- * @param y absolute y position
+ * @param x absolute x position (0-1FF)
+ * @param y absolute y position (0-FF)
  */
-void spr_move(obj_t *obj, const u16 x, const u8 y)
+void spr_move(obj_t *obj, const uint x, const uint y)
 {
 	obj->attr1 &= 0xFE00;
 	obj->attr1 |= x & 0x01FF;

@@ -64,7 +64,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
     DEFINE_ITEM("IRON", 2, ITEM_TYPE_IRON, 4, 1),
     DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
-    DEFINE_ITEM("FURNACE", 44, ITEM_TYPE_FURNITURE, 2, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
+    DEFINE_ITEM("FURNACE", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
 };
 
 
@@ -106,16 +106,18 @@ bool item_can_attack(const item_t *item)
 }
 
 
-void item_add_to_inventory(const item_t *item, inventory_t *inv)
+item_t *item_add_to_inventory(const item_t *item, inventory_t *inv)
 {
     item_t *i = item_get_from_inventory_matching(item, inv);
     // check if we already have this item in our inventory
     if(i) {
         i->count += item->count;
+        return i;
     } else {
         item_t *inv_item = &inv->items[inv->size++];
         *inv_item = *item;
         inv_item->parent = inv;
+        return inv_item;
     }
 }
 
@@ -127,7 +129,7 @@ bool item_remove_from_inventory(item_t *item)
     if(!inv)
         return false;
 
-    for(u16 i = 0; i < inv->size; i++)
+    for(uint i = 0; i < inv->size; i++)
     {
         if(&inv->items[i] == item)
         {
@@ -143,7 +145,7 @@ bool item_remove_from_inventory(item_t *item)
 
 item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *inv)
 {
-    for(u16 i = 0; i < inv->size; i++)
+    for(uint i = 0; i < inv->size; i++)
     {
         if(inv->items[i].type == item->type && inv->items[i].tooltype == item->tooltype)
         {
@@ -164,7 +166,7 @@ item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *
 
 item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv)
 {
-    for(u16 i = 0; i < inv->size; i++)
+    for(uint i = 0; i < inv->size; i++)
     {
         if(inv->items[i].type == type)
             return (item_t*)&inv->items[i];
@@ -207,6 +209,7 @@ bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
 static const item_t *_furn_items[] = {
     &ITEM_BENCH,
     &ITEM_CHEST,
+    &ITEM_FURNACE
 };
 
 

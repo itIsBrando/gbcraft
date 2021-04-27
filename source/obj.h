@@ -58,14 +58,14 @@ void spr_free(obj_t *obj);
  */
 void spr_init();
 
-void spr_copy(obj_t *, const uint8_t index);
+void spr_copy(obj_t *, const uint index);
 
 /**
  * Copies all sprites to OAM
  */
 void spr_copy_all();
 
-void spr_move(obj_t *, const u16, const u8);
+void spr_move(obj_t *, const uint, const uint);
 
 
 /**

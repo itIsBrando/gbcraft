@@ -211,7 +211,7 @@ void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
 
 void bg_load_tiles(const uint8_t charbank, const u16 position, const unsigned char *data, const u16 size, const bool is8bpp)
 {
-	memcpy16((vu16*)tile_mem[charbank][position << is8bpp],
+	memcpy16((u16*)tile_mem[charbank][position << is8bpp],
      (u16*)data, size >> 1);
 }
 

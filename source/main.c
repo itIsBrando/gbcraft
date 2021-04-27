@@ -36,10 +36,10 @@ int main(void) {
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
-	memcpy16(sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16(sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16(sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16(background_palette_mem, (u16*)tilesetPal, tilesetPalLen >> 1);
+	memcpy16((u16*)sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16((u16*)sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16((u16*)sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen >> 1);
+	memcpy16((u16*)background_palette_mem, (u16*)tilesetPal, tilesetPalLen >> 1);
 
 	// copy sprite to tile 1 in tileblock 4
 	bg_load_tiles(4, 1, character_idleTiles, character_idleTilesLen, false);
@@ -97,6 +97,8 @@ int main(void) {
 		ent_add(level, ENT_TYPE_SLIME, 50, 50);
 		ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
 
+		item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
+		item_change_count(plr->player.inventory.items, 19);
 		item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
@@ -185,7 +187,8 @@ int main(void) {
 				onupdate(&level->entities[i]);
 		}
 
-		lvl_try_spawn(level, 2);
+		lvl_ticks++;
+		lvl_try_spawn(level, 1);
 
 		if(curTime && --curTime == 0)
 		{

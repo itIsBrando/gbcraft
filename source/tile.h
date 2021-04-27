@@ -14,6 +14,7 @@ const tile_t *tile_get(tile_type_t type);
 void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u16 x, u16 y);
 
 bool tile_water_maypass(ent_t *e);
+bool tile_grass_maypass(ent_t *e);
 bool tile_no_pass(ent_t *e);
 
 void tile_tree_interact(ent_t *ent, item_t *item, u16 x, u16 y);

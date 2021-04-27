@@ -195,6 +195,7 @@ typedef struct {
 
 typedef struct {
     const item_t *result;
+    u8 amount; // number of `result` to add to the player's inventory
     u8 costs_num;
     cost_t costs[4];
 } recipe_t;
@@ -213,6 +214,7 @@ typedef struct {
     s8 max_health;
     s8 stamina;
     s8 max_stamina;
+    bool is_swimming;
     item_t *activeItem;
     inventory_t inventory;
     u8 invulnerability;

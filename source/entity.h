@@ -36,6 +36,7 @@ void ent_furniture_set_tile(ent_t *e);;
 void ent_slime_init(ent_t *e);
 void ent_zombie_init(ent_t *e);
 void ent_player_init(ent_t *e);
+void ent_furniture_init(ent_t *e);
 
 void ent_player_update(ent_t *plr);
 void ent_slime_update(ent_t *s);

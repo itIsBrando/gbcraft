@@ -9,6 +9,7 @@
 #include "memory.h"
 
 static BG_REGULAR *target_bg;
+uint lvl_ticks;
 
 
 static inline u16 lvl_get_size(const level_t *lvl)
@@ -135,6 +136,10 @@ inline u16 lvl_to_pixel_y(level_t *lvl, u16 ty)
  */
 bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
 {
+    // prevent too many mobs
+    if(lvl->mob_density > 6 + lvl->layer)
+        return false;
+
     ent_t *plr = lvl_get_player(lvl);
     *x = rnd_random_bounded(0, LEVEL_WIDTH) << 4;
     *y = rnd_random_bounded(0, LEVEL_HEIGHT) << 4;
@@ -145,14 +150,15 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
     if(abs(px - *x) + abs(py - *y) > 80)
         return false;
 
-    const tile_t *t = lvl_get_tile(lvl, *x >> 4, *y >> 4);
-    if(t->event->maypass && !t->event->maypass(plr))
+    const tile_type_t t = lvl_get_tile_type(lvl, *x >> 4, *y >> 4);
+    if(t != TILE_GRASS)
         return false;
 
-    // prevent too many mobs
-    if(lvl->mob_density > 8)
+    // if ANY entity exists here, then do not proceed with spawning
+    ent_t *ents[1];
+    if(ent_get_all_stack(lvl, ents, *x, *y, 1))
         return false;
-
+    
     lvl->mob_density++;
 
     return true;
@@ -164,10 +170,9 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
  */
 void lvl_try_spawn(level_t *level, uint tries)
 {
+    uint x, y;
     for(uint i = 0; i < tries; i++)
     {
-        uint x, y;
-
         // if we cannot find a spawn location, then do not add
         if(!lvl_try_spawn_position(level, &x, &y))
             continue;
