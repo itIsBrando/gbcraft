@@ -4,6 +4,7 @@
 #include "player.h"
 #include "entity.h"
 
+#include "memory.h"
 #include "text.h"
 #include "bg.h"
 
@@ -33,55 +34,48 @@ const tile_event_t tile_events[] = {
         .interact=tile_wood_interact
     },
     { // rock
-        .onhurt=tile_stone_onhurt,
+        .onhurt=NULL,
         .ontouch=NULL,
         .maypass=tile_no_pass,
         .interact=tile_stone_interact,
-    }
+    },
+    { // stairs
+        .onhurt=NULL,
+        .ontouch=tile_stair_ontouch,
+        .maypass=NULL,
+        .interact=NULL,
+    },
 };
 
 
 // @todo add this
-#define CREATE_TILE() {}
+/**
+ * @param _type `tile_type_t`
+ * @param _tile tile index
+ * @param _indexing_mode `tile_indexing_mode_t`
+ * @param _event_num index in `tile_events`
+ * @param _connect_to tile_type_t to visually connect to
+ */
+#define CREATE_TILE(_type, _tile, _indexing_mode, _event_num, _connect_to, ...) {\
+ .type=_type,\
+ .tiling={_tile},\
+ .indexing=_indexing_mode,\
+ .event=&tile_events[_event_num],\
+ .connect_to=_connect_to,\
+ __VA_ARGS__\
+}
 
 
 const tile_t tile_tile_data[] = 
 {
-    { // grass floor
-        .type=TILE_GRASS,
-        .tiling={45},              // tile base
-        .connect_to=TILE_TREE,
-        .indexing=TILE_INDEXING_9PT,// indexing mode
-        .event=&tile_events[0],
-    },
-    { // water tile
-        .type=TILE_WATER,
-        .tiling={48},              // tile base
-        .connect_to=TILE_NONE,
-        .indexing=TILE_INDEXING_9PT,// indexing mode
-        .event=&tile_events[1],
-    },
-    { // tree
-        .type=TILE_TREE,
-        .tiling={7},              // tile base
-        .connect_to=TILE_GRASS,
-        .indexing=TILE_INDEXING_SINGLE_16x16,// indexing mode
-        .event=&tile_events[2]
-    },
-    { // wood plank
-        .type=TILE_WOOD,
-        .tiling={3},              // tile base
-        .connect_to=TILE_NONE,
-        .indexing=TILE_INDEXING_TOP_BOT,// indexing mode
-        .event=&tile_events[3]
-    },
-    { // rock
-        .type=TILE_STONE,  // type
-        .tiling={42},                // tile base
-        .connect_to=TILE_NONE,
-        .indexing=TILE_INDEXING_9PT,// indexing mode
-        .event=&tile_events[4]
-    },
+    CREATE_TILE(TILE_GRASS, 45, TILE_INDEXING_9PT, 0, TILE_TREE),
+    CREATE_TILE(TILE_WATER, 48, TILE_INDEXING_9PT, 1, TILE_NONE),
+    CREATE_TILE(TILE_TREE, 7, TILE_INDEXING_SINGLE_16x16, 2, TILE_NONE),
+    CREATE_TILE(TILE_WOOD, 3, TILE_INDEXING_TOP_BOT, 3, TILE_NONE),
+    CREATE_TILE(TILE_STONE, 42, TILE_INDEXING_9PT, 4, TILE_NONE),
+    CREATE_TILE(TILE_IRON, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
+    CREATE_TILE(TILE_GOLD, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
+    CREATE_TILE(TILE_STAIRS, 67, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
 };
 
 
@@ -350,8 +344,12 @@ void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
     if(dmg > 20)
     {
+        uint px = lvl_to_pixel_x(lvl, x), py = lvl_to_pixel_y(lvl, y);
+
         lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-                ent_item_new(lvl, lvl_to_pixel_x(lvl, x), lvl_to_pixel_y(lvl, y), (item_t*)&ITEM_STONE, 2);
+        ent_item_new(lvl, px, py, (item_t*)&ITEM_STONE, 2);
+        if((rnd_random() & 0xF) == 0)
+            ent_item_new(lvl, x, y, &ITEM_COAL, (rnd_random() & 0x1) + 1);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
@@ -388,6 +386,18 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
     {
        tile_wood_hurt(ent->level, 5 + item->level, x, y);
     }
+}
+
+/** called when entity collides with this
+ * @param x relative pixel x
+ * @param y relative pixel y
+ */
+void tile_stair_ontouch(ent_t *e, uint x, uint y)
+{
+    if(e->type != ENT_TYPE_PLAYER)
+        return;
+
+    // @todo enter new level
 }
 
 

@@ -49,7 +49,8 @@ int main(void) {
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
 	// set first tile to be non-transparent black
-	memset16((u16*)&tile_mem[0][0], 0x4444, 16);
+	memset16((u16*)&tile_mem[0][0], 0xCCCC, 32);
+	background_palette_mem[0xC] = RGB15(4, 4, 4);
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
 	background_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red

@@ -47,6 +47,7 @@ uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize)
  * @param x relative pixel x
  * @param y relative pixel y
  * @returns NULL if none, or an array of pointers to entities allocated on the heap
+ * @warning very slow!!! prefer `ent_get_all_stack`
  */
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 {

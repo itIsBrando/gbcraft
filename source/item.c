@@ -25,9 +25,9 @@ item_event_t ITEM_EVENTS[] =
     [3]={ // furniture
         .interact=item_furniture_interact
     },
-    [4]={ // ore & gem
+    [4]={ // ore, coal, & gem
         
-    }
+    },
 };
 
 /**
@@ -65,6 +65,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("IRON", 2, ITEM_TYPE_IRON, 4, 1),
     DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
     DEFINE_ITEM("FURNACE", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
+    DEFINE_ITEM("COAL", 11, ITEM_TYPE_COAL, 4, 1),
 };
 
 
@@ -79,6 +80,7 @@ const char *item_lookup_name(item_t *item)
 
     return item_get_from_inventory_matching(item, &inv)->name;
 }
+
 
 const item_t *item_get_from_type(item_type_t type, s16 data)
 {

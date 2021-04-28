@@ -13,7 +13,7 @@
 #include "entity.h"
 
 
-#define EMPTY_TILE_INDEX 517
+#define EMPTY_TILE_INDEX 0
 
 static void mnu_scroll_up()
 {

@@ -22,6 +22,7 @@
 - [ ] Add support for player healing
 - [ ] Add apple
 - [ ] Add bonus damage to sword
+- [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
 - [x] Add player swimming
 - [x] Add furnace
@@ -76,6 +77,8 @@
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Add inner-corner tiles for `9pt indexing`
 - [ ] Redo font
+- [ ] Fixed background colors and other paletting problems!!!!
+- [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
 - [x] Document `onhurt` function for entity events. return value is true if entity died
 - [x] Prevent enemies from spawning on top of water & other entities
 - [x] Create a modified version of `ent_get_all` that uses the stack instead of the heap

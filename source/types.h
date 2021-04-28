@@ -10,7 +10,10 @@ enum {
     TILE_WOOD,
     TILE_STONE,
     TILE_TREE,
-
+    TILE_IRON,
+    TILE_GOLD,
+    TILE_STAIRS,
+    
     TILE_NONE, // last tile
 }; // order irrelevant
 
@@ -140,7 +143,7 @@ typedef struct {
 
 typedef struct tile_event_t {
     void(*onhurt)(ent_t *);
-    void(*ontouch)(ent_t *);
+    void(*ontouch)(ent_t *, uint, uint);
     bool(*maypass)(ent_t *);
     void (*interact)(ent_t *, item_t *item, u16 x, u16 y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
 } tile_event_t;

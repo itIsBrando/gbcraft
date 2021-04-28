@@ -136,7 +136,7 @@ void gen_generate_underworld(level_t *lvl)
             u8 tile = TILE_STONE;
 
             if(n1[index] > 1500)
-                tile = TILE_WATER;
+                tile = TILE_IRON;
             
             lvl->map[index] = tile;
     }

@@ -13,7 +13,7 @@
  * @param item item_t that will be added to the player's inventory upon touching
  * @param cnt number of `item` to add to the inventory
  */
-void ent_item_new(level_t *level, u16 x, u16 y, item_t *item, u8 cnt)
+void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt)
 {
     ent_t *e = ent_add(level, ENT_TYPE_ITEM_ENTITY, x + 8, y + 8);
     e->itemEntity.item = item;

@@ -18,7 +18,8 @@
 #define ITEM_GOLD_ORE       ALL_ITEMS[12]
 #define ITEM_IRON           ALL_ITEMS[13]
 #define ITEM_GOLD           ALL_ITEMS[14]
-#define ITEM_FURNACE      ALL_ITEMS[15]
+#define ITEM_FURNACE        ALL_ITEMS[15]
+#define ITEM_COAL           ALL_ITEMS[16]
 
 extern const item_t ALL_ITEMS[];
 /**
