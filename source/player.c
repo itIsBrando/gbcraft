@@ -28,19 +28,18 @@ void ent_player_init(ent_t *e)
 void ent_player_update(ent_t *plr)
 {
     u16 keys = key_pressed();
+    const bool isMoving = keys & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN);
 
     if(plr->player.invulnerability)
         plr->player.invulnerability--;
 
     if(keys & KEY_LEFT)
     {
-        spr_flip(plr->sprite, SPR_FLIP_NONE);
         plr_move_by(plr, DIRECTION_LEFT);
     }
     
     if(keys & KEY_RIGHT)
     {
-        spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
         plr_move_by(plr, DIRECTION_RIGHT);
     }
 
@@ -73,6 +72,27 @@ void ent_player_update(ent_t *plr)
         }
 
     }
+
+    // if we are facing up or down
+    if(isMoving && (plr->dir & (DIRECTION_DOWN | DIRECTION_UP)))
+    {
+        if(lvl_ticks & 0x08)
+            spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
+        else
+            spr_flip(plr->sprite, SPR_FLIP_NONE);
+    } else if(isMoving) {
+        // if we are facing left or right
+        if(plr->dir == DIRECTION_LEFT)
+            spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
+        else 
+            spr_flip(plr->sprite, SPR_FLIP_NONE);
+        
+        if(lvl_ticks & 0x08)
+            spr_set_tile(plr->sprite, 26);
+        else
+            spr_set_tile(plr->sprite, 22);
+    }
+
 }
 
 

@@ -16,7 +16,7 @@
 void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt)
 {
     ent_t *e = ent_add(level, ENT_TYPE_ITEM_ENTITY, x + 8, y + 8);
-    e->itemEntity.item = item;
+    e->itemEntity.item = (item_t *)item;
     e->itemEntity.count = cnt;
     e->itemEntity.frames_alive = 0;
     e->xKnockback = rnd_random_bounded(-1, 1) * 6;
