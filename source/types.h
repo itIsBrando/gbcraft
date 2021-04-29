@@ -126,6 +126,7 @@ typedef struct {
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
+    void (*onrelocate)(ent_t *eOld, ent_t *eNew); /** called when the location of a pointer to an entity is about to change. @param eOld location of old pointer @param eNew location of the new pointer */
 } ent_event_t;
 
 
@@ -219,6 +220,7 @@ typedef struct {
     s8 stamina;
     s8 max_stamina;
     bool is_swimming;
+    bool removed; // true when the player has changed levels. Used to interrupt flow inside functions because this entity pointer will be decayed soon
     item_t *activeItem;
     inventory_t inventory;
     u8 invulnerability;

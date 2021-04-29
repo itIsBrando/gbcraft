@@ -397,6 +397,7 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 
 
 /** called when entity collides with this. This is a stairway down
+ * @param e player entity
  * @param x relative pixel x
  * @param y relative pixel y
  */
@@ -414,7 +415,7 @@ void tile_stair_down_ontouch(ent_t *e, uint x, uint y)
         newLevel = world[curLayer+1];
     else {
         // generate new level if necessary
-        newLevel = lvl_new(1, curLevel);
+        newLevel = lvl_new(curLayer + 1, curLevel);
         gen_generate(newLevel);
     }
    

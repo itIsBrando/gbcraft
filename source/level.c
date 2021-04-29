@@ -237,7 +237,7 @@ void lvl_blit()
 
     for(u16 y = 0; y < lvl_current->size; y++)
     {
-        for(u16 x = 0; x < lvl_current->size-1; x++)
+        for(u16 x = 0; x < lvl_current->size; x++)
         {
             const tile_t *tile = lvl_get_tile(lvl_current, x, y);
             tile_render(target_bg, lvl_current, tile, x, y);

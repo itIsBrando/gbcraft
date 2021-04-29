@@ -50,6 +50,7 @@ void ent_player_interact(const ent_t *plr); // not a standard event
 bool ent_slime_hurt(ent_t *, ent_t *, s8);
 bool ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
 
+void ent_player_onrelocate(ent_t *eOld, ent_t *eNew);
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
 

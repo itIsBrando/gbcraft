@@ -125,6 +125,8 @@ int main(void) {
 	while (true) {
 		key_scan();
 		u16 keys = key_pressed_no_repeat();
+		level_t *lvl = lvl_get_current();
+		plr = lvl_get_player(lvl);
 
 		if((keys & KEY_A) && !curTime)
 		{
@@ -142,12 +144,12 @@ int main(void) {
 		if(keys & KEY_START)
 		{
 			mnu_show_inventory(plr);
-		} else if(keys == KEY_SELECT)
+		}
+		else if(keys == KEY_SELECT)
 		{
 			sve_save_level(level);
 		}
 
-		level_t *lvl = lvl_get_current();
 		for(int i = 0; i < lvl->ent_size; i++)
 		{
 			const void (*onupdate)(ent_t *) = lvl->entities[i].events->onupdate;

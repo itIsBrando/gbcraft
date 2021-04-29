@@ -177,21 +177,26 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
 
 /**
  * Moves an entity from one layer to another.
- * @note removes `e` from other level
+ * @note does NOT remove `e` from other level
  * @returns new location of entity
  */
 ent_t *ent_change_level(ent_t *e, level_t *newLevel)
 {
+    // level_t *oldLevel = e->level;
     ent_t *ent = &newLevel->entities[newLevel->ent_size++];
     obj_t spr = *e->sprite;
     memcpy(ent, e, sizeof(ent_t));
 
     ent->level = newLevel;
     if(e->type == ENT_TYPE_PLAYER)
+    {
         ent->level->player = ent;
-    
-    ent_remove(e->level, e);
+        ent->player.removed = true;
+    }
 
+    if(e->events->onrelocate)
+        e->events->onrelocate(e, ent);
+    
     ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
 
     return ent;
@@ -285,7 +290,7 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
         //   function to return after switching levels
         if(events->ontouch) {
             events->ontouch(ent, tx, ty);
-            return true;
+            return false;
         }
     }
 

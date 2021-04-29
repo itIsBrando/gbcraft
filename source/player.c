@@ -17,11 +17,13 @@ static void ent_move_all(level_t *lvl, const direction_t direction);
 void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
-    e->level->player = e;
+    e->player.removed = false;
 
+    e->level->player = e;
 	e->player.max_health = e->player.health = 20;
 	e->player.max_stamina = e->player.stamina = 20;
 }
+
 
 /**
  * Called every frame
@@ -53,6 +55,13 @@ void ent_player_update(ent_t *plr)
         spr_set_tile(plr->sprite, 1);
     }
 
+    // player gets removed when the player changes level. Is this janky???
+    if(plr->player.removed)
+    {
+        ent_remove(plr->level, plr);
+        return;
+    }
+
     // 'hotbar'
     if(keys_no_repeat & KEY_L)
     {
@@ -70,7 +79,8 @@ void ent_player_update(ent_t *plr)
         }
         // if(!plr->player.stamina)
         //     plr->events->onhurt(plr, NULL, 1);
-    } else if(plr->player.stamina < plr->player.max_stamina)
+    }
+    else if(plr->player.stamina < plr->player.max_stamina)
     {
         if(plr->player.stamina_time++ >= 10)
         {
@@ -78,7 +88,6 @@ void ent_player_update(ent_t *plr)
             plr->player.stamina_time = 0;
             bar_draw_stamina(plr);
         }
-
     }
 
     if(isMoving)
@@ -90,7 +99,7 @@ void ent_player_update(ent_t *plr)
                 spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
             else
                 spr_flip(plr->sprite, SPR_FLIP_NONE);
-        } else  {
+        } else {
             // if we are facing left or right
             if(plr->dir == DIRECTION_LEFT)
                 spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
@@ -104,6 +113,24 @@ void ent_player_update(ent_t *plr)
         }
     }
 
+}
+
+
+void ent_player_onrelocate(ent_t *eOld, ent_t *eNew)
+{
+    inventory_t *inv = &eOld->player.inventory;
+    inventory_t *newInv = &eNew->player.inventory;
+
+    inv->parent = eNew;
+
+    for(uint i = 0; i < inv->size; i++) 
+    {
+        newInv->items[i] = inv->items[i];
+
+        newInv->items[i].parent = newInv;
+    }
+
+    newInv->size = inv->size;
 }
 
 
