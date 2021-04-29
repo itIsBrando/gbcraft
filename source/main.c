@@ -53,7 +53,7 @@ int main(void) {
 	background_palette_mem[0xC] = RGB15(4, 4, 4);
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
-	background_palette_mem[16 + 7] = RGB15(255, 0, 0); // set color red
+	background_palette_mem[16 + 8] = RGB15(255, 0, 0); // set color red for text
 	background_palette_mem[16 + 4] = RGB15(6, 6, 6); // set bg color to darkish-black for pal 1
 	sprite_palette_mem[16 + 12] = RGB15(0xff, 0xff, 0xff);
 	sprite_palette_mem[16 + 2] = RGB15(0xd, 8, 07); // set color brown (for wood tools)
@@ -79,6 +79,10 @@ int main(void) {
 
 	uint menuOption = mnu_open_main();
 
+	// empty all level_t pointers
+	for(uint i = 0; i < 4; i++)
+		world[i] = NULL;
+
 	// generate our level
 	lvl_set_target_background(main_background);
 	level_t *level = lvl_new(0, NULL);
@@ -92,7 +96,7 @@ int main(void) {
 
 	if(menuOption == 0)
 	{
-		gen_generate_overworld(level);
+		gen_generate(level);
 		plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 
 		ent_add(level, ENT_TYPE_SLIME, 50, 50);
@@ -110,7 +114,8 @@ int main(void) {
 		ent_player_set_active_item(plr, NULL); // active item pointer probs decayed
 	}
 
-	lvl_blit(level);
+	lvl_change_level(level);
+	
 	mnu_draw_hotbar(plr);
 	foo(FLASH_ID_TEXT); // @todo remove this unnecessary function
 
@@ -123,49 +128,10 @@ int main(void) {
 
 		if((keys & KEY_A) && !curTime)
 		{
-			u16 x = 124 + bg_get_scx(main_background),
-				y = 84  + bg_get_scy(main_background);
-			x>>=4, y>>=4;
-			x += dir_get_x(plr->dir);
-			y += dir_get_y(plr->dir);
-
-
-			if(plr->player.activeItem)
-			{ // interact with item
-				item_event_t *e = plr->player.activeItem->event;
-				if(e->interact)
-					e->interact(
-						plr->player.activeItem,
-						(ent_t*)plr,
-						lvl_get_tile(level, x, y),
-						x, y
-					);
-			} else { // interact with tile
-				const tile_t *t = lvl_get_tile(level, x, y);
-				const tile_event_t *e = t->event;
-				if(e->interact)
-					e->interact(plr, NULL, x, y);
-			}
-
-			// check to see if we can interact with an entity
-	
-			u8 px = plr->x + (dir_get_x(plr->dir) << 3) + 8,
-			   py = plr->y + (dir_get_y(plr->dir) << 3) + 8;
-			ent_t *ents[5];
-			uint s = ent_get_all_stack(plr->level, ents, px, py, 5);
-
-			for(uint i = 0; i < s; i++)
-			{
-				ent_t *e = ents[i];
-				if(e == plr) continue;
-
-				if(e->events->onhurt && e->events->onhurt(e, plr, 2))
-					break;
-			}
-
+			ent_player_interact(plr);
 			// cursor @todo move this elsewhere
-			x = (plr->x+4) + (dir_get_x(plr->dir) * 9);
-			y = (plr->y+4) + (dir_get_y(plr->dir) * 11);
+			uint x = (plr->x+4) + (dir_get_x(plr->dir) * 9);
+			uint y = (plr->y+4) + (dir_get_y(plr->dir) * 11);
 			item_set_icon(cursor, plr->player.activeItem);
 			curTime = 10;
 			spr_move(cursor, x, y);
@@ -181,15 +147,16 @@ int main(void) {
 			sve_save_level(level);
 		}
 
-		for(int i = level->ent_size - 1; i >= 0; i--)
+		level_t *lvl = lvl_get_current();
+		for(int i = 0; i < lvl->ent_size; i++)
 		{
-			const void (*onupdate)(ent_t *) = level->entities[i].events->onupdate;
+			const void (*onupdate)(ent_t *) = lvl->entities[i].events->onupdate;
 			if(onupdate)
-				onupdate(&level->entities[i]);
+				onupdate(&lvl->entities[i]);
 		}
 
 		lvl_ticks++;
-		lvl_try_spawn(level, 1);
+		lvl_try_spawn(lvl, 1);
 
 		if(curTime && --curTime == 0)
 		{

@@ -2,15 +2,13 @@
 
 
 ### Features
-- [ ] Add player side sprite
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Add `interrupt.h`
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
-- [ ] Create stairs
-- [ ] Create generation for caves
+- [ ] Create stairs up
 - [ ] Add iron
 - [ ] Add coal
 - [ ] Add gold
@@ -24,6 +22,10 @@
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
+- [ ] Create a *hole* around the player's initial position so it will never get stuck in blocks
+- [x] Create stairs down
+- [x] Create generation for caves
+- [x] Add player side sprite
 - [x] Add player swimming
 - [x] Add furnace
 - [x] Enemy spawning
@@ -68,17 +70,18 @@
 ### Polish
 - [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
-- [ ] Animate player
 - [ ] New tree sprite
 - [ ] Furniture snap to grid?
-- [ ] Have `spr_copy_all()` only copy the number of allocated sprites, not all 128
 - [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Add inner-corner tiles for `9pt indexing`
-- [ ] Redo font
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
+- [ ] Fix level changing. It is very sloppy
+- [x] Animate player
+- [x] Redo font
+- [x] Have `spr_copy_all()` only copy the number of allocated sprites, not all 128
 - [x] Document `onhurt` function for entity events. return value is true if entity died
 - [x] Prevent enemies from spawning on top of water & other entities
 - [x] Create a modified version of `ent_get_all` that uses the stack instead of the heap
@@ -88,12 +91,16 @@
 
 
 ### Bug
-- [ ] Spontaneously crashes (jumps to address 00000000). Maybe zombie out of bounds?
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
-- [ ] Entities are visible above the hotbar
-- [ ] Grass does not connect to tree
+- [ ] Blocks can be placed on top of player
+- [ ] Furniture items can be placed on top of other furniture and entities
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
+- [ ] Pointers decay after `ent_change_level` :'(
+    - potential fix could be to add `onrelocate` function to the entity events. It would also help with saving/loading
+- [x] Changing levels breaks the palettes for some reason. ugh
+- [x] Grass does not connect to tree
+- [x] Entities are visible above the hotbar
 - [x] Entities are drawn above the hotbar
 - [x] **Fix weird & fast zombie movement**
 - [x] Weird & occasional screen shake when attacking with many mobs spawned

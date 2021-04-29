@@ -3,6 +3,8 @@
 #include "item.h"
 #include "player.h"
 #include "entity.h"
+#include "terraingen.h"
+#include "menu.h"
 
 #include "memory.h"
 #include "text.h"
@@ -39,9 +41,12 @@ const tile_event_t tile_events[] = {
         .maypass=tile_no_pass,
         .interact=tile_stone_interact,
     },
+    { // ore
+
+    },
     { // stairs
         .onhurt=NULL,
-        .ontouch=tile_stair_ontouch,
+        .ontouch=tile_stair_down_ontouch,
         .maypass=NULL,
         .interact=NULL,
     },
@@ -75,7 +80,8 @@ const tile_t tile_tile_data[] =
     CREATE_TILE(TILE_STONE, 42, TILE_INDEXING_9PT, 4, TILE_NONE),
     CREATE_TILE(TILE_IRON, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
     CREATE_TILE(TILE_GOLD, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
-    CREATE_TILE(TILE_STAIRS, 67, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
+    CREATE_TILE(TILE_STAIRS, 129, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
+    CREATE_TILE(TILE_MUD, 34, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
 };
 
 
@@ -380,6 +386,7 @@ void tile_wood_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
 }
 
+
 void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
     if(item && item->tooltype == TOOL_TYPE_AXE && plr_pay_stamina(ent, 4 - item->level))
@@ -388,16 +395,33 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
     }
 }
 
-/** called when entity collides with this
+
+/** called when entity collides with this. This is a stairway down
  * @param x relative pixel x
  * @param y relative pixel y
  */
-void tile_stair_ontouch(ent_t *e, uint x, uint y)
+void tile_stair_down_ontouch(ent_t *e, uint x, uint y)
 {
     if(e->type != ENT_TYPE_PLAYER)
         return;
 
     // @todo enter new level
+    level_t *curLevel = e->level;
+    uint curLayer = curLevel->layer;
+    level_t *newLevel;
+
+    if(world[curLayer+1])
+        newLevel = world[curLayer+1];
+    else {
+        // generate new level if necessary
+        newLevel = lvl_new(1, curLevel);
+        gen_generate(newLevel);
+    }
+   
+    ent_change_level(e, newLevel);
+
+    lvl_change_level(newLevel);
+	mnu_draw_hotbar(e);
 }
 
 

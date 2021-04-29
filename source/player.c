@@ -5,6 +5,7 @@
 #include "menu.h"
 #include "player.h"
 
+#include "window.h"
 #include "keypad.h"
 #include "bg.h"
 #include "obj.h"
@@ -27,7 +28,8 @@ void ent_player_init(ent_t *e)
  */
 void ent_player_update(ent_t *plr)
 {
-    u16 keys = key_pressed();
+    uint keys = key_pressed();
+    uint keys_no_repeat = key_pressed_no_repeat();
     const bool isMoving = keys & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN);
 
     if(plr->player.invulnerability)
@@ -36,9 +38,7 @@ void ent_player_update(ent_t *plr)
     if(keys & KEY_LEFT)
     {
         plr_move_by(plr, DIRECTION_LEFT);
-    }
-    
-    if(keys & KEY_RIGHT)
+    } else if(keys & KEY_RIGHT)
     {
         plr_move_by(plr, DIRECTION_RIGHT);
     }
@@ -47,12 +47,20 @@ void ent_player_update(ent_t *plr)
     {
         plr_move_by(plr, DIRECTION_UP);
         spr_set_tile(plr->sprite, 5);
-    }
-
-    if(keys & KEY_DOWN)
+    } else if(keys & KEY_DOWN)
     {
         plr_move_by(plr, DIRECTION_DOWN);
         spr_set_tile(plr->sprite, 1);
+    }
+
+    // 'hotbar'
+    if(keys_no_repeat & KEY_L)
+    {
+        player_change_hotbar_pos(plr, -1);
+    } 
+    else if(keys_no_repeat & KEY_R)
+    {
+        player_change_hotbar_pos(plr, 1);
     }
 
     if(plr->player.is_swimming) {
@@ -73,28 +81,58 @@ void ent_player_update(ent_t *plr)
 
     }
 
-    // if we are facing up or down
-    if(isMoving && (plr->dir & (DIRECTION_DOWN | DIRECTION_UP)))
+    if(isMoving)
     {
-        if(lvl_ticks & 0x08)
-            spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
-        else
-            spr_flip(plr->sprite, SPR_FLIP_NONE);
-    } else if(isMoving) {
-        // if we are facing left or right
-        if(plr->dir == DIRECTION_LEFT)
-            spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
-        else 
-            spr_flip(plr->sprite, SPR_FLIP_NONE);
-        
-        if(lvl_ticks & 0x08)
-            spr_set_tile(plr->sprite, 26);
-        else
-            spr_set_tile(plr->sprite, 22);
+        // if we are facing up or down
+        if(plr->dir == DIRECTION_DOWN || plr->dir == DIRECTION_UP)
+        {
+            if(lvl_ticks & 0x08)
+                spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
+            else
+                spr_flip(plr->sprite, SPR_FLIP_NONE);
+        } else  {
+            // if we are facing left or right
+            if(plr->dir == DIRECTION_LEFT)
+                spr_flip(plr->sprite, SPR_FLIP_HORIZONTAL);
+            else 
+                spr_flip(plr->sprite, SPR_FLIP_NONE);
+            
+            if(lvl_ticks & 0x08)
+                spr_set_tile(plr->sprite, 26);
+            else
+                spr_set_tile(plr->sprite, 22);
+        }
     }
 
 }
 
+
+static uint _hotbar_index = 0;
+
+
+/**
+ * @param index index in the player's inventory. Can be unbounded
+ */
+void player_set_hotbar_pos(ent_t *p, uint index)
+{
+    const inventory_t *inv = &p->player.inventory;
+    if(!inv->size)
+        return;
+    
+    _hotbar_index = index % inv->size;
+    
+    bg_fill(win_get_0()->background, 1, 2, 11, 1, 0);
+    ent_player_set_active_item(p, (item_t*)&inv->items[_hotbar_index]);
+}
+
+
+/**
+ * @param a -1 or 1 for left or right
+ */
+inline void player_change_hotbar_pos(ent_t *p, int a)
+{
+    player_set_hotbar_pos(p, _hotbar_index+a);
+}
 
 /**
  * Redraws hotbar and subtracts from player's health
@@ -132,7 +170,7 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
 }
 
 
-// inverts the direction
+// inverts the direction @todo move elsewhere
 inline direction_t dir_get_opposite(direction_t direction)
 {
     return direction ^ 1;
@@ -166,5 +204,55 @@ static void ent_move_all(level_t *lvl, const direction_t direction)
         ent->y += dy;
 
         ent_draw(ent++);
+    }
+}
+
+
+/**
+ * Called when the user presses the `A` button
+ */
+void ent_player_interact(const ent_t *plr)
+{
+    // check to see if we can interact with an entity
+    uint px = 120 + (dir_get_x(plr->dir) << 3),
+         py = 80 + (dir_get_y(plr->dir) << 3);
+    ent_t *ents[5];
+    uint s = 0;
+
+    if(!plr->player.activeItem || (plr->player.activeItem && plr->player.activeItem->tooltype != TOOL_TYPE_PICKUP))
+        s = ent_get_all_stack(plr->level, ents, px, py, 5);
+
+    for(uint i = 0; i < s; i++)
+    {
+        ent_t *e = ents[i];
+        if(e == plr) continue;
+
+        if(e->events->onhurt && e->events->onhurt(e, (ent_t*)plr, 2))
+            break;
+    }
+
+    uint x = 124 + bg_get_scx(main_background),
+        y = 84  + bg_get_scy(main_background);
+    x>>=4, y>>=4;
+    x += dir_get_x(plr->dir);
+    y += dir_get_y(plr->dir);
+
+    // interact with held item
+    if(plr->player.activeItem)
+    { // interact with item
+        const item_event_t *e = plr->player.activeItem->event;
+        if(e->interact)
+            e->interact(
+                plr->player.activeItem,
+                (ent_t*)plr,
+                lvl_get_tile(plr->level, x, y),
+                x, y
+            );
+    } else {
+        // interact with tile
+        const tile_t *t = lvl_get_tile(plr->level, x, y);
+        const tile_event_t *e = t->event;
+        if(e->interact)
+            e->interact((ent_t*)plr, NULL, x, y);
     }
 }

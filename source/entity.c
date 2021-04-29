@@ -175,6 +175,29 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
 }
 
 
+/**
+ * Moves an entity from one layer to another.
+ * @note removes `e` from other level
+ * @returns new location of entity
+ */
+ent_t *ent_change_level(ent_t *e, level_t *newLevel)
+{
+    ent_t *ent = &newLevel->entities[newLevel->ent_size++];
+    obj_t spr = *e->sprite;
+    memcpy(ent, e, sizeof(ent_t));
+
+    ent->level = newLevel;
+    if(e->type == ENT_TYPE_PLAYER)
+        ent->level->player = ent;
+    
+    ent_remove(e->level, e);
+
+    ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
+
+    return ent;
+}
+
+
 void ent_remove(level_t *lvl, ent_t *ent)
 {
     int index = -1;
@@ -231,9 +254,11 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
     const bounding_rect_t *rect = ent_get_bounding_rect(ent);
     uint x = ent->x + bg_get_scx(main_background);
     uint y = ent->y + bg_get_scy(main_background);
+    int cx = dir_get_x(direction);
+    int cy = dir_get_y(direction);
 
-    x += dir_get_x(direction) * 2;
-    y += dir_get_y(direction) * 2; 
+    x += cx * 2;
+    y += cy * 2; 
     
     x += rect->sx;
     y += rect->sy;
@@ -255,6 +280,13 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
 
         if(events->maypass && !events->maypass(ent))
             return false;
+        
+        // @todo fix this. The stairways down requires this
+        //   function to return after switching levels
+        if(events->ontouch) {
+            events->ontouch(ent, tx, ty);
+            return true;
+        }
     }
 
     // make sure that we don't collide into any solid entities

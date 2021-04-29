@@ -13,6 +13,7 @@ enum {
     TILE_IRON,
     TILE_GOLD,
     TILE_STAIRS,
+    TILE_MUD,
     
     TILE_NONE, // last tile
 }; // order irrelevant

@@ -100,5 +100,8 @@ void spr_show(obj_t *obj);
  */
 void spr_set_size(obj_t *obj, const spr_size_mask size);
 spr_size_mask spr_get_size(const obj_t *obj);
+uint spr_get_x(const obj_t *obj);
+uint spr_get_y(const obj_t *obj);
+uint spr_get_tile(const obj_t *obj);
 
 #endif

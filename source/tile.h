@@ -17,7 +17,7 @@ bool tile_water_maypass(ent_t *e);
 bool tile_grass_maypass(ent_t *e);
 bool tile_no_pass(ent_t *e);
 
-void tile_stair_ontouch(ent_t *e, uint x, uint y);
+void tile_stair_down_ontouch(ent_t *e, uint x, uint y);
 
 void tile_stone_onhurt(ent_t *e);
 

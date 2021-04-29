@@ -101,15 +101,20 @@ void spr_move(obj_t *obj, const uint x, const uint y)
 }
 
 
-inline u16 spr_get_x(const obj_t *obj)
+inline uint spr_get_x(const obj_t *obj)
 {
 	return obj->attr1 & 0x01FF;
 }
 
 
-inline u16 spr_get_y(const obj_t *obj)
+inline uint spr_get_y(const obj_t *obj)
 {
 	return obj->attr0 & 0x00FF;
+}
+
+inline uint spr_get_tile(const obj_t *obj)
+{
+	return obj->attr2 & 0x01FF;
 }
 
 
@@ -119,7 +124,7 @@ inline u16 spr_get_y(const obj_t *obj)
  */
 inline void spr_flip(obj_t *obj, const spr_flip_mask mask)
 {
-	obj->attr1 &= 0xC0FF;
+	obj->attr1 &= 0xCFFF;
 	obj->attr1 |= mask;
 }
 

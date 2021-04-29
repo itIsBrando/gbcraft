@@ -201,7 +201,7 @@ void sve_write_to_persistant(const save_t *sav)
 
     sve_write_data((u8*)sav, sizeof(save_t), 0);
 
-    text_print("IT IS NOW SAVE TO POWER OFF.", 0, 0);
+    text_print("IT IS NOW SAFE TO POWER OFF.", 0, 0);
 }
 
 

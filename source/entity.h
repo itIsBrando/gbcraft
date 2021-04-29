@@ -19,6 +19,7 @@ void ent_draw(const ent_t *ent);
 
 bool ent_is_on_screen(const ent_t *ent);
 ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y);
+ent_t *ent_change_level(ent_t *e, level_t *newLevel);
 void ent_remove(level_t *lvl, ent_t *ent);
 
 /**
@@ -45,8 +46,10 @@ void ent_furniture_update(ent_t *e);
 void ent_item_update(ent_t *e);
 
 bool ent_furniture_interact(ent_t *, ent_t *, s8);
+void ent_player_interact(const ent_t *plr); // not a standard event
 bool ent_slime_hurt(ent_t *, ent_t *, s8);
 bool ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
+
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
 

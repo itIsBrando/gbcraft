@@ -4,6 +4,8 @@
 #include "types.h"
 
 extern uint lvl_ticks;
+extern level_t *world[4];
+extern level_t *lvl_current;
 
 level_t *lvl_new(u16 layer, level_t *parent);
 void lvl_set_target_background(BG_REGULAR *bg);
@@ -25,6 +27,9 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y);
 void lvl_try_spawn(level_t *level, uint tries);
 
 
-void lvl_blit(level_t *lvl);
+void lvl_blit();
+
+void lvl_change_level(level_t *newLevel);
+level_t *lvl_get_current();
 
 #endif

@@ -10,6 +10,8 @@
 
 static BG_REGULAR *target_bg;
 uint lvl_ticks;
+level_t *world[4];
+level_t *lvl_current = NULL;
 
 
 static inline u16 lvl_get_size(const level_t *lvl)
@@ -96,6 +98,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
     lvl->parent = (struct level_t*)parent;
     lvl->size = 64;
     lvl->mob_density = 0;
+    lvl->ent_size = 0;
 
     // do map generation based on layer @todo
     memset(lvl->data, 0, LEVEL_SIZE);
@@ -190,17 +193,54 @@ void lvl_try_spawn(level_t *level, uint tries)
 }
 
 
-void lvl_blit(level_t *lvl)
+static void lvl_unload(level_t *lvl)
+{
+    for(uint i = 0; i < lvl->ent_size; i++)
+    {
+        if(lvl->entities[i].type != ENT_TYPE_PLAYER)
+            spr_free(lvl->entities[i].sprite);
+    }
+}
+
+
+/**
+ * Draws and sets the target level to `newLevel`. The level must have its terrain generation before this call
+ * @param newLevel MUST EXIST FOR DURATION OF BEING ACTIVE/LOADED
+ */
+void lvl_change_level(level_t *newLevel)
+{
+    if(lvl_current)
+        lvl_unload(lvl_current);
+
+    lvl_current = newLevel;
+    world[newLevel->layer] = newLevel;
+    lvl_blit();
+}
+
+
+/**
+ * @returns the loaded level
+ */
+inline level_t *lvl_get_current()
+{
+    return lvl_current;
+}
+
+
+/**
+ * Draws the current level
+ */
+void lvl_blit()
 {
     text_print("RENDERING WORLD", 0, 2);
     tile_render_use_recursion(false);
 
-    for(u16 y = 0; y < lvl->size; y++)
+    for(u16 y = 0; y < lvl_current->size; y++)
     {
-        for(u16 x = 0; x < lvl->size-1; x++)
+        for(u16 x = 0; x < lvl_current->size-1; x++)
         {
-            const tile_t *tile = lvl_get_tile(lvl, x, y);
-            tile_render(target_bg, lvl, tile, x, y);
+            const tile_t *tile = lvl_get_tile(lvl_current, x, y);
+            tile_render(target_bg, lvl_current, tile, x, y);
         }
     }
 

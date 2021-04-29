@@ -1,5 +1,8 @@
 #include "terraingen.h"
+#include "tile.h"
+#include "level.h"
 
+#include "window.h"
 #include "keypad.h"
 #include "text.h"
 #include "memory.h"
@@ -96,6 +99,30 @@ terr_t *noise(u16 mapSize, u8 featureSize)
 }
 
 
+/**
+ * Call to generate terrain for a level
+ * @param lvl must be filled with layer number
+ */
+void gen_generate(level_t *lvl)
+{
+    
+    win_move(win_get_0(), 0, 0, 240, 160);
+    
+    switch (lvl->layer)
+    {
+    case 0:
+        gen_generate_overworld(lvl);
+        gen_make_stairs_down(lvl);
+        return;
+    case 3:
+        gen_generate_underworld(lvl);
+        return;
+    default:
+        gen_generate_underworld(lvl);
+        gen_make_stairs_down(lvl);
+        return;
+    }
+}
 
 
 /**
@@ -122,6 +149,21 @@ void gen_generate_overworld(level_t *lvl)
     free(n1);
 }
 
+void gen_make_stairs_down(level_t *lvl)
+{
+    // spawn 9 staircases
+    for(uint i = 0; i < 9; i++)
+    {
+        uint iter = 0, x, y;
+        do {
+            x = rnd_random() & 0x7F;
+            y = rnd_random() & 0x7F;
+            iter++;
+        } while(lvl_get_tile_type(lvl, x, y) != TILE_STONE && iter < 10);
+        lvl_set_tile(lvl, x, y, tile_get(TILE_STAIRS));
+    }
+}
+
 
 /**
  * Uses diamond square to generate a map
@@ -129,7 +171,7 @@ void gen_generate_overworld(level_t *lvl)
  */
 void gen_generate_underworld(level_t *lvl)
 {
-    terr_t *n1 = noise(lvl->size, 16);
+    terr_t *n1 = noise(lvl->size, 8);
 
     for(uint index = 0; index < LEVEL_SIZE; index++)
     {
@@ -137,6 +179,8 @@ void gen_generate_underworld(level_t *lvl)
 
             if(n1[index] > 1500)
                 tile = TILE_IRON;
+            else if(n1[index] > 50)
+                tile = TILE_MUD;
             
             lvl->map[index] = tile;
     }
