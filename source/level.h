@@ -20,8 +20,10 @@ void lvl_set_data(level_t *lvl, u16 x, u16 y, u8 v);
 
 void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile);
 
-u16 lvl_to_pixel_x(level_t *lvl, u16 tx);
-u16 lvl_to_pixel_y(level_t *lvl, u16 ty);
+uint lvl_to_pixel_x(level_t *lvl, uint tx);
+uint lvl_to_pixel_y(level_t *lvl, uint ty);
+uint lvl_to_tile_x(const level_t *lvl, uint px);
+uint lvl_to_tile_y(const level_t *lvl, uint py);
 
 bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y);
 void lvl_try_spawn(level_t *level, uint tries);

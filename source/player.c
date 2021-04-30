@@ -122,6 +122,9 @@ void ent_player_onrelocate(ent_t *eOld, ent_t *eNew)
     inventory_t *newInv = &eNew->player.inventory;
 
     inv->parent = eNew;
+    
+    ent_player_set_active_item(eNew, NULL);
+    ent_player_set_active_item(eOld, NULL);
 
     for(uint i = 0; i < inv->size; i++) 
     {

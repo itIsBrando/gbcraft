@@ -12,9 +12,12 @@ enum {
     TILE_TREE,
     TILE_IRON,
     TILE_GOLD,
-    TILE_STAIRS,
+    TILE_STAIR_DOWN,
     TILE_MUD,
-    
+    TILE_STAIR_UP,
+    TILE_DOOR_CLOSED,
+    TILE_DOOR_OPEN,
+
     TILE_NONE, // last tile
 }; // order irrelevant
 
@@ -42,6 +45,7 @@ typedef enum {
     ITEM_TYPE_IRON,
     ITEM_TYPE_GOLD,
     ITEM_TYPE_GEM,
+    ITEM_TYPE_DOOR,
 } item_type_t; // order relevant?
 
 

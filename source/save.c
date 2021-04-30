@@ -52,7 +52,7 @@ void sve_save_level(level_t *lvl)
     save_t *save = calloc(sizeof(save_t), sizeof(uint8_t));
     uint index = 0;
 
-    memcpy(save->test, "HELLOAAA", 8);
+    memcpy(save->test, "TSTWORLD", 8);
 
     // copy entities
     for(uint i = 0; i < lvl->ent_size; i++)

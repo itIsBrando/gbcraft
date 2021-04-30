@@ -44,11 +44,21 @@ const tile_event_t tile_events[] = {
     { // ore
 
     },
-    { // stairs
+    { // stairs down
         .onhurt=NULL,
         .ontouch=tile_stair_down_ontouch,
         .maypass=NULL,
         .interact=NULL,
+    },
+    { // stairs up
+        .ontouch=tile_stair_up_ontouch,
+    },
+    { // door closed
+        .interact=tile_door_closed_interact,
+        .maypass=tile_no_pass,
+    },
+    { // door open
+        .interact=tile_door_open_interact,
     },
 };
 
@@ -70,18 +80,21 @@ const tile_event_t tile_events[] = {
  __VA_ARGS__\
 }
 
-
+// order irrelevant
 const tile_t tile_tile_data[] = 
 {
-    CREATE_TILE(TILE_GRASS, 45, TILE_INDEXING_9PT, 0, TILE_TREE),
+    CREATE_TILE(TILE_GRASS, 45, TILE_INDEXING_9PT, 0, TILE_NONE),
     CREATE_TILE(TILE_WATER, 48, TILE_INDEXING_9PT, 1, TILE_NONE),
     CREATE_TILE(TILE_TREE, 7, TILE_INDEXING_SINGLE_16x16, 2, TILE_NONE),
     CREATE_TILE(TILE_WOOD, 3, TILE_INDEXING_TOP_BOT, 3, TILE_NONE),
     CREATE_TILE(TILE_STONE, 42, TILE_INDEXING_9PT, 4, TILE_NONE),
     CREATE_TILE(TILE_IRON, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
     CREATE_TILE(TILE_GOLD, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
-    CREATE_TILE(TILE_STAIRS, 129, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
+    CREATE_TILE(TILE_STAIR_DOWN, 129, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
+    CREATE_TILE(TILE_STAIR_UP, 131, TILE_INDEXING_SINGLE_16x16, 7, TILE_NONE),
     CREATE_TILE(TILE_MUD, 34, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
+    CREATE_TILE(TILE_DOOR_CLOSED, 71, TILE_INDEXING_SINGLE_16x16, 8, TILE_NONE),
+    CREATE_TILE(TILE_DOOR_OPEN, 69, TILE_INDEXING_SINGLE_16x16, 9, TILE_NONE),
 };
 
 
@@ -95,15 +108,12 @@ const tile_t tile_tile_data[] =
  */
 tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u16 y)
 {
-    int dx[] = {-1, 1, 0, 0, -1, 1, -1, 1};
-    int dy[] = {0, 0, -1, 1, -1, -1, 1, 1};
-
     tile_surround_mask mask = 0;
 
     for(uint i = 0; i < 8; i++)
     {
         mask <<= 1;
-        if(type == lvl_get_tile_type(lvl, x + dx[i], y + dy[i]))
+        if(type == lvl_get_tile_type(lvl, x + dir_get_x(i), y + dir_get_y(i)))
             mask |= 1;
     }
 
@@ -114,6 +124,9 @@ tile_surround_mask tile_get_surrounding(level_t *lvl, tile_type_t type, u16 x, u
 static void tile_render_single_8x8(const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
     bg_fill(target_bg, x, y, 2, 2, tile->tiling.center);
+
+    // @todo maybe make a call to `tile_get_surrounding instead??
+    tile_render_nearby(SURROUNDING_DOWN | SURROUNDING_LEFT | SURROUNDING_UP | SURROUNDING_RIGHT, lvl, tile, x, y);
 }
 
 
@@ -153,8 +166,8 @@ static bool _use_recursion;
 
 static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x >> 1, y >> 1)
-     | tile_get_surrounding((level_t *)lvl, tile->connect_to, x >> 1, y >> 1);
+    tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x >> 1, y >> 1);
+    //| tile_get_surrounding((level_t *)lvl, tile->connect_to, x >> 1, y >> 1);
     const u8 t = tile->tiling.center;
 
     if(tile->indexing != TILE_INDEXING_9PT)
@@ -168,6 +181,7 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
     bool dl = mask & SURROUNDING_LEFT_DOWN;
     bool ul = mask & SURROUNDING_LEFT_UP;
     bool dr = mask & SURROUNDING_RIGHT_DOWN;
+    bool ur = mask & SURROUNDING_RIGHT_UP;
 
     u8 corners[] = {t - 33, t - 31, t + 31, t + 33};
     
@@ -211,6 +225,9 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
 
     if(!ul && u && l)
         corners[0] = t + 65; // up left
+        
+    if(!ur && u && r)
+        corners[1] = t + 96; // up right
     
     bg_rect(target_bg, x, y, 2, 2, corners);
 
@@ -220,24 +237,22 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
 
 void tile_render_nearby(tile_surround_mask mask, const level_t *lvl, const tile_t *tile, u16 x, u16 y)
 {
-    tile_surround_mask m = SURROUNDING_LEFT;
 
     if(!_use_recursion)
         return;
 
-    for(uint i = 0; i < 4; i++)
+    for(uint i = 0; i < 8; i++)
     {
-        s16 xx = x + (dir_get_x(i) << 1),
+        int xx = x + (dir_get_x(i) << 1),
             yy = y + (dir_get_y(i) << 1);
         if(xx < 0 || yy < 0 || xx >= LEVEL_WIDTH || yy >= LEVEL_HEIGHT)
             continue;
         
-        // if(mask & m)
-        //     _render_9pt(lvl, tile, xx, yy);
-        // else
-        _render_9pt(lvl, (tile_t*)lvl_get_tile((level_t*)lvl, xx >> 1, yy >> 1), xx, yy);
+        const tile_t *t = lvl_get_tile((level_t*)lvl, xx >> 1, yy >> 1);
+
+        if(t->indexing == TILE_INDEXING_9PT)
+            _render_9pt(lvl, (tile_t*)t, xx, yy);
         
-        m >>= 1;
     }
 }
 
@@ -254,6 +269,7 @@ void tile_render_use_recursion(bool b)
 {
     _use_recursion = b;
 }
+
 
 /**
  * @param x [0, level.size).
@@ -301,12 +317,6 @@ bool tile_no_pass(ent_t *e)
 }
 
 
-void tile_stone_onhurt(ent_t *e)
-{
-    
-}
-
-
 void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 {
     dmg += lvl_get_data(lvl, x, y);
@@ -320,7 +330,6 @@ void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
-
 
 }
 
@@ -352,10 +361,11 @@ void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
     {
         uint px = lvl_to_pixel_x(lvl, x), py = lvl_to_pixel_y(lvl, y);
 
-        lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
+        lvl_set_tile(lvl, x, y, tile_get(lvl->layer > 0 ? TILE_MUD : TILE_GRASS));
+
         ent_item_new(lvl, px, py, (item_t*)&ITEM_STONE, 2);
         if((rnd_random() & 0xF) == 0)
-            ent_item_new(lvl, x, y, &ITEM_COAL, (rnd_random() & 0x1) + 1);
+            ent_item_new(lvl, px, py, &ITEM_COAL, (rnd_random() & 0x1) + 1);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
@@ -396,6 +406,24 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 }
 
 
+void tile_stair_up_ontouch(ent_t *e, uint x, uint y)
+{
+    if(e->type != ENT_TYPE_PLAYER)
+        return;
+
+    level_t *curLevel = e->level;
+    level_t *newLevel = world[curLevel->layer-1];
+    
+    if(!curLevel->layer)
+        return;
+    
+    ent_change_level(e, newLevel);
+
+    lvl_change_level(newLevel);
+	mnu_draw_hotbar(e);
+}
+
+
 /** called when entity collides with this. This is a stairway down
  * @param e player entity
  * @param x relative pixel x
@@ -417,12 +445,38 @@ void tile_stair_down_ontouch(ent_t *e, uint x, uint y)
         // generate new level if necessary
         newLevel = lvl_new(curLayer + 1, curLevel);
         gen_generate(newLevel);
+        uint tx = lvl_to_tile_x(newLevel, e->x + 8);
+        uint ty = lvl_to_tile_y(newLevel, e->y + 8);
+        for(uint i = 0; i < 8; i++)
+            lvl_set_tile(newLevel, tx + dir_get_x(i), ty + dir_get_y(i), tile_get(TILE_MUD));
+        lvl_set_tile(newLevel, tx, ty, tile_get(TILE_MUD));
+        lvl_set_tile(newLevel, tx - 1, ty - 1, tile_get(TILE_STAIR_UP));
     }
    
     ent_change_level(e, newLevel);
 
     lvl_change_level(newLevel);
 	mnu_draw_hotbar(e);
+}
+
+
+void tile_door_closed_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    // @todo add door_hurt
+    if(item && item->tooltype == TOOL_TYPE_AXE)
+        return;
+
+    lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_OPEN));
+}
+
+
+void tile_door_open_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    // @todo add door_hurt (can be the same for opened and closed)
+    if(item && item->tooltype == TOOL_TYPE_AXE)
+        return;
+
+    lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_CLOSED));
 }
 
 

@@ -160,7 +160,7 @@ void gen_make_stairs_down(level_t *lvl)
             y = rnd_random() & 0x7F;
             iter++;
         } while(lvl_get_tile_type(lvl, x, y) != TILE_STONE && iter < 10);
-        lvl_set_tile(lvl, x, y, tile_get(TILE_STAIRS));
+        lvl_set_tile(lvl, x, y, tile_get(TILE_STAIR_DOWN));
     }
 }
 

@@ -80,6 +80,7 @@ ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 static ent_event_t events[] = {
     { // player
         .init=ent_player_init,
+        .onrelocate=ent_player_onrelocate,
         .onhurt=NULL,
         .ontouch=NULL,
         .ondeath=NULL,
@@ -139,7 +140,7 @@ uint ent_get_tile(const ent_t *e) {
  * Order matters based on  ent_type_t
  */
 static const bounding_rect_t __rects[] = {
-    {3, 2, 3, 0}, // player
+    {3, 2, 3, 1}, // player
     {2, 2, 1, 3}, // slime
     {3, 2, 2, 0}, // zombie
     {3, 2, 4, 1}, // furniture
@@ -182,7 +183,6 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
  */
 ent_t *ent_change_level(ent_t *e, level_t *newLevel)
 {
-    // level_t *oldLevel = e->level;
     ent_t *ent = &newLevel->entities[newLevel->ent_size++];
     obj_t spr = *e->sprite;
     memcpy(ent, e, sizeof(ent_t));
@@ -190,14 +190,15 @@ ent_t *ent_change_level(ent_t *e, level_t *newLevel)
     ent->level = newLevel;
     if(e->type == ENT_TYPE_PLAYER)
     {
-        ent->level->player = ent;
-        ent->player.removed = true;
+        newLevel->player = ent;
+        e->player.removed = true;
     }
 
     if(e->events->onrelocate)
         e->events->onrelocate(e, ent);
     
     ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
+    spr_set_size(ent->sprite, SPR_SIZE_16x16);
 
     return ent;
 }

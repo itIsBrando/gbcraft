@@ -59,6 +59,13 @@ const recipe_t CRAFTING_RECIPES[] = {
             CREATE_COST(ITEM_TYPE_WOOD, 5),
         }
     },
+    { // door
+        .result=&ITEM_DOOR,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
+        }
+    },
     { // chest
         .result=&ITEM_CHEST,
         .costs_num=1,
@@ -66,7 +73,7 @@ const recipe_t CRAFTING_RECIPES[] = {
             CREATE_COST(ITEM_TYPE_WOOD, 20),
         }
     },
-    {
+    { // furnace
         .result=&ITEM_FURNACE,
         .costs_num=1,
         .costs = {

@@ -8,7 +8,6 @@
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
-- [ ] Create stairs up
 - [ ] Add iron
 - [ ] Add coal
 - [ ] Add gold
@@ -22,7 +21,10 @@
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
-- [ ] Create a *hole* around the player's initial position so it will never get stuck in blocks
+- [ ] Add door sprite for the inventory!
+- [x] Create stairs up
+- [x] Create a door
+- [x] Create a *hole* around the player's initial position so it will never get stuck in blocks
 - [x] Create stairs down
 - [x] Create generation for caves
 - [x] Add player side sprite
@@ -78,6 +80,7 @@
 - [ ] Add inner-corner tiles for `9pt indexing`
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
+- [ ] Opening a door after reentering the overworld crashes
 - [ ] Fix level changing. It is very sloppy
 - [x] Animate player
 - [x] Redo font
@@ -96,8 +99,13 @@
 - [ ] Blocks can be placed on top of player
 - [ ] Furniture items can be placed on top of other furniture and entities
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
-- [ ] Pointers decay after `ent_change_level` :'(
+- [ ] Random null pointer crash when ItemEntity exists on lower level
+- [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
+- [ ] Player sprite disappears after switching levels (note this affect with a crafting table placed down)
+- [ ] Inventory cursor sprite disappears when on lower level (**WHY!!!**)
+- [x] Pointers decay after `ent_change_level` :'(
     - potential fix could be to add `onrelocate` function to the entity events. It would also help with saving/loading
+- [x] Tiles rendered on lower levels do not render properly
 - [x] Changing levels breaks the palettes for some reason. ugh
 - [x] Grass does not connect to tree
 - [x] Entities are visible above the hotbar

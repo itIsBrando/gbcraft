@@ -128,6 +128,9 @@ int main(void) {
 		level_t *lvl = lvl_get_current();
 		plr = lvl_get_player(lvl);
 
+		if(keys & KEY_B)
+			lvl_set_tile(lvl_get_current(), 32, 32, tile_get(TILE_GRASS));
+
 		if((keys & KEY_A) && !curTime)
 		{
 			ent_player_interact(plr);

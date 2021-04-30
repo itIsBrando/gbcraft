@@ -111,7 +111,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
  * Converts an absolute tile x coordinate to a pixel x coordinate
  * @returns x coordinate between 0-320
  */
-inline u16 lvl_to_pixel_x(level_t *lvl, u16 tx)
+inline uint lvl_to_pixel_x(level_t *lvl, uint tx)
 {
     tx <<= 4;
     tx -= bg_get_scx(main_background);
@@ -123,11 +123,33 @@ inline u16 lvl_to_pixel_x(level_t *lvl, u16 tx)
  * Converts an absolute tile y coordinate to a pixel y coordinate
  * @returns y coordinate between 0-240
  */
-inline u16 lvl_to_pixel_y(level_t *lvl, u16 ty)
+inline uint lvl_to_pixel_y(level_t *lvl, uint ty)
 {
     ty <<= 4;
     ty -= bg_get_scy(main_background);
     return ty;
+}
+
+
+/**
+ * Converts a screen pixel coordinate to an absolute tile coordinate
+ * @param px [0-240)
+ * @returns [0-128)
+ */
+inline uint lvl_to_tile_x(const level_t *lvl, uint px)
+{
+    return (px + bg_get_scx(main_background)) >> 4;
+}
+
+
+/**
+ * Converts a screen pixel coordinate to an absolute tile coordinate
+ * @param py [0-160)
+ * @returns [0-128)
+ */
+inline uint lvl_to_tile_y(const level_t *lvl, uint py)
+{
+    return (py + bg_get_scy(main_background)) >> 4;
 }
 
 
@@ -197,8 +219,7 @@ static void lvl_unload(level_t *lvl)
 {
     for(uint i = 0; i < lvl->ent_size; i++)
     {
-        if(lvl->entities[i].type != ENT_TYPE_PLAYER)
-            spr_free(lvl->entities[i].sprite);
+        spr_free(lvl->entities[i].sprite);
     }
 }
 

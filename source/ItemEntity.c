@@ -29,10 +29,10 @@ void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt)
 
 void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
 {
-    if(other->type != ENT_TYPE_PLAYER || (e->xKnockback != 0 || e->yKnockback != 0))
+    if(other->type != ENT_TYPE_PLAYER || (e->xKnockback | e->yKnockback))
         return;
 
-    for(u16 i = 0; i < e->itemEntity.count; i++)
+    for(uint i = 0; i < e->itemEntity.count; i++)
         item_add_to_inventory(e->itemEntity.item, &lvl_get_player(e->level)->player.inventory);
     ent_remove(e->level, e);
 }
@@ -46,14 +46,18 @@ void ent_item_update(ent_t *e)
         ent_remove(e->level, e);
         return;
     }
+    
+    ent_apply_knockback(e);
+    ent_draw(e);
 
     // flash if we are about to disappear
     if(e->itemEntity.frames_alive > 60*10)
     {
-        spr_set_pal(e->sprite, (e->itemEntity.frames_alive & 3) == 0);
+        if((e->itemEntity.frames_alive & 4))
+            spr_hide(e->sprite);
+        else
+            spr_show(e->sprite);
     }
 
-    ent_apply_knockback(e);
 
-    ent_draw(e);
 }
