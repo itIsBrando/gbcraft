@@ -12,18 +12,18 @@ void lvl_set_target_background(BG_REGULAR *bg);
 
 ent_t *lvl_get_player(const level_t *lvl);
 
-tile_type_t lvl_get_tile_type(const level_t *lvl, u16 x, u16 y);
-const tile_t *lvl_get_tile(level_t *lvl, u16 x, u16 y);
+tile_type_t lvl_get_tile_type(const level_t *lvl, uint x, uint y);
+const tile_t *lvl_get_tile(level_t *lvl, uint x, uint y);
 
-u8 lvl_get_data(level_t *lvl, u16 x, u16 y);
-void lvl_set_data(level_t *lvl, u16 x, u16 y, u8 v);
+u8 lvl_get_data(level_t *lvl, uint x, uint y);
+void lvl_set_data(level_t *lvl, uint x, uint y, u8 v);
 
-void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile);
+void lvl_set_tile(level_t *lvl, uint x, uint y, const tile_t *tile);
 
-uint lvl_to_pixel_x(level_t *lvl, uint tx);
-uint lvl_to_pixel_y(level_t *lvl, uint ty);
-uint lvl_to_tile_x(const level_t *lvl, uint px);
-uint lvl_to_tile_y(const level_t *lvl, uint py);
+uint lvl_to_pixel_x(uint tx);
+uint lvl_to_pixel_y(uint ty);
+uint lvl_to_tile_x(uint px);
+uint lvl_to_tile_y(uint py);
 
 bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y);
 void lvl_try_spawn(level_t *level, uint tries);

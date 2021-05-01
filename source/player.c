@@ -298,8 +298,7 @@ void ent_player_interact(const ent_t *plr)
             break;
     }
 
-    uint x = lvl_to_tile_x(plr->level, 124),
-        y = lvl_to_tile_y(plr->level, 84);
+    uint x = lvl_to_tile_x(124), y = lvl_to_tile_y(84);
 
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
@@ -322,4 +321,26 @@ void ent_player_interact(const ent_t *plr)
         if(e->interact)
             e->interact((ent_t*)plr, NULL, x, y);
     }
+}
+
+static inline uint min(uint a, uint b)
+{
+    return a > b ? b : a;
+}
+
+
+/**
+ * Heals the player
+ * @returns false if player is at max health
+ */
+bool ent_player_heal(ent_t *e, uint by)
+{
+    if(e->player.health < e->player.max_health)
+    {
+        e->player.health = min(e->player.max_health, e->player.health + by);
+        mnu_draw_hotbar(e);
+        return true;
+    }
+
+    return false;
 }

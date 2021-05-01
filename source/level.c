@@ -14,20 +14,15 @@ level_t *world[4];
 level_t *lvl_current = NULL;
 
 
-static inline u16 lvl_get_size(const level_t *lvl)
-{
-    return lvl->size;
-}
-
 /**
  * Unbounded check for a tile
  * @param x absolute tile x
  * @param y absolute tile y
  * @returns the raw, stored tile at (x, y)
  */
-tile_type_t lvl_get_tile_type(const level_t *lvl, u16 x, u16 y)
+tile_type_t lvl_get_tile_type(const level_t *lvl, uint x, uint y)
 {
-    return lvl->map[x + y * lvl_get_size(lvl)];
+    return lvl->map[x + (y << 6)];
 }
 
 
@@ -37,7 +32,7 @@ tile_type_t lvl_get_tile_type(const level_t *lvl, u16 x, u16 y)
  * @param y absolute tile y
  * @returns the details of a tile at (x, y)
  */
-inline const tile_t *lvl_get_tile(level_t *lvl, u16 x, u16 y)
+inline const tile_t *lvl_get_tile(level_t *lvl, uint x, uint y)
 {
     return tile_get(lvl_get_tile_type(lvl, x, y));
 }
@@ -56,9 +51,9 @@ inline ent_t *lvl_get_player(const level_t *lvl)
  * @param y absolute tile y
  * @returns the data of the tile at (x, y)
  */
-inline u8 lvl_get_data(level_t *lvl, u16 x, u16 y)
+inline u8 lvl_get_data(level_t *lvl, uint x, uint y)
 {
-    return lvl->data[x + y * lvl->size];
+    return lvl->data[x + (y << 6)];
 }
 
 
@@ -68,15 +63,15 @@ inline u8 lvl_get_data(level_t *lvl, u16 x, u16 y)
  * @param y absolute tile y
  * @param v 8-bit data value
  */
-inline void lvl_set_data(level_t *lvl, u16 x, u16 y, u8 v)
+inline void lvl_set_data(level_t *lvl, uint x, uint y, u8 v)
 {
-    lvl->data[x + y * lvl->size] = v;
+    lvl->data[x + (y << 6)] = v;
 }
 
 
-void lvl_set_tile(level_t *lvl, u16 x, u16 y, const tile_t *tile)
+void lvl_set_tile(level_t *lvl, uint x, uint y, const tile_t *tile)
 {
-    u16 i = x + y * lvl_get_size(lvl);
+    uint i = x + (y << 6);
     lvl->map[i] = tile->type;
     lvl->data[i] = 0;
     tile_render(target_bg, lvl, tile, x, y);
@@ -96,7 +91,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
         text_error("Could not allocate heap for level");
     lvl->layer = layer;
     lvl->parent = (struct level_t*)parent;
-    lvl->size = 64;
+    // lvl->size = 64;
     lvl->mob_density = 0;
     lvl->ent_size = 0;
 
@@ -111,7 +106,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
  * Converts an absolute tile x coordinate to a pixel x coordinate
  * @returns x coordinate between 0-240
  */
-inline uint lvl_to_pixel_x(level_t *lvl, uint tx)
+inline uint lvl_to_pixel_x(uint tx)
 {
     tx <<= 4;
     tx -= bg_get_scx(main_background);
@@ -123,7 +118,7 @@ inline uint lvl_to_pixel_x(level_t *lvl, uint tx)
  * Converts an absolute tile y coordinate to a pixel y coordinate
  * @returns y coordinate between 0-160
  */
-inline uint lvl_to_pixel_y(level_t *lvl, uint ty)
+inline uint lvl_to_pixel_y(uint ty)
 {
     ty <<= 4;
     ty -= bg_get_scy(main_background);
@@ -134,9 +129,9 @@ inline uint lvl_to_pixel_y(level_t *lvl, uint ty)
 /**
  * Converts a screen pixel coordinate to an absolute tile coordinate
  * @param px [0-240)
- * @returns [0-128)
+ * @returns [0-64)
  */
-inline uint lvl_to_tile_x(const level_t *lvl, uint px)
+inline uint lvl_to_tile_x(uint px)
 {
     return (px + bg_get_scx(main_background)) >> 4;
 }
@@ -145,9 +140,9 @@ inline uint lvl_to_tile_x(const level_t *lvl, uint px)
 /**
  * Converts a screen pixel coordinate to an absolute tile coordinate
  * @param py [0-160)
- * @returns [0-128)
+ * @returns [0-64)
  */
-inline uint lvl_to_tile_y(const level_t *lvl, uint py)
+inline uint lvl_to_tile_y(uint py)
 {
     return (py + bg_get_scy(main_background)) >> 4;
 }
@@ -271,9 +266,9 @@ void lvl_blit()
     text_print("RENDERING WORLD", 0, 2);
     tile_render_use_recursion(false);
 
-    for(u16 y = 0; y < lvl_current->size; y++)
+    for(u16 y = 0; y < 64; y++)
     {
-        for(u16 x = 0; x < lvl_current->size; x++)
+        for(u16 x = 0; x < 64; x++)
         {
             const tile_t *tile = lvl_get_tile(lvl_current, x, y);
             tile_render(target_bg, lvl_current, tile, x, y);

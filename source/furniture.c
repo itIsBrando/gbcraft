@@ -43,6 +43,13 @@ const recipe_t CRAFTING_RECIPES[] = {
             CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
     },
+    { // wood hoe
+        .result=&ITEM_WOOD_HOE,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
+        }
+    },
     { // stone axe
         .result=&ITEM_STONE_AXE,
         .costs_num=2,
@@ -92,6 +99,14 @@ const recipe_t CRAFTING_RECIPES[] = {
 
 
 const recipe_t FURNACE_RECIPES[] = {
+    {
+        .result=&ITEM_BREAD,
+        .amount=1,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_WHEAT, 3),
+        }
+    },
     {
         .result=&ITEM_IRON,
         .amount=5,

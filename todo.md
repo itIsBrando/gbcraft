@@ -13,18 +13,20 @@
 - [ ] Add gold
 - [ ] Add gem
 - [ ] Add attack bonus for swords (and axes?)
-- [ ] Add wood floor
 - [ ] Add seed selection
 - [ ] Add slime tile drop
-- [ ] Add support for player healing
 - [ ] Add apple
-- [ ] Add seeds
-- [ ] Add hoe
-- [ ] Add tiling
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
 - [ ] **Allow player to recieve damage**
+- [ ] Add bread consumation
+- [x] Add support for player healing
+- [x] Add wood floor
+- [x] Add bread
+- [x] Add seeds
+- [x] Add hoe
+- [x] Add tiling
 - [x] Add door sprite for the inventory!
 - [x] Create stairs up
 - [x] Create a door
@@ -105,6 +107,7 @@
 - [ ] Furniture items can be placed on top of other furniture and entities
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
 - [ ] Random null pointer crash when ItemEntity exists on lower level
+- [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
 - [ ] Player placement after changing level is incorrect
 - [ ] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete

@@ -64,4 +64,6 @@ void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
 void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt);
 
 void ent_player_set_active_item(ent_t *plr, item_t *item);
+bool ent_player_heal(ent_t *e, uint by);
+
 #endif

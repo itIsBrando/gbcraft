@@ -33,6 +33,15 @@ item_event_t ITEM_EVENTS[] =
     },
     [6]={// wooden floor
         .interact=item_floor_interact
+    },
+    [7]={ // sapling
+        .interact=item_sapling_interact
+    },
+    [8]={ // seed
+        .interact=item_seed_interact
+    },
+    [9]={ // material (has no events)
+
     }
 };
 
@@ -66,7 +75,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("WOOD PICK", 19, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKAXE),
     DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD),
     DEFINE_ITEM("CHEST", 33, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CHEST),
-    DEFINE_ITEM("IRON ORE", 12, ITEM_TYPE_IRON_ORE, 4, 1), // @todo add tile numbers
+    DEFINE_ITEM("IRON ORE", 12, ITEM_TYPE_IRON_ORE, 4, 1),
     DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
     DEFINE_ITEM("IRON", 13, ITEM_TYPE_IRON, 4, 1),
     DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
@@ -74,6 +83,11 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("COAL", 11, ITEM_TYPE_COAL, 4, 1),
     DEFINE_ITEM("DOOR", 36, ITEM_TYPE_DOOR, 5, 1),
     DEFINE_ITEM("WOOD FLOOR", 37, ITEM_TYPE_FLOOR, 6, 1),
+    DEFINE_ITEM("WOOD HOE", 20, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_HOE),
+    DEFINE_ITEM("SEED", 38, ITEM_TYPE_SEED, 8, 1),
+    DEFINE_ITEM("SAPLING", 39, ITEM_TYPE_SAPLING, 7, 1),
+    DEFINE_ITEM("WHEAT", 40, ITEM_TYPE_WHEAT, 9, 1),
+    DEFINE_ITEM("BREAD", 41, ITEM_TYPE_BREAD, 9, 1),
 };
 
 
@@ -249,13 +263,36 @@ static const item_t *_furn_items[] = {
 };
 
 
+bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+{
+    if(tile->type != TILE_MUD || plr->level->layer)
+        return false;
+
+    item_change_count(item, -1);
+    lvl_set_tile(plr->level, x, y, tile_get(TILE_SEEDED_MUD));
+
+    return true;
+}
+
+
+bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+{
+    if(tile->type != TILE_GRASS)
+        return false;
+
+    lvl_set_tile(plr->level, x, y, tile_get(TILE_SAPLING));
+    item_change_count(item, -1);
+    return true;
+}
+
+
 bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
     // pick up furniture entities
     if(item->tooltype == TOOL_TYPE_PICKUP)
     {
-        x = lvl_to_pixel_x(plr->level, x);
-        y = lvl_to_pixel_y(plr->level, y);
+        x = lvl_to_pixel_x(x);
+        y = lvl_to_pixel_y(y);
         ent_t *e[5];
         uint s = ent_get_all_stack(plr->level, e, x, y, 5);
 

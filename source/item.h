@@ -22,6 +22,11 @@
 #define ITEM_COAL           ALL_ITEMS[16]
 #define ITEM_DOOR           ALL_ITEMS[17]
 #define ITEM_FLOOR_WOOD     ALL_ITEMS[18]
+#define ITEM_WOOD_HOE       ALL_ITEMS[19]
+#define ITEM_SEED           ALL_ITEMS[20]
+#define ITEM_SAPLING        ALL_ITEMS[21]
+#define ITEM_WHEAT          ALL_ITEMS[22]
+#define ITEM_BREAD          ALL_ITEMS[23]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -112,4 +117,6 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
 bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 
+bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 #endif

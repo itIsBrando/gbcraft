@@ -18,6 +18,9 @@ enum {
     TILE_DOOR_CLOSED,
     TILE_DOOR_OPEN,
     TILE_FLOOR_WOOD,
+    TILE_SAPLING,
+    TILE_SEEDED_MUD,
+    TILE_WHEAT_MUD,
 
     TILE_NONE, // last tile
 }; // order irrelevant
@@ -48,6 +51,9 @@ typedef enum {
     ITEM_TYPE_GEM,
     ITEM_TYPE_DOOR,
     ITEM_TYPE_FLOOR,
+    ITEM_TYPE_SEED,
+    ITEM_TYPE_WHEAT,
+    ITEM_TYPE_BREAD,
 } item_type_t; // order relevant?
 
 
@@ -154,6 +160,7 @@ typedef struct tile_event_t {
     bool(*ontouch)(ent_t *, uint, uint);
     bool(*maypass)(ent_t *);
     void (*interact)(ent_t *, item_t *item, u16 x, u16 y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
+    void (*onrandomtick)(level_t *lvl, uint x, uint y); /** @param x absolute tile x @param y absolute tile y */
 } tile_event_t;
 
 
@@ -165,7 +172,8 @@ typedef enum {
     TOOL_TYPE_AXE,
     TOOL_TYPE_PICKAXE,
     TOOL_TYPE_SWORD,
-    TOOL_TYPE_PICKUP
+    TOOL_TYPE_PICKUP,
+    TOOL_TYPE_HOE,
 } tooltype_t;
 
 
@@ -300,7 +308,6 @@ typedef struct level_t {
     uint ent_size;  // number of entities in the `entities` table
     ent_t entities[50]; // @todo allocate on heap
     ent_t *player;
-    uint size; // Width/height of map. Must be a power of two. Rn it's only value is 64
     tile_type_t map[LEVEL_SIZE]; // needs to be adapted to level.size @todo
     u8 data[LEVEL_SIZE];
     u8 mob_density;

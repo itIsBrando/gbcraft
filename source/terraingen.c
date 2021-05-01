@@ -130,7 +130,7 @@ void gen_generate(level_t *lvl)
  */
 void gen_generate_overworld(level_t *lvl)
 {
-    terr_t *n1 = noise(lvl->size, 32);
+    terr_t *n1 = noise(64, 32);
 
     for(uint index = 0; index < LEVEL_SIZE; index++)
     {
@@ -156,8 +156,8 @@ void gen_make_stairs_down(level_t *lvl)
     {
         uint iter = 0, x, y;
         do {
-            x = rnd_random() & 0x7F;
-            y = rnd_random() & 0x7F;
+            x = rnd_random() & 63;
+            y = rnd_random() & 63;
             iter++;
         } while(lvl_get_tile_type(lvl, x, y) != TILE_STONE && iter < 10);
         lvl_set_tile(lvl, x, y, tile_get(TILE_STAIR_DOWN));
@@ -171,7 +171,7 @@ void gen_make_stairs_down(level_t *lvl)
  */
 void gen_generate_underworld(level_t *lvl)
 {
-    terr_t *n1 = noise(lvl->size, 8);
+    terr_t *n1 = noise(64, 8);
 
     for(uint index = 0; index < LEVEL_SIZE; index++)
     {

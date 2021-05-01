@@ -17,6 +17,7 @@ const tile_event_t tile_events[] = {
         .onhurt=NULL,
         .ontouch=NULL,
         .maypass=tile_grass_maypass,
+        .interact=tile_grass_interact,
     },
     { // water tile
         .onhurt=NULL,
@@ -60,6 +61,18 @@ const tile_event_t tile_events[] = {
     { // door open
         .interact=tile_door_open_interact,
     },
+    [10]={ // mud
+        .onrandomtick=tile_mud_tick,
+    },
+    [11]={ // sapling
+        .onrandomtick=tile_sapling_tick,
+    },
+    [12]={ // seed
+        .onrandomtick=tile_seed_tick,
+    },
+    [13]={ // fullly grown wheat
+        .interact=tile_wheat_interact,
+    }
 };
 
 
@@ -69,33 +82,34 @@ const tile_event_t tile_events[] = {
  * @param _tile tile index
  * @param _indexing_mode `tile_indexing_mode_t`
  * @param _event_num index in `tile_events`
- * @param _connect_to tile_type_t to visually connect to
  */
-#define CREATE_TILE(_type, _tile, _indexing_mode, _event_num, _connect_to, ...) {\
+#define CREATE_TILE(_type, _tile, _indexing_mode, _event_num, ...) {\
  .type=_type,\
  .tiling={_tile},\
  .indexing=_indexing_mode,\
  .event=&tile_events[_event_num],\
- .connect_to=_connect_to,\
  __VA_ARGS__\
 }
 
 // order irrelevant
 const tile_t tile_tile_data[] = 
 {
-    CREATE_TILE(TILE_GRASS, 45, TILE_INDEXING_9PT, 0, TILE_NONE),
-    CREATE_TILE(TILE_WATER, 48, TILE_INDEXING_9PT, 1, TILE_NONE),
-    CREATE_TILE(TILE_TREE, 7, TILE_INDEXING_SINGLE_16x16, 2, TILE_NONE),
-    CREATE_TILE(TILE_WOOD, 3, TILE_INDEXING_TOP_BOT, 3, TILE_NONE),
-    CREATE_TILE(TILE_STONE, 42, TILE_INDEXING_9PT, 4, TILE_NONE),
-    CREATE_TILE(TILE_IRON, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
-    CREATE_TILE(TILE_GOLD, 65, TILE_INDEXING_SINGLE_16x16, 5, TILE_NONE),
-    CREATE_TILE(TILE_STAIR_DOWN, 129, TILE_INDEXING_SINGLE_16x16, 6, TILE_NONE),
-    CREATE_TILE(TILE_STAIR_UP, 131, TILE_INDEXING_SINGLE_16x16, 7, TILE_NONE),
-    CREATE_TILE(TILE_MUD, 34, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
-    CREATE_TILE(TILE_DOOR_CLOSED, 71, TILE_INDEXING_SINGLE_16x16, 8, TILE_NONE),
-    CREATE_TILE(TILE_DOOR_OPEN, 69, TILE_INDEXING_SINGLE_16x16, 9, TILE_NONE),
-    CREATE_TILE(TILE_FLOOR_WOOD, 1, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
+    CREATE_TILE(TILE_GRASS, 45, TILE_INDEXING_9PT, 0),
+    CREATE_TILE(TILE_WATER, 48, TILE_INDEXING_9PT, 1),
+    CREATE_TILE(TILE_TREE, 7, TILE_INDEXING_SINGLE_16x16, 2),
+    CREATE_TILE(TILE_WOOD, 3, TILE_INDEXING_TOP_BOT, 3),
+    CREATE_TILE(TILE_STONE, 42, TILE_INDEXING_9PT, 4),
+    CREATE_TILE(TILE_IRON, 65, TILE_INDEXING_SINGLE_16x16, 5),
+    CREATE_TILE(TILE_GOLD, 65, TILE_INDEXING_SINGLE_16x16, 5),
+    CREATE_TILE(TILE_STAIR_DOWN, 129, TILE_INDEXING_SINGLE_16x16, 6),
+    CREATE_TILE(TILE_STAIR_UP, 131, TILE_INDEXING_SINGLE_16x16, 7),
+    CREATE_TILE(TILE_MUD, 34, TILE_INDEXING_SINGLE_8x8, 10),
+    CREATE_TILE(TILE_DOOR_CLOSED, 71, TILE_INDEXING_SINGLE_16x16, 8),
+    CREATE_TILE(TILE_DOOR_OPEN, 69, TILE_INDEXING_SINGLE_16x16, 9),
+    CREATE_TILE(TILE_FLOOR_WOOD, 1, TILE_INDEXING_SINGLE_8x8, 0),
+    CREATE_TILE(TILE_SAPLING, 67, TILE_INDEXING_SINGLE_16x16, 11),
+    CREATE_TILE(TILE_SEEDED_MUD, 2, TILE_INDEXING_SINGLE_8x8, 12),
+    CREATE_TILE(TILE_WHEAT_MUD, 33, TILE_INDEXING_SINGLE_8x8, 13),
 };
 
 
@@ -321,6 +335,18 @@ bool tile_no_pass(ent_t *e)
 }
 
 
+void tile_grass_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    if(item->tooltype != TOOL_TYPE_HOE || lvl_get_tile_type(ent->level, x, y) != TILE_GRASS)
+        return;
+
+    lvl_set_tile(ent->level, x, y, tile_get(TILE_MUD));
+    if((rnd_random() & 0x7) == 0)
+        ent_item_new(ent->level, lvl_to_pixel_x(x), lvl_to_pixel_y(y), (item_t*)&ITEM_SEED, 1);
+
+}
+
+
 void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 {
     dmg += lvl_get_data(lvl, x, y);
@@ -330,7 +356,11 @@ void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
     if(dmg > 20)
     {
         lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-        ent_item_new(lvl, lvl_to_pixel_x(lvl, x), lvl_to_pixel_y(lvl, y), (item_t*)&ITEM_WOOD, 2);
+        x = lvl_to_pixel_x(x);
+        y =  lvl_to_pixel_y(y);
+        ent_item_new(lvl, x, y, (item_t*)&ITEM_WOOD, 2);
+        if((rnd_random() & 0x3) == 0)
+            ent_item_new(lvl, x, y, (item_t*)&ITEM_SAPLING, 2);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }
@@ -363,7 +393,7 @@ void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
     if(dmg > 20)
     {
-        uint px = lvl_to_pixel_x(lvl, x), py = lvl_to_pixel_y(lvl, y);
+        uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
 
         lvl_set_tile(lvl, x, y, tile_get(lvl->layer > 0 ? TILE_MUD : TILE_GRASS));
 
@@ -502,6 +532,59 @@ void tile_door_open_interact(ent_t *ent, item_t *item, u16 x, u16 y)
         return;
 
     lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_CLOSED));
+}
+
+
+void tile_wheat_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+{
+    level_t *lvl = ent->level;
+    uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
+
+    lvl_set_tile(lvl, x, y, tile_get(TILE_MUD));
+    ent_item_new(lvl, px, py, &ITEM_WHEAT, (rnd_random() & 0x1) + 1);
+    ent_item_new(lvl, px, py, &ITEM_SEED, (rnd_random() & 0x3));
+}
+
+
+/**
+ * @param x tile x
+ * @param y tile y
+ */
+void tile_mud_tick(level_t *lvl, uint x, uint y)
+{
+    // only if we are on the surface
+    if(!lvl->layer)
+        lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
+}
+
+
+/**
+ * @param x tile x
+ * @param y tile y
+ */
+void tile_sapling_tick(level_t *lvl, uint x, uint y)
+{
+    uint data = lvl_get_data(lvl, x, y) + 1;
+
+    if(data > 5)
+        lvl_set_tile(lvl, x, y, tile_get(TILE_TREE));
+    else
+        lvl_set_data(lvl, x, y, data);
+}
+
+
+/**
+ * @param x tile x
+ * @param y tile y
+ */
+void tile_seed_tick(level_t *lvl, uint x, uint y)
+{
+    uint data = lvl_get_data(lvl, x, y) + 2;
+
+    if(data > 5)
+        lvl_set_tile(lvl, x, y, tile_get(TILE_WHEAT_MUD));
+    else
+        lvl_set_data(lvl, x, y, data);
 }
 
 
