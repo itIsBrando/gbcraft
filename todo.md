@@ -18,10 +18,14 @@
 - [ ] Add slime tile drop
 - [ ] Add support for player healing
 - [ ] Add apple
+- [ ] Add seeds
+- [ ] Add hoe
+- [ ] Add tiling
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
-- [ ] Add door sprite for the inventory!
+- [ ] **Allow player to recieve damage**
+- [x] Add door sprite for the inventory!
 - [x] Create stairs up
 - [x] Create a door
 - [x] Create a *hole* around the player's initial position so it will never get stuck in blocks
@@ -73,15 +77,16 @@
 - [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
 - [ ] New tree sprite
-- [ ] Furniture snap to grid?
 - [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
 - [ ] **Add indication that a tile is being destroyed**
-- [ ] Add inner-corner tiles for `9pt indexing`
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
-- [ ] Opening a door after reentering the overworld crashes
-- [ ] Fix level changing. It is very sloppy
+- [ ] Add door opening/closing sound effect
+- [ ] Add mob spawning on lower levels
+- [x] Furniture snap to grid?
+- [x] Add inner-corner tiles for `9pt indexing`
+- [x] Fix level changing. It is very sloppy
 - [x] Animate player
 - [x] Redo font
 - [x] Have `spr_copy_all()` only copy the number of allocated sprites, not all 128
@@ -101,8 +106,15 @@
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
 - [ ] Random null pointer crash when ItemEntity exists on lower level
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
-- [ ] Player sprite disappears after switching levels (note this affect with a crafting table placed down)
-- [ ] Inventory cursor sprite disappears when on lower level (**WHY!!!**)
+- [ ] Player placement after changing level is incorrect
+- [ ] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete
+- [ ] Fix graphically remenants after closing chest
+- [ ] Fix graphically remenants after closing crafting
+- [x] Chest items are eaten upon saving and loading
+- [x] Entities slightly offscreen will disappear
+- [x] Opening a door after reentering the overworld crashes
+- [x] Inventory cursor sprite disappears when on lower level (**WHY!!!**)
+- [x] Player sprite disappears after switching levels (note this affect with a crafting table placed down)
 - [x] Pointers decay after `ent_change_level` :'(
     - potential fix could be to add `onrelocate` function to the entity events. It would also help with saving/loading
 - [x] Tiles rendered on lower levels do not render properly

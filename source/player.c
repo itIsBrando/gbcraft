@@ -10,6 +10,7 @@
 #include "bg.h"
 #include "obj.h"
 #include "text.h"
+#include <stdlib.h>
 
 static void ent_move_all(level_t *lvl, const direction_t direction);
 
@@ -72,6 +73,10 @@ void ent_player_update(ent_t *plr)
         player_change_hotbar_pos(plr, 1);
     }
 
+    // staircase timing
+    if(plr->player.on_stairs)
+        plr->player.on_stairs--;
+
     if(plr->player.is_swimming) {
         if(plr->player.stamina && (lvl_ticks & 0x3F) == 0x3F) {
             plr->player.stamina--;
@@ -121,7 +126,7 @@ void ent_player_onrelocate(ent_t *eOld, ent_t *eNew)
     inventory_t *inv = &eOld->player.inventory;
     inventory_t *newInv = &eNew->player.inventory;
 
-    inv->parent = eNew;
+    newInv->parent = eNew;
     
     ent_player_set_active_item(eNew, NULL);
     ent_player_set_active_item(eOld, NULL);
@@ -207,6 +212,38 @@ inline direction_t dir_get_opposite(direction_t direction)
 }
 
 
+/**
+ * Sets the player's position. Does not check if it's a valid move.
+ * @param x absolute tile x
+ * @param y absolute tile y
+ */
+inline void plr_move_to(ent_t *plr, uint x, uint y)
+{
+    // get distance we will move
+    uint oldX = bg_get_scx(main_background);
+    uint oldY = bg_get_scy(main_background);
+
+    uint bgx = (x - 7) << 4, bgy = ((y - 5) << 4) + 8;
+    int dx = (int)bgx - oldX;
+    int dy = (int)bgy - oldY;
+    ent_t *e = plr->level->entities;
+    
+    bg_move(main_background, bgx, bgy);
+
+    for(uint i = 0; i < plr->level->ent_size; i++)
+    {
+        if(e->type == ENT_TYPE_PLAYER) {
+            e++;
+            continue;
+        }
+
+        e->x -= (s16)dx;
+        e->y -= (s16)dy;
+        ent_draw(e++);
+    }
+}
+
+
 void plr_move_by(ent_t *player, const direction_t direction)
 {
     if(ent_can_move(player, direction))
@@ -244,11 +281,11 @@ static void ent_move_all(level_t *lvl, const direction_t direction)
 void ent_player_interact(const ent_t *plr)
 {
     // check to see if we can interact with an entity
-    uint px = 120 + (dir_get_x(plr->dir) << 3),
-         py = 80 + (dir_get_y(plr->dir) << 3);
+    uint px = 120 + (dir_get_x(plr->dir) * 8),
+         py = 80 + (dir_get_y(plr->dir) * 8);
     ent_t *ents[5];
     uint s = 0;
-
+    
     if(!plr->player.activeItem || (plr->player.activeItem && plr->player.activeItem->tooltype != TOOL_TYPE_PICKUP))
         s = ent_get_all_stack(plr->level, ents, px, py, 5);
 
@@ -261,9 +298,9 @@ void ent_player_interact(const ent_t *plr)
             break;
     }
 
-    uint x = 124 + bg_get_scx(main_background),
-        y = 84  + bg_get_scy(main_background);
-    x>>=4, y>>=4;
+    uint x = lvl_to_tile_x(plr->level, 124),
+        y = lvl_to_tile_y(plr->level, 84);
+
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
 

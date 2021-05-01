@@ -458,3 +458,13 @@ uint mnu_open_main()
 
     return yCur;
 }
+
+
+
+void mnu_load_level()
+{
+    WIN_REGULAR *w = win_get_0();
+    bg_fill(w->background, 0, 0, 240/16, 10, 0);
+    win_move(w, 0, 0, 240, 160);
+    text_print("LOADING WORLD...", 0, 0);
+}

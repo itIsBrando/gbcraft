@@ -27,6 +27,11 @@ void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt)
 }
 
 
+uint ent_item_get_tile(const ent_t *e)
+{
+    return e->itemEntity.item->tile;
+}
+
 void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
 {
     if(other->type != ENT_TYPE_PLAYER || (e->xKnockback | e->yKnockback))

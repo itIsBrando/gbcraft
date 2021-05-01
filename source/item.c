@@ -30,6 +30,9 @@ item_event_t ITEM_EVENTS[] =
     },
     [5]={ //door
         .interact=item_door_interact
+    },
+    [6]={// wooden floor
+        .interact=item_floor_interact
     }
 };
 
@@ -63,13 +66,14 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("WOOD PICK", 19, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKAXE),
     DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD),
     DEFINE_ITEM("CHEST", 33, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CHEST),
-    DEFINE_ITEM("IRON ORE", 2, ITEM_TYPE_IRON_ORE, 4, 1), // @todo add tile numbers
+    DEFINE_ITEM("IRON ORE", 12, ITEM_TYPE_IRON_ORE, 4, 1), // @todo add tile numbers
     DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
-    DEFINE_ITEM("IRON", 2, ITEM_TYPE_IRON, 4, 1),
+    DEFINE_ITEM("IRON", 13, ITEM_TYPE_IRON, 4, 1),
     DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
     DEFINE_ITEM("FURNACE", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
     DEFINE_ITEM("COAL", 11, ITEM_TYPE_COAL, 4, 1),
-    DEFINE_ITEM("DOOR", 1, ITEM_TYPE_DOOR, 5, 1),
+    DEFINE_ITEM("DOOR", 36, ITEM_TYPE_DOOR, 5, 1),
+    DEFINE_ITEM("WOOD FLOOR", 37, ITEM_TYPE_FLOOR, 6, 1),
 };
 
 
@@ -182,6 +186,19 @@ item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv)
 }
 
 
+bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+{
+    if(tile->type != TILE_GRASS)
+        return false;
+    
+    item_change_count(item, -1);
+
+    lvl_set_tile(plr->level, x, y, tile_get(TILE_FLOOR_WOOD));
+
+    return true;
+}
+
+
 bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
     if(tile->type != TILE_GRASS)
@@ -234,7 +251,6 @@ static const item_t *_furn_items[] = {
 
 bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
-
     // pick up furniture entities
     if(item->tooltype == TOOL_TYPE_PICKUP)
     {

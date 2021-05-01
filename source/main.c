@@ -88,7 +88,6 @@ int main(void) {
 	level_t *level = lvl_new(0, NULL);
 
 	win_move(&window, 0, 0, 240, 160);
-	bg_move(main_background, 512, 512);
 	bg_set_priority(window.background, BG_PRIORITY_LOWEST);
 	bg_set_priority(main_background, BG_PRIORITY_HIGH);
 
@@ -108,6 +107,8 @@ int main(void) {
 		item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_CHEST, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_DOOR, &plr->player.inventory);
+		plr_move_to(plr, 32, 32);
 	} else {
 		sve_load_from_persistant(level);
 		plr = lvl_get_player(level);
@@ -127,9 +128,6 @@ int main(void) {
 		u16 keys = key_pressed_no_repeat();
 		level_t *lvl = lvl_get_current();
 		plr = lvl_get_player(lvl);
-
-		if(keys & KEY_B)
-			lvl_set_tile(lvl_get_current(), 32, 32, tile_get(TILE_GRASS));
 
 		if((keys & KEY_A) && !curTime)
 		{
@@ -153,15 +151,15 @@ int main(void) {
 			sve_save_level(level);
 		}
 
-		for(int i = 0; i < lvl->ent_size; i++)
+		lvl_ticks++;
+		lvl_try_spawn(lvl, 1);
+
+		for(int i = lvl->ent_size - 1; i >= 0; i--)
 		{
 			const void (*onupdate)(ent_t *) = lvl->entities[i].events->onupdate;
 			if(onupdate)
 				onupdate(&lvl->entities[i]);
 		}
-
-		lvl_ticks++;
-		lvl_try_spawn(lvl, 1);
 
 		if(curTime && --curTime == 0)
 		{

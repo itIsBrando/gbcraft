@@ -61,7 +61,7 @@ void text_init(BG_REGULAR *bg, u16 startTile)
 
 void text_error(char *string)
 {
-    bg_fill(target_background, 0, 0, 320/8, 8, 0);
+    bg_fill(target_background, 0, 0, 240/8, 1, 0);
     text_print(string, 0, 0);
 
     for (uint i = 0; i < 68; i++)

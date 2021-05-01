@@ -95,6 +95,7 @@ const tile_t tile_tile_data[] =
     CREATE_TILE(TILE_MUD, 34, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
     CREATE_TILE(TILE_DOOR_CLOSED, 71, TILE_INDEXING_SINGLE_16x16, 8, TILE_NONE),
     CREATE_TILE(TILE_DOOR_OPEN, 69, TILE_INDEXING_SINGLE_16x16, 9, TILE_NONE),
+    CREATE_TILE(TILE_FLOOR_WOOD, 1, TILE_INDEXING_SINGLE_8x8, 0, TILE_NONE),
 };
 
 
@@ -138,6 +139,9 @@ static void tile_render_single_16x16(const level_t *lvl, tile_t *tile, u16 x, u1
         tile->tiling.topRight + 33};
 
     bg_rect(target_bg, x, y, 2, 2, data);
+
+    // @todo maybe make a call to `tile_get_surrounding instead??
+    tile_render_nearby(SURROUNDING_DOWN | SURROUNDING_LEFT | SURROUNDING_UP | SURROUNDING_RIGHT, lvl, tile, x, y);
 }
 
 
@@ -406,38 +410,56 @@ void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 }
 
 
-void tile_stair_up_ontouch(ent_t *e, uint x, uint y)
+bool tile_stair_up_ontouch(ent_t *e, uint x, uint y)
 {
     if(e->type != ENT_TYPE_PLAYER)
-        return;
+        return false;
+
+    if(e->player.on_stairs > 0)
+        return false;
+
+    mnu_load_level();
 
     level_t *curLevel = e->level;
     level_t *newLevel = world[curLevel->layer-1];
+    plr_move_to(e, x, y);
     
-    if(!curLevel->layer)
-        return;
+    if(!curLevel->layer) // @todo safeguard against this. The window will block viewport
+        return false;
     
-    ent_change_level(e, newLevel);
+    e = ent_change_level(e, newLevel);
 
     lvl_change_level(newLevel);
 	mnu_draw_hotbar(e);
+
+    e->player.on_stairs = 65;
+
+    return true;
 }
 
 
 /** called when entity collides with this. This is a stairway down
  * @param e player entity
- * @param x relative pixel x
- * @param y relative pixel y
+ * @param x absolute tile x
+ * @param y absolute tile y
+ * @returns true if the player changed levels
  */
-void tile_stair_down_ontouch(ent_t *e, uint x, uint y)
+bool tile_stair_down_ontouch(ent_t *e, uint x, uint y)
 {
     if(e->type != ENT_TYPE_PLAYER)
-        return;
+        return false;
+    
+    if(e->player.on_stairs > 0)
+        return false;
+
+    mnu_load_level();
 
     // @todo enter new level
     level_t *curLevel = e->level;
     uint curLayer = curLevel->layer;
     level_t *newLevel;
+
+    plr_move_to(e, x, y);
 
     if(world[curLayer+1])
         newLevel = world[curLayer+1];
@@ -445,18 +467,21 @@ void tile_stair_down_ontouch(ent_t *e, uint x, uint y)
         // generate new level if necessary
         newLevel = lvl_new(curLayer + 1, curLevel);
         gen_generate(newLevel);
-        uint tx = lvl_to_tile_x(newLevel, e->x + 8);
-        uint ty = lvl_to_tile_y(newLevel, e->y + 8);
+
         for(uint i = 0; i < 8; i++)
-            lvl_set_tile(newLevel, tx + dir_get_x(i), ty + dir_get_y(i), tile_get(TILE_MUD));
-        lvl_set_tile(newLevel, tx, ty, tile_get(TILE_MUD));
-        lvl_set_tile(newLevel, tx - 1, ty - 1, tile_get(TILE_STAIR_UP));
+            lvl_set_tile(newLevel, x + dir_get_x(i), y + dir_get_y(i), tile_get(TILE_MUD));
+
+        lvl_set_tile(newLevel, x, y, tile_get(TILE_STAIR_UP));
     }
    
-    ent_change_level(e, newLevel);
+    e = ent_change_level(e, newLevel);
 
     lvl_change_level(newLevel);
+
+    e->player.on_stairs = 65;
+
 	mnu_draw_hotbar(e);
+    return true;
 }
 
 

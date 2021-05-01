@@ -77,7 +77,7 @@ ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 
 
 // order matters. Based on `ent_type_t`
-static ent_event_t events[] = {
+static const ent_event_t events[] = {
     { // player
         .init=ent_player_init,
         .onrelocate=ent_player_onrelocate,
@@ -127,11 +127,16 @@ static u16 __tiles[] = {
     0,  // slime
     1,  // zombie
     0,  // furniture (set externally. see item_furniture_interact)
-    0,  // item entity (set exeternally. See `ent_item_new()`)
+    0,  // item entity (set externally. See `ent_item_new()`)
 };
 
 uint ent_get_tile(const ent_t *e) {
-    return __tiles[e->type];
+    if(e->type == ENT_TYPE_FURNITURE)
+        return ent_furniture_get_tile(e);
+    else if(e->type == ENT_TYPE_ITEM_ENTITY)
+        return ent_item_get_tile(e);
+    else
+        return __tiles[e->type];
 }
 
 
@@ -147,6 +152,14 @@ static const bounding_rect_t __rects[] = {
     {0, 8, 0, 8}, // item
 };
 
+/**
+ * Sets the entity's events pointer based on its type
+ */
+void ent_load_events(ent_t *e)
+{
+    e->events = &events[e->type];
+}
+
 
 /**
  * @returns NULL if unable to create
@@ -158,17 +171,19 @@ ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
     
     ent_t *ent = &lvl->entities[lvl->ent_size++];
 
+    memset(ent, 0, sizeof(ent_t));
     ent->type = type;
     ent->x = x;
     ent->y = y;
-    ent->events = &events[type];
     ent->level = lvl;
-    ent->sprite = spr_alloc(x, y, ent_get_tile(ent));
+    ent->sprite = spr_alloc(x, y, 0);
+    ent_load_events(ent);
 
     if(ent->events->init) {
         ent->events->init(ent);
     }
 
+    spr_set_tile(ent->sprite, ent_get_tile(ent));
 	spr_set_size(ent->sprite, SPR_SIZE_16x16);
     spr_set_priority(ent->sprite, SPR_PRIORITY_HIGH);
     spr_set_pal(ent->sprite, 0);
@@ -193,12 +208,12 @@ ent_t *ent_change_level(ent_t *e, level_t *newLevel)
         newLevel->player = ent;
         e->player.removed = true;
     }
-
-    if(e->events->onrelocate)
-        e->events->onrelocate(e, ent);
     
     ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
     spr_set_size(ent->sprite, SPR_SIZE_16x16);
+
+    if(e->events->onrelocate)
+        e->events->onrelocate(e, ent);
 
     return ent;
 }
@@ -290,8 +305,8 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
         // @todo fix this. The stairways down requires this
         //   function to return after switching levels
         if(events->ontouch) {
-            events->ontouch(ent, tx, ty);
-            return false;
+            if(events->ontouch(ent, tx, ty))
+                return false;
         }
     }
 
@@ -424,5 +439,6 @@ void ent_show_all(level_t *level)
  */
 bool ent_is_on_screen(const ent_t *ent)
 {
-    return ent->x <= 240 && ent->y <= 160;
+    const int x = (s16)ent->x, y = (s16)ent->y;
+    return x > -16 &&  y > -16 && x <= 240 && y <= 160;
 }

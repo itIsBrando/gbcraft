@@ -109,7 +109,7 @@ level_t *lvl_new(u16 layer, level_t *parent)
 
 /**
  * Converts an absolute tile x coordinate to a pixel x coordinate
- * @returns x coordinate between 0-320
+ * @returns x coordinate between 0-240
  */
 inline uint lvl_to_pixel_x(level_t *lvl, uint tx)
 {
@@ -121,7 +121,7 @@ inline uint lvl_to_pixel_x(level_t *lvl, uint tx)
 
 /**
  * Converts an absolute tile y coordinate to a pixel y coordinate
- * @returns y coordinate between 0-240
+ * @returns y coordinate between 0-160
  */
 inline uint lvl_to_pixel_y(level_t *lvl, uint ty)
 {
@@ -220,6 +220,7 @@ static void lvl_unload(level_t *lvl)
     for(uint i = 0; i < lvl->ent_size; i++)
     {
         spr_free(lvl->entities[i].sprite);
+        lvl->entities[i].sprite = NULL;
     }
 }
 
@@ -235,6 +236,20 @@ void lvl_change_level(level_t *newLevel)
 
     lvl_current = newLevel;
     world[newLevel->layer] = newLevel;
+
+    // reload sprites. This is buggy :(
+    ent_t *e = lvl_current->entities;
+    for(uint i = 0; i < lvl_current->ent_size; i++)
+    {
+        if(!e->sprite)
+            e->sprite = spr_alloc(e->x, e->y, ent_get_tile(e));
+        
+        spr_set_size(e->sprite, SPR_SIZE_16x16);
+        spr_set_priority(e->sprite, SPR_PRIORITY_HIGH);
+        spr_set_pal(e->sprite, 0);
+        e++;
+    }
+
     lvl_blit();
 }
 

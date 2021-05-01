@@ -17,6 +17,7 @@ enum {
     TILE_STAIR_UP,
     TILE_DOOR_CLOSED,
     TILE_DOOR_OPEN,
+    TILE_FLOOR_WOOD,
 
     TILE_NONE, // last tile
 }; // order irrelevant
@@ -46,6 +47,7 @@ typedef enum {
     ITEM_TYPE_GOLD,
     ITEM_TYPE_GEM,
     ITEM_TYPE_DOOR,
+    ITEM_TYPE_FLOOR,
 } item_type_t; // order relevant?
 
 
@@ -149,7 +151,7 @@ typedef struct {
 
 typedef struct tile_event_t {
     void(*onhurt)(ent_t *);
-    void(*ontouch)(ent_t *, uint, uint);
+    bool(*ontouch)(ent_t *, uint, uint);
     bool(*maypass)(ent_t *);
     void (*interact)(ent_t *, item_t *item, u16 x, u16 y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
 } tile_event_t;
@@ -223,6 +225,7 @@ typedef struct {
     s8 max_health;
     s8 stamina;
     s8 max_stamina;
+    u8 on_stairs; // >0 after entering a staircase
     bool is_swimming;
     bool removed; // true when the player has changed levels. Used to interrupt flow inside functions because this entity pointer will be decayed soon
     item_t *activeItem;
@@ -272,7 +275,7 @@ typedef struct ent_t {
     obj_t *sprite;       // refers to OAM sprite representing this entity
     level_t *level;
     direction_t dir;
-    ent_event_t *events;
+    const ent_event_t *events;
 } ent_t;
 
 

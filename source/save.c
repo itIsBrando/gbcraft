@@ -215,9 +215,10 @@ void sve_load_save(save_t *save, level_t *lvl)
         e->sprite = spr_alloc(e->x, e->y, ent_get_tile(e));
         spr_set_size(e->sprite, SPR_SIZE_16x16);
         spr_set_priority(e->sprite, SPR_PRIORITY_HIGH);
+        ent_load_events(e);
 
-        if(e->events->init)
-            e->events->init(e);
+        // if(e->events->init)
+        //     e->events->init(e);
 
         if(e->type == ENT_TYPE_PLAYER)
             lvl->player = e;
@@ -234,10 +235,6 @@ void sve_load_save(save_t *save, level_t *lvl)
             }
 
             inv->parent = e;
-
-            // necessary to set the sprite tile for furniture
-            if(e->type == ENT_TYPE_FURNITURE)
-                ent_furniture_set_tile(e);
         }
 
     }

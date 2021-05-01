@@ -14,6 +14,14 @@
 
 // sizes changes here need to be reflected in `furniture.h`
 const recipe_t CRAFTING_RECIPES[] = {
+    {
+        .result=&ITEM_FLOOR_WOOD,
+        .amount=4,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_WOOD, 2),
+        },
+    },
     { // wood axe crafting
         .result=&ITEM_WOOD_AXE,
         .costs_num=1,
@@ -148,8 +156,13 @@ bool ent_furniture_maypass(ent_t *f, ent_t *e)
 
 
 // sprite indexes for 16x16 furniture sprites
-static const u8 _fur_spr[] = {53, 49, 45};
+const u8 _fur_spr[] = {53, 49, 45};
+
+inline u8 ent_furniture_get_tile(const ent_t *e)
+{
+    return _fur_spr[e->furniture.type];
+}
 
 void ent_furniture_set_tile(ent_t *e) {
-    spr_set_tile(e->sprite, _fur_spr[e->furniture.type]);
+    spr_set_tile(e->sprite, ent_furniture_get_tile(e));
 }

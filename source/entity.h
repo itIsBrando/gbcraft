@@ -28,11 +28,16 @@ void ent_remove(level_t *lvl, ent_t *ent);
  */
 void ent_kill(ent_t *e);
 
+void plr_move_to(ent_t *plr, uint x, uint y);
+
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize);
 uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize);
 
-void ent_furniture_set_tile(ent_t *e);;
+void ent_furniture_set_tile(ent_t *e);
+u8 ent_furniture_get_tile(const ent_t *e);
+uint ent_item_get_tile(const ent_t *e);
 
+void ent_load_events(ent_t *e);
 
 void ent_slime_init(ent_t *e);
 void ent_zombie_init(ent_t *e);

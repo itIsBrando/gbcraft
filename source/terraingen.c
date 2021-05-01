@@ -152,7 +152,7 @@ void gen_generate_overworld(level_t *lvl)
 void gen_make_stairs_down(level_t *lvl)
 {
     // spawn 9 staircases
-    for(uint i = 0; i < 9; i++)
+    for(uint i = 0; i < 19; i++)
     {
         uint iter = 0, x, y;
         do {
