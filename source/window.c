@@ -22,7 +22,8 @@ void win_init(WIN_REGULAR *win, BG_REGULAR *bg, bool num)
 
     REG_WINOUT = BIT(4) | BIT(
         2/* map number to include outside window*/
-    );
+    ) | BIT(0)
+    | BIT(5) /* enable blending outside window */;
     // enable background and sprites
     REG_WININ = BIT(bg->map_number) | BIT(4);
 }

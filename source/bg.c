@@ -163,7 +163,7 @@ void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, v
             for (i = x; i < x + w; i++)
             {
                 *ptr++ = *(u16*)data;
-                data++;
+                data += 2;
             }
 
             ptr += 32 - w;

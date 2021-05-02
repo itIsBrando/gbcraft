@@ -205,3 +205,34 @@ spr_size_mask spr_get_size(const obj_t *obj)
 {
 	return ((obj->attr0 >> 0xE) << 2) | (obj->attr1 >> 0xE);
 }
+
+
+inline void spr_set_gfx_mode(obj_t *obj, spr_gfx_mode_t mode)
+{
+	obj->attr0 &= 0xF3FF;
+	obj->attr0 |= (mode & 0x3) << 0xA;
+}
+
+
+#define BLEND_CNT			*(vu16*)(0x04000050)	// Alpha control
+#define BLEND_ALPHA		    *(vu16*)(0x04000052)	// Fade level
+// #define REG_BLDY			*(vu16*)(0x04000054)	// Blend levels
+
+
+inline void blnd_set(const blnd_cnt_mask_t mask, const blnd_mode_t mode)
+{
+	BLEND_CNT = mask | mode;
+	blnd_set_weights(28, 4);
+}
+
+
+inline void blnd_set_weights(uint top, uint bot)
+{
+	BLEND_ALPHA = (top & 0x1F) + ((bot & 0x1F) << 8);
+}
+
+
+inline void blnd_set_fade(uint amt)
+{
+	*(vu16*)(0x04000054) = amt;
+}

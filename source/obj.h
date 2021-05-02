@@ -43,6 +43,37 @@ typedef enum {
     SPR_PRIORITY_HIGHEST = BIT(0xA) | BIT(0xB),
 } spr_priority_t;
 
+
+typedef enum {
+	BLEND_BOT_OBJ=BIT(0xC),
+	BLEND_BOT_BG3=BIT(0xB),
+	BLEND_BOT_BG2=BIT(0xA),
+	BLEND_BOT_BG1=BIT(0x9),
+	BLEND_BOT_BG0=BIT(0x8),
+
+	BLEND_TOP_OBJ=BIT(0x4),
+	BLEND_TOP_BG3=BIT(0x3),
+	BLEND_TOP_BG2=BIT(0x2),
+	BLEND_TOP_BG1=BIT(0x1),
+	BLEND_TOP_BG0=BIT(0x0),
+
+	BLEND_MODE_0=0,			/** no blending. */
+	BLEND_MODE_1=0b01<<6,	/** weighted blending. @see `REG_BNDALPHA` */
+	BLEND_MODE_2=0b10<<6,	/** white @see REG_BLDY` */
+	BLEND_MODE_3=0b11<<6,	/** black @see REG_BLDY` */
+} blnd_cnt_mask_t;
+
+
+typedef enum {
+	SPR_GFX_NONE,
+	SPR_GFX_ALPHA_BLENDING,
+	SPR_GFX_WINDOW
+} spr_gfx_mode_t;
+
+
+typedef blnd_cnt_mask_t blnd_mode_t; /** `BLEND_MODE_...` */
+
+
 /**
  * @param x initial x position
  * @param y initial x position
@@ -89,6 +120,14 @@ void spr_set_priority(obj_t *obj, spr_priority_t priority);
 void spr_set_pal(obj_t *obj, u8 pal);
 
 void spr_set_tile(obj_t *obj, u16 tile);
+
+
+/**
+ * Sets special graphics mode for a sprite. Default is `SPR_GFX_NONE`
+ * @param mode SPR_GFX_...
+ */
+void spr_set_gfx_mode(obj_t *obj, spr_gfx_mode_t mode);
+
 void spr_flip(obj_t *obj, const spr_flip_mask mask); // only compatible with regular sprites
 
 void spr_hide(obj_t *obj);
@@ -103,5 +142,27 @@ spr_size_mask spr_get_size(const obj_t *obj);
 uint spr_get_x(const obj_t *obj);
 uint spr_get_y(const obj_t *obj);
 uint spr_get_tile(const obj_t *obj);
+
+
+
+/**
+ * @param mask layers to blend (BLEND_TOP_... | BLEND_BOT...)
+ * @param mode blending mode to use (BLEND_MODE_...)
+ */
+void blnd_set(const blnd_cnt_mask_t mask, const blnd_mode_t mode);
+
+
+/**
+ * Only for mode 1
+ * @param top top layer weight [0-1F] [0-31]
+ * @param bot bottom layer weight [0-1F] [0-31]
+ */
+void blnd_set_weights(uint top, uint bot);
+
+/**
+ * Sets darkening/lightening affect for modes 2 & 3
+ * @param amt [0-1f] [0-31]
+ */
+void blnd_set_fade(uint amt);
 
 #endif
