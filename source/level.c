@@ -150,8 +150,8 @@ inline uint lvl_to_tile_y(uint py)
 
 /**
  * Tries to get a valid spawn position for enemies
- * @param x pointer to x coordinate. Will be updated to a random position
- * @param y pointer to y coordinate. Will be updated to a random position
+ * @param x pointer to x coordinate. Will be updated to a random position regardless of success
+ * @param y pointer to y coordinate. Will be updated to a random position regardless of success
  * @returns true if in a spawnable range. if false, x and y coordinates are still modified
  */
 bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
@@ -161,8 +161,8 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
         return false;
 
     ent_t *plr = lvl_get_player(lvl);
-    *x = rnd_random_bounded(0, LEVEL_WIDTH) << 4;
-    *y = rnd_random_bounded(0, LEVEL_HEIGHT) << 4;
+    *x = (rnd_random() & 63) << 4;
+    *y = (rnd_random() & 63) << 4;
 
     int px = plr->x + bg_get_scx(main_background);
     int py = plr->y + bg_get_scy(main_background);
@@ -176,7 +176,7 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
 
     // if ANY entity exists here, then do not proceed with spawning
     ent_t *ents[1];
-    if(ent_get_all_stack(lvl, ents, *x, *y, 1))
+    if(ent_get_all_stack(lvl, NULL, ents, *x, *y, 1))
         return false;
     
     lvl->mob_density++;
@@ -232,7 +232,6 @@ void lvl_change_level(level_t *newLevel)
     lvl_current = newLevel;
     world[newLevel->layer] = newLevel;
 
-    // reload sprites. This is buggy :(
     ent_t *e = lvl_current->entities;
     for(uint i = 0; i < lvl_current->ent_size; i++)
     {

@@ -9,9 +9,10 @@ direction_t dir_get(const s16 dx, const s16 dy);
 const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent);
 uint ent_get_tile(const ent_t *e);
 
-bool ent_can_move(ent_t *ent, const direction_t direction);
-bool ent_move(ent_t *ent, const direction_t direction);
+bool ent_can_move(ent_t *ent, const direction_t direction, uint dist);
+bool ent_move(ent_t *ent, const direction_t direction, const uint dist);
 void ent_apply_knockback(ent_t *e);
+void plr_apply_knockback(ent_t *e);
 
 void ent_hide_all(level_t *level);
 void ent_show_all(level_t *level);
@@ -29,9 +30,10 @@ void ent_remove(level_t *lvl, ent_t *ent);
 void ent_kill(ent_t *e);
 
 void plr_move_to(ent_t *plr, uint x, uint y);
+bool plr_hurt(ent_t *mob, ent_t *e, int dmg);
 
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize);
-uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize);
+uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer, u16 x, u16 y, u8 maxSize);
 
 void ent_furniture_set_tile(ent_t *e);
 u8 ent_furniture_get_tile(const ent_t *e);
@@ -59,11 +61,12 @@ void ent_player_onrelocate(ent_t *eOld, ent_t *eNew);
 
 bool ent_furniture_maypass(ent_t *f, ent_t *e);
 
-void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
+bool ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
+bool ent_mob_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
 
 void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt);
 
 void ent_player_set_active_item(ent_t *plr, item_t *item);
-bool ent_player_heal(ent_t *e, uint by);
+bool plr_heal(ent_t *e, uint by);
 
 #endif

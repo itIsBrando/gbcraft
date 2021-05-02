@@ -9,7 +9,6 @@
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
 - [ ] Add iron
-- [ ] Add coal
 - [ ] Add gold
 - [ ] Add gem
 - [ ] Add attack bonus for swords (and axes?)
@@ -19,8 +18,10 @@
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add player swimming animation
-- [ ] **Allow player to recieve damage**
-- [ ] Add bread consumation
+- [ ] Add lighting to caves
+- [x] Add bread consumation
+- [x] Add coal
+- [x] **Allow player to recieve damage**
 - [x] Add support for player healing
 - [x] Add wood floor
 - [x] Add bread
@@ -84,6 +85,7 @@
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
+- [ ] **Cover up ugly map overflow**
 - [ ] Add door opening/closing sound effect
 - [ ] Add mob spawning on lower levels
 - [x] Furniture snap to grid?
@@ -109,10 +111,10 @@
 - [ ] Random null pointer crash when ItemEntity exists on lower level
 - [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
-- [ ] Player placement after changing level is incorrect
 - [ ] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete
 - [ ] Fix graphically remenants after closing chest
 - [ ] Fix graphically remenants after closing crafting
+- [x] Player placement after changing level is incorrect
 - [x] Chest items are eaten upon saving and loading
 - [x] Entities slightly offscreen will disappear
 - [x] Opening a door after reentering the overworld crashes

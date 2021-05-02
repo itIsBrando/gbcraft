@@ -134,7 +134,7 @@ typedef struct {
     bool (*onhurt)(ent_t *, ent_t *, s8); /** called when damage is received @param dmg amount of damage to subtract from ent's health @returns true if the entity dies, otherwises false*/
     void (*init)(ent_t *);    /** Called when entity is created. @param ent entity */
     void (*doDamage)(ent_t *, ent_t *);    // called when damage is done
-    void (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y */
+    bool (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y @returns true to inhibit movement*/
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame

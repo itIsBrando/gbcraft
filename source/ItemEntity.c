@@ -32,14 +32,16 @@ uint ent_item_get_tile(const ent_t *e)
     return e->itemEntity.item->tile;
 }
 
-void ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
+bool ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
 {
     if(other->type != ENT_TYPE_PLAYER || (e->xKnockback | e->yKnockback))
-        return;
+        return false;
 
     for(uint i = 0; i < e->itemEntity.count; i++)
         item_add_to_inventory(e->itemEntity.item, &lvl_get_player(e->level)->player.inventory);
     ent_remove(e->level, e);
+
+    return true;
 }
 
 

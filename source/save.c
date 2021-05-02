@@ -228,10 +228,13 @@ void sve_load_save(save_t *save, level_t *lvl)
         {
             inventory_t *inv = e->type == ENT_TYPE_PLAYER ? &e->player.inventory : &e->furniture.inventory;
 
+            item_t *item = inv->items;
             for(uint j = 0; j < inv->size; j++)
             {
-                inv->items[j].parent = inv;
-                inv->items[j].name = item_lookup_name(&inv->items[j]);
+                item->parent = inv;
+                item->event = item_get_from_type(item->type, item->tooltype)->event;
+                item->name = item_lookup_name(&inv->items[j]);
+                item++;
             }
 
             inv->parent = e;

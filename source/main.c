@@ -125,7 +125,7 @@ int main(void) {
 
 	while (true) {
 		key_scan();
-		u16 keys = key_pressed_no_repeat();
+		uint keys = key_pressed_no_repeat();
 		level_t *lvl = lvl_get_current();
 		plr = lvl_get_player(lvl);
 
@@ -149,28 +149,30 @@ int main(void) {
 		else if(keys == KEY_SELECT)
 		{
 			sve_save_level(level);
-		}
+		} else if(keys == KEY_B)
+			plr->player.health = 20;
 
 		lvl_ticks++;
 		lvl_try_spawn(lvl, 1);
 
 		// random tick
-		uint cnt = (keys & KEY_B) ? 25 : 2;
-		for(uint i = 0; i < cnt; i++)
+		for(uint i = 0; i < 2; i++)
 		{
 			uint x = rnd_random() & 63;
 			uint y = rnd_random() & 63;
-			const tile_t *tile = lvl_get_tile(lvl, x, y);
+			const tile_event_t *events = lvl_get_tile(lvl, x, y)->event;
 
-			if(tile->event->onrandomtick)
-				tile->event->onrandomtick(lvl, x, y);
+			if(events->onrandomtick)
+				events->onrandomtick(lvl, x, y);
 		}
 
+		ent_t *e = &lvl->entities[lvl->ent_size-1];
 		for(int i = lvl->ent_size - 1; i >= 0; i--)
 		{
-			const void (*onupdate)(ent_t *) = lvl->entities[i].events->onupdate;
+			const void (*onupdate)(ent_t *) = e->events->onupdate;
 			if(onupdate)
-				onupdate(&lvl->entities[i]);
+				onupdate(e);
+			e--;
 		}
 
 		if(curTime && --curTime == 0)

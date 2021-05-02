@@ -29,7 +29,7 @@ void ent_zombie_update(ent_t *e)
 
     direction_t dir = dir_get(e->zombie.xAccel, e->zombie.yAccel);
 
-    if(!ent_move(e, dir) || (rnd_random() & 0x3F) == 0)
+    if(!ent_move(e, dir, 1) || (rnd_random() & 0x3F) == 0)
     {
         e->zombie.walk = 60;
         e->zombie.xAccel = rnd_random_bounded(-1, 1);

@@ -42,6 +42,9 @@ item_event_t ITEM_EVENTS[] =
     },
     [9]={ // material (has no events)
 
+    },
+    [10]={ // food
+        .interact=item_food_interact
     }
 };
 
@@ -87,7 +90,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("SEED", 38, ITEM_TYPE_SEED, 8, 1),
     DEFINE_ITEM("SAPLING", 39, ITEM_TYPE_SAPLING, 7, 1),
     DEFINE_ITEM("WHEAT", 40, ITEM_TYPE_WHEAT, 9, 1),
-    DEFINE_ITEM("BREAD", 41, ITEM_TYPE_BREAD, 9, 1),
+    DEFINE_ITEM("BREAD", 41, ITEM_TYPE_BREAD, 10, 1),
 };
 
 
@@ -289,12 +292,12 @@ bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, 
 bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
 {
     // pick up furniture entities
-    if(item->tooltype == TOOL_TYPE_PICKUP)
+    if(item && item->tooltype == TOOL_TYPE_PICKUP)
     {
         x = lvl_to_pixel_x(x);
         y = lvl_to_pixel_y(y);
         ent_t *e[5];
-        uint s = ent_get_all_stack(plr->level, e, x, y, 5);
+        uint s = ent_get_all_stack(plr->level, plr, e, x, y, 5);
 
         for(uint i = 0; i < s; i++)
         {
@@ -337,6 +340,18 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
     item_change_count(item, -1);
 
     return true;
+}
+
+
+bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+{
+    if(plr_heal(plr, 2))
+    {
+        item_change_count(item, -1);
+        return true;
+    }
+
+    return false;
 }
 
 

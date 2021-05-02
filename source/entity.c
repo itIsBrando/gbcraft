@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "level.h"
+#include "player.h"
 
 #include "bg.h"
 #include "obj.h"
@@ -16,26 +17,32 @@ inline u8 abss(u8 a, u8 b)
 
 /**
  * @param lvl level to inspect
+ * @param ignoredEntity This entity will not appear in `buffer`. Can be NULL
  * @param buffer buffer of entities to fill
  * @param x relative pixel x
  * @param y relative pixel y
  * @param maxSize max number of entities that the buffer can hold
  * @returns NULL if none, or an array of pointers to entities allocated on the heap
  */
-uint ent_get_all_stack(level_t *lvl, ent_t **buffer, u16 x, u16 y, u8 maxSize)
+uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer, u16 x, u16 y, u8 maxSize)
 {
     uint index = 0;
 
+        ent_t *e = lvl->entities;
     for(uint i = 0; i < lvl->ent_size; i++)
     {
-        ent_t *e = &lvl->entities[i];
-
+        if(e == ignoredEntity)
+        {
+            e++;
+            continue;
+        }
         if((x >= e->x) && (x <= e->x + 16) && (y >= e->y) && (y <= e->y + 16))
         {
             buffer[index++] = e;
             if(index >= maxSize)
                 return maxSize;
         }
+        e++;
     }
     
     return index;
@@ -82,7 +89,7 @@ static const ent_event_t events[] = {
         .init=ent_player_init,
         .onrelocate=ent_player_onrelocate,
         .onhurt=NULL,
-        .ontouch=NULL,
+        .ontouch=ent_mob_ontouch,
         .ondeath=NULL,
         .onupdate=ent_player_update
     },
@@ -91,6 +98,7 @@ static const ent_event_t events[] = {
         .onhurt=ent_slime_hurt,
         .ontouch=NULL,
         .ondeath=NULL,
+        .maypass=NULL,
         .onupdate=ent_slime_update
     },
     { // zombie
@@ -269,8 +277,9 @@ inline const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent)
 /**
  * @param ent entity to check for valid movement
  * @param direction direction to move
+ * @param dist Number of pixels to check for movement
  */
-bool ent_can_move(ent_t *ent, const direction_t direction)
+bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
 {
     const bounding_rect_t *rect = ent_get_bounding_rect(ent);
     uint x = ent->x + bg_get_scx(main_background);
@@ -278,8 +287,8 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
     int cx = dir_get_x(direction);
     int cy = dir_get_y(direction);
 
-    x += cx * 2;
-    y += cy * 2; 
+    x += cx * dist + cy;
+    y += cy * dist + cy;
     
     x += rect->sx;
     y += rect->sy;
@@ -316,7 +325,7 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
     px += dir_get_x(direction) << 3, py += dir_get_y(direction) << 3;
     
     ent_t *e[3];
-    uint s = ent_get_all_stack(ent->level, e, px, py, 3);
+    uint s = ent_get_all_stack(ent->level, ent, e, px, py, 3);
 
     for(uint i = 0; i < s; i++)
     {
@@ -324,8 +333,8 @@ bool ent_can_move(ent_t *ent, const direction_t direction)
         if(events->maypass && !events->maypass(e[i], ent))
             return false;
 
-        if(events->ontouch)
-            events->ontouch(e[i], ent, px, py);
+        if(events->ontouch && events->ontouch(e[i], ent, px, py))
+            return false;
     }
 
     return true;
@@ -358,12 +367,17 @@ direction_t dir_get(const s16 dx, const s16 dy)
 }
 
 
-bool ent_move(ent_t *ent, const direction_t direction)
+/**
+ * @param ent
+ * @param direction direction_t
+ * @param dist number of pixels to move in the direction dictated by `direction` parameter
+ */
+bool ent_move(ent_t *ent, const direction_t direction, const uint dist)
 {
-    if(ent_can_move(ent, direction))
+    if(ent_can_move(ent, direction, dist))
     {
-        ent->x += dir_get_x(direction);
-        ent->y += dir_get_y(direction);
+        ent->x += dir_get_x(direction) * dist;
+        ent->y += dir_get_y(direction) * dist;
         return true;
     }
 
@@ -377,7 +391,7 @@ inline void _dec_magnitude(s8 *a)
         *a < 0 ? (*a)++ : (*a)--;
 }
 
-u8 _get_magnitude(s8 a)
+inline u8 _get_magnitude(int a)
 {
     return a < 0 ? -a : a;
 }
@@ -390,12 +404,45 @@ void ent_apply_knockback(ent_t *e)
     const int yMag = _get_magnitude(e->yKnockback);
     int dist = xMag != 0 ? xMag : yMag;
 
-    for(uint i = 0; i < dist; i++)
-        ent_move(e, d);
+    ent_move(e, d, dist);
     
     _dec_magnitude(&e->xKnockback);
     _dec_magnitude(&e->yKnockback);
 }
+
+
+void plr_apply_knockback(ent_t *e)
+{
+    if(e->xKnockback == 0 && e->yKnockback == 0)
+        return;
+
+    const int dist = e->xKnockback ? e->xKnockback : e->yKnockback;
+    direction_t d = e->dir;
+
+    plr_move_by(e, dir_get(e->xKnockback, e->yKnockback), abs(dist));
+
+    e->dir = d; // restore direction
+
+    _dec_magnitude(&e->xKnockback);
+    _dec_magnitude(&e->yKnockback);
+}
+
+
+/**
+ * Does damage to the player
+ * @param e mob
+ * @param other player
+ */
+bool ent_mob_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
+{
+    if(other->type != ENT_TYPE_SLIME)
+        return false;
+    
+    plr_hurt(other, e, e->level->layer + 1);
+
+    return true;
+}
+
 
 
 void ent_draw(const ent_t *ent)

@@ -12,7 +12,7 @@
 #include "text.h"
 #include <stdlib.h>
 
-static void ent_move_all(level_t *lvl, const direction_t direction);
+static void ent_move_all(level_t *lvl, const direction_t direction, const uint dist);
 
 
 void ent_player_init(ent_t *e)
@@ -40,19 +40,19 @@ void ent_player_update(ent_t *plr)
 
     if(keys & KEY_LEFT)
     {
-        plr_move_by(plr, DIRECTION_LEFT);
+        plr_move_by(plr, DIRECTION_LEFT, 1);
     } else if(keys & KEY_RIGHT)
     {
-        plr_move_by(plr, DIRECTION_RIGHT);
+        plr_move_by(plr, DIRECTION_RIGHT, 1);
     }
 
     if(keys & KEY_UP)
     {
-        plr_move_by(plr, DIRECTION_UP);
+        plr_move_by(plr, DIRECTION_UP, 1);
         spr_set_tile(plr->sprite, 5);
     } else if(keys & KEY_DOWN)
     {
-        plr_move_by(plr, DIRECTION_DOWN);
+        plr_move_by(plr, DIRECTION_DOWN, 1);
         spr_set_tile(plr->sprite, 1);
     }
 
@@ -118,6 +118,7 @@ void ent_player_update(ent_t *plr)
         }
     }
 
+    plr_apply_knockback(plr);
 }
 
 
@@ -142,19 +143,24 @@ void ent_player_onrelocate(ent_t *eOld, ent_t *eNew)
 }
 
 
-static uint _hotbar_index = 0;
+static int _hotbar_index = 0;
 
 
 /**
  * @param index index in the player's inventory. Can be unbounded
  */
-void player_set_hotbar_pos(ent_t *p, uint index)
+void player_set_hotbar_pos(ent_t *p, int index)
 {
     const inventory_t *inv = &p->player.inventory;
     if(!inv->size)
         return;
     
-    _hotbar_index = index % inv->size;
+    if(index < 0)
+        index = inv->size-1;
+    else if(index >= inv->size)
+        index = 0;
+    
+    _hotbar_index = index;
     
     bg_fill(win_get_0()->background, 1, 2, 11, 1, 0);
     ent_player_set_active_item(p, (item_t*)&inv->items[_hotbar_index]);
@@ -204,11 +210,14 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
     spr_set_tile(spr, item ? item->tile : 0);
 }
 
+const direction_t _dirs[] = {DIRECTION_RIGHT, DIRECTION_LEFT, DIRECTION_DOWN, DIRECTION_UP,
+    DIRECTION_RIGHT_DOWN, DIRECTION_LEFT_DOWN, DIRECTION_RIGHT_UP, DIRECTION_LEFT_UP
+};
 
 // inverts the direction @todo move elsewhere
 inline direction_t dir_get_opposite(direction_t direction)
 {
-    return direction ^ 1;
+    return _dirs[direction];
 }
 
 
@@ -217,7 +226,7 @@ inline direction_t dir_get_opposite(direction_t direction)
  * @param x absolute tile x
  * @param y absolute tile y
  */
-inline void plr_move_to(ent_t *plr, uint x, uint y)
+void plr_move_to(ent_t *plr, uint x, uint y)
 {
     // get distance we will move
     uint oldX = bg_get_scx(main_background);
@@ -244,20 +253,46 @@ inline void plr_move_to(ent_t *plr, uint x, uint y)
 }
 
 
-void plr_move_by(ent_t *player, const direction_t direction)
+/**
+ * @param e player entity
+ * @param dmg amount of damage to deal
+ * @return true if the player dies from this attack
+ */
+bool plr_hurt(ent_t *mob, ent_t *e, int dmg)
 {
-    if(ent_can_move(player, direction))
+    if(e->player.invulnerability)
+        return false;
+    
+    e->player.health -= dmg;
+    e->xKnockback = dir_get_x(mob->dir) * 5;
+    e->yKnockback = dir_get_y(mob->dir) * 5;
+
+    if(e->player.health <= 0)
+        e->player.health = 0;
+
+    e->player.invulnerability = 20;
+
+    bar_draw_health(e);
+    return false;
+}
+
+
+void plr_move_by(ent_t *player, const direction_t direction, const uint dist)
+{
+    if(ent_can_move(player, direction, dist))
     {
-        ent_move_all(player->level, dir_get_opposite(direction));
-        bg_move_by(main_background, direction);
+        ent_move_all(player->level, dir_get_opposite(direction), dist);
+        s16 dx = dir_get_x(direction) * dist;
+        s16 dy = dir_get_y(direction) * dist;
+        bg_move(main_background, bg_get_scx(main_background) + dx, bg_get_scy(main_background) + dy);
     }
 }
 
 
-static void ent_move_all(level_t *lvl, const direction_t direction)
+static void ent_move_all(level_t *lvl, const direction_t direction, const uint dist)
 {
-    const int dx = dir_get_x(direction);
-    const int dy = dir_get_y(direction);
+    const int dx = dir_get_x(direction) * dist;
+    const int dy = dir_get_y(direction) * dist;
     ent_t *ent = lvl->entities;
 
     for(uint i = 0; i < lvl->ent_size; i++)
@@ -287,7 +322,7 @@ void ent_player_interact(const ent_t *plr)
     uint s = 0;
     
     if(!plr->player.activeItem || (plr->player.activeItem && plr->player.activeItem->tooltype != TOOL_TYPE_PICKUP))
-        s = ent_get_all_stack(plr->level, ents, px, py, 5);
+        s = ent_get_all_stack(plr->level, plr, ents, px, py, 5);
 
     for(uint i = 0; i < s; i++)
     {
@@ -333,7 +368,7 @@ static inline uint min(uint a, uint b)
  * Heals the player
  * @returns false if player is at max health
  */
-bool ent_player_heal(ent_t *e, uint by)
+bool plr_heal(ent_t *e, uint by)
 {
     if(e->player.health < e->player.max_health)
     {

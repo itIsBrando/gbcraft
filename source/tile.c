@@ -337,6 +337,9 @@ bool tile_no_pass(ent_t *e)
 
 void tile_grass_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
+    if(!item)
+        return;
+
     if(item->tooltype != TOOL_TYPE_HOE || lvl_get_tile_type(ent->level, x, y) != TILE_GRASS)
         return;
 
@@ -370,10 +373,7 @@ void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
 
 void tile_tree_interact(ent_t *ent, item_t *item, u16 x, u16 y)
 {
-    if(!(!item || item->tooltype == TOOL_TYPE_AXE))
-        return;
-
-    if(ent->type != ENT_TYPE_PLAYER)
+    if(!item || item->tooltype != TOOL_TYPE_AXE || ent->type != ENT_TYPE_PLAYER)
         return;
 
     if(!plr_pay_stamina(ent, 3 + (!item)))

@@ -119,4 +119,5 @@ bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
 
 bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
 #endif

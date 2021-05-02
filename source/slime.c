@@ -22,7 +22,7 @@ void ent_slime_update(ent_t *s)
     slime_t *slime = &s->slime;
     direction_t d = dir_get(slime->xAccel, slime->yAccel);
 
-    if(!ent_move(s, d) || (rnd_random() & 0x1F) == 0)
+    if(!ent_move(s, d, 1) || (rnd_random() & 0x1F) == 0)
     {
         if(slime->jump_time <= -20)
         {
