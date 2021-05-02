@@ -34,9 +34,9 @@ static vu16 *regs[][3] = {
 };
 
 
-u16 bg_get_ssb(const u16 tx, const u16 ty)
+inline uint bg_get_quadrant(const uint tx, const uint ty)
 {
-    return (ty >> 5) * 2;
+    return 0;//(ty >> 5) * 2;
 }
 
 void bg_move_by(BG_REGULAR *bg, const direction_t direction)
@@ -99,11 +99,11 @@ inline void bg_clamp_coordinates(const BG_REGULAR *bg, u16 *tx, u16 *ty)
 /**
  * Gets the tile using absolute tile coordinates
  * @see bg_get_tile()
+ * @todo add support for large BG_REGULAR maps
  */
-u16 bg_get_tile_absolute(const BG_REGULAR *bg, u16 tx, u16 ty)
+u16 bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
 {
-    const u16 tile = map_mem[bg->map_base + bg_get_ssb(tx, ty)][tx + (ty << 5)];
-    return tile;
+    return map_mem[bg->map_base + bg_get_quadrant(tx, ty)][tx + (ty << 5)];
 }
 
 
@@ -112,7 +112,7 @@ u16 bg_get_tile_absolute(const BG_REGULAR *bg, u16 tx, u16 ty)
  * @param tx coordinate = tx + bgXoffset
  * @param ty coordinate = ty + bgYoffset
  */
-u16 bg_get_tile(const BG_REGULAR *bg, u16 tx, u16 ty)
+u16 bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty)
 {
     return bg_get_tile_absolute(bg, tx + (bg_get_scx(bg) >> 3), ty + (bg_get_scy(bg) >> 3));
 }
@@ -131,7 +131,7 @@ void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, u16 tile)
             tile = (tile & 0x00FF) | (*ptr & 0xFF00);
         *ptr = tile;
     } else {
-	    map_mem[bg->map_base][x + (y << 5)] = tile;
+	    map_mem[bg->map_base + bg_get_quadrant(x, y)][x + (y << 5)] = tile;
     }
 }
 
@@ -156,7 +156,7 @@ void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, v
             ptr += ((1 << bg->width_bits) - w) >> 1;
         }
     } else {
-        ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
+        ptr = map_mem[bg->map_base + bg_get_quadrant(x, y)] + (y << 5) + x;
 
         for(j = y; j < y + h; j++)
         {
@@ -194,7 +194,7 @@ void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
             ptr += ((1 << bg->width_bits) - w) >> 1;
         }
     } else {
-        ptr = map_mem[bg->map_base + bg_get_ssb(x, y)] + (y << 5) + x;
+        ptr = map_mem[bg->map_base + bg_get_quadrant(x, y)] + (y << 5) + x;
         for(j = y; j < y + h; j++)
         {
             for(i = x; i < x + w; i++)
@@ -232,7 +232,7 @@ void bg_set_priority(BG_REGULAR *bg, bg_priority_t p)
 }
 
 
-void bg_affine_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num)
+void bg_affine_init(AFFINE_BG *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num)
 {
     bg->is_affine = true;
 
@@ -266,8 +266,8 @@ void bg_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, co
     bg->map_number = num;
     bg->is_affine = false;
 
-    *bg->BG_CNT = BG_16_COLOR | BG_SIZE_0
-     | BG_MAP_BASE(mapBlock) | BG_TILE_BASE(tileBlock);
+    *bg->BG_CNT = BG_16_COLOR
+        | BG_MAP_BASE(mapBlock) | BG_TILE_BASE(tileBlock);
     
     bg_move(bg, 0, 0);
     bg_show(bg);

@@ -38,8 +38,8 @@ typedef enum {
 
 typedef enum {
     SPR_PRIORITY_LOWEST = 0,
-    SPR_PRIORITY_LOW = BIT(0xB),
-    SPR_PRIORITY_HIGH = BIT(0xA),
+    SPR_PRIORITY_LOW = BIT(0xA),
+    SPR_PRIORITY_HIGH = BIT(0xB),
     SPR_PRIORITY_HIGHEST = BIT(0xA) | BIT(0xB),
 } spr_priority_t;
 
