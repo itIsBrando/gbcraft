@@ -5,6 +5,7 @@
 #include "entity.h"
 #include "terraingen.h"
 #include "menu.h"
+#include "lighting.h"
 
 #include "memory.h"
 #include "text.h"
@@ -460,6 +461,11 @@ bool tile_stair_up_ontouch(ent_t *e, uint x, uint y)
     e = ent_change_level(e, newLevel);
 
     lvl_change_level(newLevel);
+
+    if(!newLevel->layer) {
+        lt_hide();
+    }
+
 	mnu_draw_hotbar(e);
 
     e->player.on_stairs = 65;
@@ -507,6 +513,7 @@ bool tile_stair_down_ontouch(ent_t *e, uint x, uint y)
     e = ent_change_level(e, newLevel);
 
     lvl_change_level(newLevel);
+    lt_show(newLevel);
 
     e->player.on_stairs = 65;
 

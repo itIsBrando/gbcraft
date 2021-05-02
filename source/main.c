@@ -27,6 +27,7 @@
 #include "terraingen.h"
 #include "item.h"
 #include "menu.h"
+#include "lighting.h"
 
 extern const char FLASH_ID_TEXT[];
 extern void foo(const char *); // @todo remove the need for this
@@ -50,6 +51,8 @@ int main(void) {
 
 	// set first tile to be non-transparent black
 	memset16((u16*)&tile_mem[0][0], 0xCCCC, 32);
+	// set tile 517 to be transparent black
+	memset16((u16*)&tile_mem[0][517], 0x0000, 16); // this tile is 4bpp
 	background_palette_mem[0xC] = RGB15(4, 4, 4);
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
@@ -61,7 +64,7 @@ int main(void) {
 
 	BG_REGULAR bg;
 	main_background = &bg;
-	bg_affine_init(main_background, 10, 0, 2);
+	bg_affine_init(main_background, 12, 0, 2);
 	bg_set_size(main_background, BG_SIZE_AFF_128x128);
 
 	// create window
@@ -72,6 +75,7 @@ int main(void) {
 	text_init(&bg_win, 526); // initialize our text generator
 
 	spr_init(); // initialize sprites
+	lt_init();
 
 	// enable interrupts
 	irqInit();
@@ -88,8 +92,8 @@ int main(void) {
 	level_t *level = lvl_new(0, NULL);
 
 	win_move(&window, 0, 0, 240, 160);
-	bg_set_priority(window.background, BG_PRIORITY_LOWEST);
-	bg_set_priority(main_background, BG_PRIORITY_HIGH);
+	bg_set_priority(window.background, BG_PRIORITY_LOW);
+	bg_set_priority(main_background, BG_PRIORITY_HIGHEST);
 
 	ent_t *plr;
 
@@ -149,8 +153,7 @@ int main(void) {
 		else if(keys == KEY_SELECT)
 		{
 			sve_save_level(level);
-		} else if(keys == KEY_B)
-			plr->player.health = 20;
+		}
 
 		lvl_ticks++;
 		lvl_try_spawn(lvl, 1);
