@@ -287,7 +287,7 @@ bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
     int cx = dir_get_x(direction);
     int cy = dir_get_y(direction);
 
-    x += cx * dist + cy;
+    x += cx * dist + cx;
     y += cy * dist + cy;
     
     x += rect->sx;

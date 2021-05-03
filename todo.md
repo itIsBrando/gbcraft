@@ -17,8 +17,9 @@
 - [ ] Add apple
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
-- [ ] Add player swimming animation
 - [ ] Add lighting to caves
+- [ ] Add torches
+- [x] Add player swimming animation
 - [x] Add bread consumation
 - [x] Add coal
 - [x] **Allow player to recieve damage**
