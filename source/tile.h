@@ -20,14 +20,15 @@ bool tile_no_pass(ent_t *e);
 bool tile_stair_down_ontouch(ent_t *e, uint x, uint y);
 bool tile_stair_up_ontouch(ent_t *e, uint x, uint y);
 
-void tile_tree_interact(ent_t *ent, item_t *item, u16 x, u16 y);
-void tile_stone_interact(ent_t *ent, item_t *item, u16 x, u16 y);
-void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y);
-void tile_door_closed_interact(ent_t *ent, item_t *item, u16 x, u16 y);
-void tile_door_open_interact(ent_t *ent, item_t *item, u16 x, u16 y);
-void tile_grass_interact(ent_t *ent, item_t *item, u16 x, u16 y);
+void tile_tree_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_stone_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_wood_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_door_closed_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_door_open_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_grass_interact(ent_t *ent, item_t *item, uint x, uint y);
+void tile_iron_interact(ent_t *ent, item_t *item, uint x, uint y);
 
-void tile_wheat_interact(ent_t *ent, item_t *item, u16 x, u16 y);
+void tile_wheat_interact(ent_t *ent, item_t *item, uint x, uint y);
 void tile_mud_tick(level_t *, uint, uint);
 void tile_sapling_tick(level_t *lvl, uint x, uint y);
 void tile_seed_tick(level_t *lvl, uint x, uint y);

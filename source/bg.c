@@ -11,15 +11,15 @@ inline u16 RGB15(u16 r, u16 g, u16 b)
 }
 
 
-s16 _dx[] = {-1, 1, 0, 0, -1, 1, -1, 1, 0};
-s16 _dy[] = {0, 0, -1, 1, -1, -1, 1, 1, 0};
+int _dx[] = {-1, 1, 0, 0, -1, 1, -1, 1, 0};
+int _dy[] = {0, 0, -1, 1, -1, -1, 1, 1, 0};
 
-inline s16 dir_get_x(direction_t direction)
+inline int dir_get_x(direction_t direction)
 {
     return _dx[direction];
 }
 
-inline s16 dir_get_y(direction_t direction)
+inline int dir_get_y(direction_t direction)
 {
     return _dy[direction];
 }

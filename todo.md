@@ -17,8 +17,8 @@
 - [ ] Add apple
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
-- [ ] Add lighting to caves
 - [ ] Add torches
+- [x] Add lighting to caves
 - [x] Add player swimming animation
 - [x] Add bread consumation
 - [x] Add coal
@@ -88,7 +88,7 @@
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
 - [ ] **Cover up ugly map overflow**
 - [ ] Add door opening/closing sound effect
-- [ ] Add mob spawning on lower levels
+- [x] Add mob spawning on lower levels
 - [x] Furniture snap to grid?
 - [x] Add inner-corner tiles for `9pt indexing`
 - [x] Fix level changing. It is very sloppy
@@ -112,9 +112,10 @@
 - [ ] Random null pointer crash when ItemEntity exists on lower level
 - [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
-- [ ] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete
 - [ ] Fix graphically remenants after closing chest
 - [ ] Fix graphically remenants after closing crafting
+- [ ] Using any staircase other than the first one causes major bugs and results in a crash (opening inventory crashes)
+- [x] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete
 - [x] Player placement after changing level is incorrect
 - [x] Chest items are eaten upon saving and loading
 - [x] Entities slightly offscreen will disappear

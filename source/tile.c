@@ -3,9 +3,7 @@
 #include "item.h"
 #include "player.h"
 #include "entity.h"
-#include "terraingen.h"
 #include "menu.h"
-#include "lighting.h"
 
 #include "memory.h"
 #include "text.h"
@@ -14,52 +12,48 @@
 static BG_REGULAR *target_bg;
 
 const tile_event_t tile_events[] = {
-    { // grass floor
-        .onhurt=NULL,
+    [0]={ // grass floor
         .ontouch=NULL,
         .maypass=tile_grass_maypass,
         .interact=tile_grass_interact,
     },
-    { // water tile
-        .onhurt=NULL,
+    [1]={ // water tile
         .ontouch=NULL,
+        .maypass=NULL,
         .maypass=tile_water_maypass,
     },
-    { // tree tile
-        .onhurt=NULL,
+    [2]={ // tree tile
         .ontouch=NULL,
         .maypass=tile_no_pass,
         .interact=tile_tree_interact
     },
-    { // wood plank
-        .onhurt=NULL,
+    [3]={ // wood plank
         .ontouch=NULL,
         .maypass=tile_no_pass,
         .interact=tile_wood_interact
     },
-    { // rock
-        .onhurt=NULL,
+    [4]={ // rock
         .ontouch=NULL,
         .maypass=tile_no_pass,
         .interact=tile_stone_interact,
     },
-    { // ore
-
+    [5]={ // ore
+        .maypass=tile_no_pass,
+        .interact=tile_iron_interact,
     },
-    { // stairs down
-        .onhurt=NULL,
+    [6]={ // stairs down
         .ontouch=tile_stair_down_ontouch,
         .maypass=NULL,
         .interact=NULL,
     },
-    { // stairs up
+    [7]={ // stairs up
         .ontouch=tile_stair_up_ontouch,
     },
-    { // door closed
+    [8]={ // door closed
         .interact=tile_door_closed_interact,
         .maypass=tile_no_pass,
     },
-    { // door open
+    [9]={ // door open
         .interact=tile_door_open_interact,
     },
     [10]={ // mud
@@ -320,236 +314,19 @@ bool tile_water_maypass(ent_t *e)
 }
 
 
-bool tile_grass_maypass(ent_t *e)
-{
-    if(e->type == ENT_TYPE_PLAYER) {
-        plr_set_swim(e, false);
-
-    }
-    
-    return true;
-}
-
-
 bool tile_no_pass(ent_t *e)
 {
     return false;
 }
 
 
-void tile_grass_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    if(!item)
-        return;
-
-    if(item->tooltype != TOOL_TYPE_HOE || lvl_get_tile_type(ent->level, x, y) != TILE_GRASS)
-        return;
-
-    lvl_set_tile(ent->level, x, y, tile_get(TILE_MUD));
-    if((rnd_random() & 0x7) == 0)
-        ent_item_new(ent->level, lvl_to_pixel_x(x), lvl_to_pixel_y(y), (item_t*)&ITEM_SEED, 1);
-
-}
-
-
-void tile_tree_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
-{
-    dmg += lvl_get_data(lvl, x, y);
-
-    //@todo add particles
-
-    if(dmg > 20)
-    {
-        lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-        x = lvl_to_pixel_x(x);
-        y =  lvl_to_pixel_y(y);
-        ent_item_new(lvl, x, y, (item_t*)&ITEM_WOOD, 2);
-        if((rnd_random() & 0x3) == 0)
-            ent_item_new(lvl, x, y, (item_t*)&ITEM_SAPLING, 2);
-    } else {
-        lvl_set_data(lvl, x, y, dmg);
-    }
-
-}
-
-
-void tile_tree_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    if(!item || item->tooltype != TOOL_TYPE_AXE || ent->type != ENT_TYPE_PLAYER)
-        return;
-
-    if(!plr_pay_stamina(ent, 3 + (!item)))
-        return;
-
-    u8 bonus = item ? item->level : -1;
-
-    tile_tree_hurt(ent->level, 5 + bonus, x, y);
-}
-
-
-void tile_stone_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
-{
-    dmg += lvl_get_data(lvl, x, y);
-
-    //@todo add particles
-
-    if(dmg > 20)
-    {
-        uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
-
-        lvl_set_tile(lvl, x, y, tile_get(lvl->layer > 0 ? TILE_MUD : TILE_GRASS));
-
-        ent_item_new(lvl, px, py, (item_t*)&ITEM_STONE, 2);
-        if((rnd_random() & 0xF) == 0)
-            ent_item_new(lvl, px, py, &ITEM_COAL, (rnd_random() & 0x1) + 1);
-    } else {
-        lvl_set_data(lvl, x, y, dmg);
-    }
-
-}
-
-
-void tile_stone_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    if(item && item->tooltype == TOOL_TYPE_PICKAXE && plr_pay_stamina(ent, 4))
-        tile_stone_hurt(ent->level, 6 + (item->level << 2), x, y);
-}
-
-
-void tile_wood_hurt(level_t *lvl, u8 dmg, u16 x, u16 y)
-{
-    dmg += lvl_get_data(lvl, x, y);
-
-    //@todo add particles
-
-    if(dmg > 20)
-    {
-        lvl_set_tile(lvl, x, y, tile_get(TILE_GRASS));
-        item_add_to_inventory(&ITEM_WOOD, &lvl_get_player(lvl)->player.inventory);
-    } else {
-        lvl_set_data(lvl, x, y, dmg);
-    }
-
-}
-
-
-void tile_wood_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    if(item && item->tooltype == TOOL_TYPE_AXE && plr_pay_stamina(ent, 4 - item->level))
-    {
-       tile_wood_hurt(ent->level, 5 + item->level, x, y);
-    }
-}
-
-
-bool tile_stair_up_ontouch(ent_t *e, uint x, uint y)
-{
-    if(e->type != ENT_TYPE_PLAYER)
-        return false;
-
-    if(e->player.on_stairs > 0)
-        return false;
-
-    mnu_load_level();
-
-    level_t *curLevel = e->level;
-    level_t *newLevel = world[curLevel->layer-1];
-    plr_move_to(e, x, y);
-    
-    if(!curLevel->layer) // @todo safeguard against this. The window will block viewport
-        return false;
-    
-    e = ent_change_level(e, newLevel);
-
-    lvl_change_level(newLevel);
-
-    if(!newLevel->layer) {
-        lt_hide();
-    }
-
-	mnu_draw_hotbar(e);
-
-    e->player.on_stairs = 65;
-
-    return true;
-}
-
-
-/** called when entity collides with this. This is a stairway down
- * @param e player entity
- * @param x absolute tile x
- * @param y absolute tile y
- * @returns true if the player changed levels
- */
-bool tile_stair_down_ontouch(ent_t *e, uint x, uint y)
-{
-    if(e->type != ENT_TYPE_PLAYER)
-        return false;
-    
-    if(e->player.on_stairs > 0)
-        return false;
-
-    mnu_load_level();
-
-    // @todo enter new level
-    level_t *curLevel = e->level;
-    uint curLayer = curLevel->layer;
-    level_t *newLevel;
-
-    plr_move_to(e, x, y);
-
-    if(world[curLayer+1])
-        newLevel = world[curLayer+1];
-    else {
-        // generate new level if necessary
-        newLevel = lvl_new(curLayer + 1, curLevel);
-        gen_generate(newLevel);
-
-        for(uint i = 0; i < 8; i++)
-            lvl_set_tile(newLevel, x + dir_get_x(i), y + dir_get_y(i), tile_get(TILE_MUD));
-
-        lvl_set_tile(newLevel, x, y, tile_get(TILE_STAIR_UP));
-    }
-   
-    e = ent_change_level(e, newLevel);
-
-    lvl_change_level(newLevel);
-    lt_show(newLevel);
-
-    e->player.on_stairs = 65;
-
-	mnu_draw_hotbar(e);
-    return true;
-}
-
-
-void tile_door_closed_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    // @todo add door_hurt
-    if(item && item->tooltype == TOOL_TYPE_AXE)
-        return;
-
-    lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_OPEN));
-}
-
-
-void tile_door_open_interact(ent_t *ent, item_t *item, u16 x, u16 y)
-{
-    // @todo add door_hurt (can be the same for opened and closed)
-    if(item && item->tooltype == TOOL_TYPE_AXE)
-        return;
-
-    lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_CLOSED));
-}
-
-
-void tile_wheat_interact(ent_t *ent, item_t *item, u16 x, u16 y)
+void tile_wheat_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     level_t *lvl = ent->level;
-    uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
+    const uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
 
     lvl_set_tile(lvl, x, y, tile_get(TILE_MUD));
-    ent_item_new(lvl, px, py, &ITEM_WHEAT, (rnd_random() & 0x1) + 1);
+    ent_item_new(lvl, px, py, &ITEM_WHEAT, 1);
     ent_item_new(lvl, px, py, &ITEM_SEED, (rnd_random() & 0x3));
 }
 

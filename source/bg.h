@@ -5,8 +5,8 @@
 
 u16 RGB15(u16 r, u16 g, u16 b);
 
-s16 dir_get_x(direction_t direction); // @todo move elsewhere
-s16 dir_get_y(direction_t direction);
+int dir_get_x(direction_t direction); // @todo move elsewhere
+int dir_get_y(direction_t direction);
 typedef BG_REGULAR AFFINE_BG;
 
 /**

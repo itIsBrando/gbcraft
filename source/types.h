@@ -156,10 +156,9 @@ typedef struct {
 
 
 typedef struct tile_event_t {
-    void(*onhurt)(ent_t *);
     bool(*ontouch)(ent_t *, uint, uint);
     bool(*maypass)(ent_t *);
-    void (*interact)(ent_t *, item_t *item, u16 x, u16 y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
+    void (*interact)(ent_t *, item_t *item, uint x, uint y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
     void (*onrandomtick)(level_t *lvl, uint x, uint y); /** @param x absolute tile x @param y absolute tile y */
 } tile_event_t;
 

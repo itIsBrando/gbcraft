@@ -68,5 +68,7 @@ void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt);
 
 void ent_player_set_active_item(ent_t *plr, item_t *item);
 bool plr_heal(ent_t *e, uint by);
+bool plr_pay_stamina(ent_t *plr, s8 amt);
+void plr_set_swim(ent_t *e, bool state);
 
 #endif

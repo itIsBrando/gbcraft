@@ -171,7 +171,8 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
         return false;
 
     const tile_type_t t = lvl_get_tile_type(lvl, *x >> 4, *y >> 4);
-    if(t != TILE_GRASS)
+    
+    if(!(t == TILE_GRASS || t == TILE_MUD))
         return false;
 
     // if ANY entity exists here, then do not proceed with spawning
