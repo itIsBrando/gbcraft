@@ -312,7 +312,7 @@ void tile_render(const BG_REGULAR *bg, const level_t *lvl, const tile_t *tile, u
 bool tile_water_maypass(ent_t *e)
 {
     if(e->type == ENT_TYPE_PLAYER) {
-        e->player.is_swimming = true;
+        plr_set_swim(e, true);
         return true;
     }
     else
@@ -323,7 +323,8 @@ bool tile_water_maypass(ent_t *e)
 bool tile_grass_maypass(ent_t *e)
 {
     if(e->type == ENT_TYPE_PLAYER) {
-        e->player.is_swimming = false;
+        plr_set_swim(e, false);
+
     }
     
     return true;

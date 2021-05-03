@@ -14,6 +14,7 @@
 
 static void ent_move_all(level_t *lvl, const direction_t direction, const uint dist);
 
+static obj_t *swim_sprite = NULL;
 
 void ent_player_init(ent_t *e)
 {
@@ -78,6 +79,7 @@ void ent_player_update(ent_t *plr)
         plr->player.on_stairs--;
 
     if(plr->player.is_swimming) {
+
         if(plr->player.stamina && (lvl_ticks & 0x3F) == 0x3F) {
             plr->player.stamina--;
             bar_draw_stamina(plr);
@@ -119,6 +121,35 @@ void ent_player_update(ent_t *plr)
     }
 
     plr_apply_knockback(plr);
+}
+
+
+/**
+ * Changes the player's swimming state
+ * @param state true to set player to be on water, else player is on grass
+ */
+void plr_set_swim(ent_t *e, bool state)
+{
+    if(e->player.is_swimming == state)
+        return;
+    
+    e->player.is_swimming = state;
+
+    if(state)
+    {
+        if(!swim_sprite)
+        {
+            swim_sprite = spr_alloc(112, 92, 30);
+            spr_set_size(swim_sprite, SPR_SIZE_16x8);
+            spr_set_priority(swim_sprite, SPR_PRIORITY_HIGHEST);
+        }
+        
+        spr_show(swim_sprite);
+        spr_set_size(e->sprite, SPR_SIZE_16x8);
+    } else if(swim_sprite) {
+        spr_hide(swim_sprite);
+        spr_set_size(e->sprite, SPR_SIZE_16x16);
+    }
 }
 
 
@@ -175,6 +206,7 @@ inline void player_change_hotbar_pos(ent_t *p, int a)
     player_set_hotbar_pos(p, _hotbar_index+a);
 }
 
+
 /**
  * Redraws hotbar and subtracts from player's health
  * @returns true if player can pay the cost, otherwise false
@@ -209,6 +241,7 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
     mnu_draw_item(item, 1, 2);
     spr_set_tile(spr, item ? item->tile : 0);
 }
+
 
 const direction_t _dirs[] = {DIRECTION_RIGHT, DIRECTION_LEFT, DIRECTION_DOWN, DIRECTION_UP,
     DIRECTION_RIGHT_DOWN, DIRECTION_LEFT_DOWN, DIRECTION_RIGHT_UP, DIRECTION_LEFT_UP
