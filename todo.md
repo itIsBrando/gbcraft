@@ -78,7 +78,6 @@
 
 
 ### Polish
-- [ ] Move & cleanup player's cursor sprite handling
 - [ ] Prevent user from placing block on the tile that it occupies
 - [ ] New tree sprite
 - [ ] Scroll inventory items when list is too long
@@ -88,6 +87,8 @@
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
 - [ ] **Cover up ugly map overflow**
 - [ ] Add door opening/closing sound effect
+- [x] Tiles can be interacted with even with an item in hand
+- [x] Move & cleanup player's cursor sprite handling
 - [x] Add mob spawning on lower levels
 - [x] Furniture snap to grid?
 - [x] Add inner-corner tiles for `9pt indexing`
@@ -114,7 +115,8 @@
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
 - [ ] Fix graphically remenants after closing chest
 - [ ] Fix graphically remenants after closing crafting
-- [ ] Using any staircase other than the first one causes major bugs and results in a crash (opening inventory crashes)
+- [x] Entity removal crashes game occasionally
+- [x] Using any staircase other than the first one causes major bugs and results in a crash (opening inventory crashes)
 - [x] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete
 - [x] Player placement after changing level is incorrect
 - [x] Chest items are eaten upon saving and loading

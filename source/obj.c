@@ -7,7 +7,6 @@
 #define SPRITE_NUM 128
 static obj_t __spr_buffer[SPRITE_NUM];
 static bool __spr_free_indexes[SPRITE_NUM];
-static uint highest_index = 0;
 
 
 static uint spr_get_free_index()
@@ -28,24 +27,12 @@ obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile)
 {
 	uint index = spr_get_free_index();
 
-	if(index > highest_index)
-		highest_index = index;
-
 	obj_t *ptr = &__spr_buffer[index];
 
 	spr_move(ptr, x, y);
 	spr_set_tile(ptr, tile);
 	spr_show(ptr);
 	return ptr;
-}
-
-
-// local routine useful to speed up spr_copy_all()
-static void _spr_find_highest_index()
-{
-	for(uint i = 0; i < SPRITE_NUM; i++)
-		if(__spr_free_indexes[i])
-			highest_index = i;
 }
 
 
@@ -58,8 +45,6 @@ void spr_free(obj_t *obj)
 		{
 			spr_copy(obj, i);
 			__spr_free_indexes[i] = false;
-			if(highest_index == i)
-				_spr_find_highest_index();
 			return;
 		}
 	}
@@ -82,7 +67,16 @@ void spr_copy(obj_t *obj, const uint index)
 void spr_copy_all()
 {
 	// @todo only copy created sprites
-	memcpy16((u16*)oam_mem, (u16*)__spr_buffer, (highest_index+1) << 2);
+	volatile obj_t *dst = oam_mem;
+	obj_t *src = __spr_buffer;
+	bool *isFree = __spr_free_indexes;
+	for(uint i = 0; i < SPRITE_NUM; i++)
+	{
+		if(*isFree)
+			*dst = *src;
+		
+		dst++, src++, isFree++;
+	}
 }
 
 

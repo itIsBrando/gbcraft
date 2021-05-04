@@ -67,7 +67,7 @@ ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 
         if((x >= e->x) && (x <= e->x + 16) && (y >= e->y) && (y <= e->y + 16)) {
             buffer[*outputSize] = e;
-            outputSize[0]++;
+            (*outputSize)++;
         }
     }
     
@@ -253,7 +253,11 @@ void ent_remove(level_t *lvl, ent_t *ent)
         return;
     }
 
-    memcpy(&lvl->entities[index], &lvl->entities[index + 1], (lvl->ent_size - index) * sizeof(ent_t));
+    for(uint i = index; i < lvl->ent_size; i++)
+    {
+        lvl->entities[i] = lvl->entities[i + 1];
+    }
+    // memcpy(&lvl->entities[index], &lvl->entities[index + 1], (lvl->ent_size - index) * sizeof(ent_t));
 
     lvl->ent_size--;
 }

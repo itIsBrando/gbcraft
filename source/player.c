@@ -121,6 +121,8 @@ void ent_player_update(ent_t *plr)
     }
 
     plr_apply_knockback(plr);
+    /** vvvvv @todo REMOVE */
+    ent_draw(plr);
 }
 
 
@@ -360,7 +362,6 @@ void ent_player_interact(const ent_t *plr)
     for(uint i = 0; i < s; i++)
     {
         ent_t *e = ents[i];
-        if(e == plr) continue;
 
         if(e->events->onhurt && e->events->onhurt(e, (ent_t*)plr, 2))
             break;
@@ -371,24 +372,25 @@ void ent_player_interact(const ent_t *plr)
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
 
+    const tile_t *t = lvl_get_tile(plr->level, x, y);
     // interact with held item
     if(plr->player.activeItem)
     { // interact with item
         const item_event_t *e = plr->player.activeItem->event;
-        if(e->interact)
-            e->interact(
+        if(e->interact && e->interact(
                 plr->player.activeItem,
                 (ent_t*)plr,
-                lvl_get_tile(plr->level, x, y),
+                t,
                 x, y
-            );
-    } else {
-        // interact with tile
-        const tile_t *t = lvl_get_tile(plr->level, x, y);
-        const tile_event_t *e = t->event;
-        if(e->interact)
-            e->interact((ent_t*)plr, NULL, x, y);
+        ))
+            return;
     }
+    
+    // interact with tile if we did not interact with item
+    const tile_event_t *e = t->event;
+    if(e->interact)
+        e->interact((ent_t*)plr, NULL, x, y);
+    
 }
 
 static inline uint min(uint a, uint b)

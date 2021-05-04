@@ -235,7 +235,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
     u16 key;
 
     obj_t **costIcons = malloc(4 * sizeof(obj_t *));
-    for(u16 i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
         costIcons[i] = spr_alloc(0, 0, 0);
 
     _crafting_draw_costs(recipes, costIcons, plr);
@@ -337,7 +337,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
 
         if((key & KEY_UP) && yCur > 0)
             yCur--;
-        else if((key & KEY_DOWN) && yCur < invs[xCur]->size - 1)
+        else if((key & KEY_DOWN) && invs[xCur]->size && yCur < invs[xCur]->size - 1)
             yCur++;
         
         if(key & KEY_LEFT)
