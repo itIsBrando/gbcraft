@@ -176,6 +176,10 @@ int main(void) {
 			const void (*onupdate)(ent_t *) = e->events->onupdate;
 			if(onupdate)
 				onupdate(e);
+			
+			// if we changed the current level, then these entities are no longer aactive
+			if(lvl != lvl_get_current())
+				break;
 			e--;
 		}
 

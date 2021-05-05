@@ -58,7 +58,7 @@ void spr_init()
 }
 
 
-void spr_copy(obj_t *obj, const uint index)
+inline void spr_copy(obj_t *obj, const uint index)
 {
 	oam_mem[index] = *obj;
 }
@@ -66,7 +66,6 @@ void spr_copy(obj_t *obj, const uint index)
 
 void spr_copy_all()
 {
-	// @todo only copy created sprites
 	volatile obj_t *dst = oam_mem;
 	obj_t *src = __spr_buffer;
 	bool *isFree = __spr_free_indexes;

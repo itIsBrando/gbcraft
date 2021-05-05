@@ -113,8 +113,9 @@
 - [ ] Inventory cursor does not show up after entering lower level
 - [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
-- [ ] Crashes after picking up live item entity when stairs are used
 - [ ] Swimming animation is messed up when player spawns in water
+- [x] Crashes after picking up live item entity when stairs are used
+- [x] Entity removal causes player entity to be overriden. POINTER TO PLAYER CHANGES WHEN ENTITIES ARE REMOVED SO THE POINTER TO THE PLAYER WILL BE ANOTHER ENTITY OR OUTSIDE VIABLE RANGE.
 - [x] Fix graphically remenants after closing chest
 - [x] Fix graphically remenants after closing crafting
 - [x] Furniture items can be placed on top of other furniture and entities

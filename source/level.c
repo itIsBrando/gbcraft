@@ -37,6 +37,7 @@ inline const tile_t *lvl_get_tile(level_t *lvl, uint x, uint y)
     return tile_get(lvl_get_tile_type(lvl, x, y));
 }
 
+
 /**
  * @returns the GBA's controllable player
  */
@@ -184,6 +185,7 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
 
     return true;
 }
+
 
 /**
  * Tries to spawn enemies

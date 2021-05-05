@@ -21,6 +21,7 @@ void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
     e->player.removed = false;
+    text_error("NEW PLAYER");
 
     e->level->player = e;
 	e->player.max_health = e->player.health = 20;
@@ -156,24 +157,26 @@ void plr_set_swim(ent_t *e, bool state)
 }
 
 
-void ent_player_onrelocate(ent_t *eOld, ent_t *eNew)
+void ent_player_onrelocate(ent_t *eOld, ent_t *eNew, level_t *lvl)
 {
     inventory_t *inv = &eOld->player.inventory;
     inventory_t *newInv = &eNew->player.inventory;
 
     newInv->parent = eNew;
     
-    ent_player_set_active_item(eNew, NULL);
-    ent_player_set_active_item(eOld, NULL);
+    eNew->player.activeItem = NULL;
 
     for(uint i = 0; i < inv->size; i++) 
     {
         newInv->items[i] = inv->items[i];
-
         newInv->items[i].parent = newInv;
     }
 
     newInv->size = inv->size;
+    
+    eOld->player.removed = true;
+
+    lvl->player = eNew;
 }
 
 
@@ -240,8 +243,10 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
 {
     if(!spr)
         spr = spr_alloc(0, 160-8, 0);
-    
-    _hotbar_index = 0;
+
+    if(!item)
+        _hotbar_index = 0;
+
     plr->player.activeItem = item;
     mnu_draw_item(item, 1, 2);
     item_set_icon(spr, item);

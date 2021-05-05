@@ -424,7 +424,7 @@ obj_t *item_new_icon(item_t *item , u16 x, u16 y)
 /** @see item_new_icon */
 void item_set_icon(obj_t *obj, const item_t *item)
 {
-    spr_set_tile(obj,  item ? item->tile : 1023); // 1023 is empty tile
+    spr_set_tile(obj,  item ? item->tile : 34);
     spr_set_size(obj, SPR_SIZE_8x8);
     spr_set_priority(obj, SPR_PRIORITY_LOWEST);
     spr_show(obj);

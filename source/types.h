@@ -139,7 +139,7 @@ typedef struct {
     bool (*maypass)(ent_t *, ent_t *);
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
-    void (*onrelocate)(ent_t *eOld, ent_t *eNew); /** called when the location of a pointer to an entity is about to change. @param eOld location of old pointer @param eNew location of the new pointer */
+    void (*onrelocate)(ent_t *eOld, ent_t *eNew, level_t *lvl); /** called when the location of a pointer to an entity is about to change. @param eOld location of old pointer @param eNew location of the new pointer @param lvl new level pointer*/
 } ent_event_t;
 
 

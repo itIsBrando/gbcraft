@@ -211,19 +211,27 @@ ent_t *ent_change_level(ent_t *e, level_t *newLevel)
     memcpy(ent, e, sizeof(ent_t));
 
     ent->level = newLevel;
-    if(e->type == ENT_TYPE_PLAYER)
-    {
-        newLevel->player = ent;
-        e->player.removed = true;
-    }
     
     ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
     spr_set_size(ent->sprite, SPR_SIZE_16x16);
 
     if(e->events->onrelocate)
-        e->events->onrelocate(e, ent);
+        e->events->onrelocate(e, ent, newLevel);
 
     return ent;
+}
+
+
+static void lvl_update_player_pointer(level_t *lvl)
+{
+    for(uint i = 0; i < lvl->ent_size; i++)
+    {
+        ent_t *e = &lvl->entities[i];
+        if(e->type == ENT_TYPE_PLAYER)
+        {
+            lvl->player = e;
+        }
+    }
 }
 
 
@@ -253,13 +261,14 @@ void ent_remove(level_t *lvl, ent_t *ent)
         return;
     }
 
-    for(uint i = index; i < lvl->ent_size; i++)
+    for(uint i = index; i < lvl->ent_size-1; i++)
     {
         lvl->entities[i] = lvl->entities[i + 1];
     }
     // memcpy(&lvl->entities[index], &lvl->entities[index + 1], (lvl->ent_size - index) * sizeof(ent_t));
 
     lvl->ent_size--;
+    lvl_update_player_pointer(lvl);
 }
 
 
