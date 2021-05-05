@@ -8,7 +8,6 @@
 - [ ] Move tile rending functions into a new file, `render.c`/`.h`
 - [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
 - [ ] Allow players to *interact* with entities, in addition to attack
-- [ ] Add iron
 - [ ] Add gold
 - [ ] Add gem
 - [ ] Add attack bonus for swords (and axes?)
@@ -18,6 +17,8 @@
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add torches
+- [ ] Add iron tools
+- [x] Add iron
 - [x] Add lighting to caves
 - [x] Add player swimming animation
 - [x] Add bread consumation
@@ -78,7 +79,6 @@
 
 
 ### Polish
-- [ ] Prevent user from placing block on the tile that it occupies
 - [ ] New tree sprite
 - [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
@@ -108,13 +108,16 @@
 - [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Blocks can be placed on top of player
-- [ ] Furniture items can be placed on top of other furniture and entities
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
 - [ ] Random null pointer crash when ItemEntity exists on lower level
+- [ ] Inventory cursor does not show up after entering lower level
 - [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
-- [ ] Fix graphically remenants after closing chest
-- [ ] Fix graphically remenants after closing crafting
+- [ ] Crashes after picking up live item entity when stairs are used
+- [ ] Swimming animation is messed up when player spawns in water
+- [x] Fix graphically remenants after closing chest
+- [x] Fix graphically remenants after closing crafting
+- [x] Furniture items can be placed on top of other furniture and entities
 - [x] Entity removal crashes game occasionally
 - [x] Using any staircase other than the first one causes major bugs and results in a crash (opening inventory crashes)
 - [x] If a `player.is_swimming = true` when entering staircase, then stamina will continue to deplete

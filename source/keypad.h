@@ -32,13 +32,19 @@ void key_scan();
 /**
  * Gets all the keys that are currently pressed
  */
-u16 key_pressed();
+uint key_pressed();
 
 
 /**
  * Gets all the keys that are pressed but were not pressed for the last `key_scan()`
  */
+uint key_pressed_no_repeat();
 
-u16 key_pressed_no_repeat();
+
+/**
+ * Waits a certain number of frames before a keys can be recognized again
+ * @param frames number of calls to `key_scan` before key presses will be recognized
+ */
+uint key_pressed_repeat_after(uint frames);
 
 #endif

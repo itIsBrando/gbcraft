@@ -22,13 +22,13 @@ inline u8 abss(u8 a, u8 b)
  * @param x relative pixel x
  * @param y relative pixel y
  * @param maxSize max number of entities that the buffer can hold
- * @returns NULL if none, or an array of pointers to entities allocated on the heap
+ * @returns the number of entities found, up to but excluding `maxSize`
  */
 uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer, u16 x, u16 y, u8 maxSize)
 {
     uint index = 0;
 
-        ent_t *e = lvl->entities;
+    ent_t *e = lvl->entities;
     for(uint i = 0; i < lvl->ent_size; i++)
     {
         if(e == ignoredEntity)
@@ -40,7 +40,7 @@ uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer,
         {
             buffer[index++] = e;
             if(index >= maxSize)
-                return maxSize;
+                return index - 1;
         }
         e++;
     }

@@ -105,6 +105,7 @@ int main(void) {
 		ent_add(level, ENT_TYPE_SLIME, 50, 50);
 		ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
 
+		item_add_to_inventory(&ITEM_IRON, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
 		item_change_count(plr->player.inventory.items, 19);
 		item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
@@ -148,7 +149,7 @@ int main(void) {
 		// show inventory
 		if(keys & KEY_START)
 		{
-			mnu_show_inventory(plr);
+			mnu_open_inventory(plr);
 		}
 		else if(keys == KEY_SELECT)
 		{

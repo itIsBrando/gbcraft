@@ -97,29 +97,29 @@ obj_t **mnu_draw_item_list(item_t *items, u8 size, uint tx, uint ty)
 }
 
 
-void mnu_show_inventory(ent_t *player)
+void mnu_open_inventory(ent_t *player)
 {
     WIN_REGULAR *win = win_get_0();
 
     text_print("INVENTORY", 0, 0);
-    bg_fill(win->background, 0, 1, 28, 10, EMPTY_TILE_INDEX);
+    bg_fill(win->background, 0, 1, 28, 18, EMPTY_TILE_INDEX);
     ent_hide_all(player->level);
 
     mnu_scroll_up();    
 
     inventory_t *inv = &player->player.inventory;
-    u16 inv_size = inv->size;
+    uint inv_size = inv->size;
 
-    u16 key;
+    uint key;
 
     obj_t **icons = mnu_draw_item_list(inv->items, inv_size, 2, 2);
 
     obj_t *cursor = spr_alloc(8, 24, 16);
-    u8 curY = 0;
+    uint curY = 0;
 
     while(true) {
         key_scan();
-        key = key_pressed_no_repeat();
+        key = key_pressed_repeat_after(8);
 
         if((key & KEY_UP) && curY > 0)
             curY--;
@@ -155,7 +155,7 @@ void mnu_show_inventory(ent_t *player)
 
 static void _crafting_draw_costs(const recipe_t *recipe, obj_t **icons, ent_t *plr)
 {
-    const u16 x = 16, y = 2;
+    const uint x = 16, y = 2;
 
     bg_fill(win_get_0()->background, x, y, 6, 4, EMPTY_TILE_INDEX); // clear background
 
@@ -216,7 +216,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
 
     ent_player_set_active_item(plr, NULL);
     text_print("CRAFTING", 0, 0);
-    bg_fill(win->background, 0, 1, 28, 10, EMPTY_TILE_INDEX);
+    bg_fill(win->background, 0, 1, 28, 18, EMPTY_TILE_INDEX);
 
     ent_hide_all(plr->level);
 
@@ -242,11 +242,11 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
 
     // init cursor
     obj_t *cursor = spr_alloc(8, 24, 16);
-    u8 curY = 0;
+    uint curY = 0;
 
     do {
         key_scan();
-        key = key_pressed_no_repeat();
+        key = key_pressed_repeat_after(8);
 
         // handle cursor movement
         if((key & KEY_UP) && curY > 0) {
@@ -258,7 +258,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
         }
 
         // check if we can craft
-        if(key & KEY_A)
+        if(key_pressed_no_repeat() & KEY_A)
         {
             const recipe_t *r = &recipes[curY];
             // if we can actually craft
@@ -333,7 +333,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
 
     do {
         key_scan();
-        key = key_pressed_no_repeat();
+        key = key_pressed_repeat_after(8);
 
         if((key & KEY_UP) && yCur > 0)
             yCur--;
@@ -410,7 +410,7 @@ void mnu_draw_hotbar(ent_t *player)
 void mnu_draw_item(item_t *item, uint x, uint y)
 {
     text_print(item ? (char*)item->name : "NONE    ", x, y);
-    if(item)
+    if(item && item->type != ITEM_TYPE_TOOL)
         text_uint(item->count, x + 10, y);
 }
 

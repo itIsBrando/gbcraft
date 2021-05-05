@@ -95,6 +95,7 @@ typedef enum {
     FURNITURE_TYPE_CRAFTING,
     FURNITURE_TYPE_CHEST,
     FURNITURE_TYPE_FURNACE,
+    FURNITURE_TYPE_ANVIL,
 } furniture_type_t;
 
 
@@ -213,7 +214,7 @@ typedef struct {
 
 typedef struct {
     const item_t *result;
-    u8 amount; // number of `result` to add to the player's inventory
+    u8 amount; // number of `result` to add to the player's inventory. 0 for tools
     u8 costs_num;
     cost_t costs[4];
 } recipe_t;

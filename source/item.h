@@ -27,6 +27,10 @@
 #define ITEM_SAPLING        ALL_ITEMS[21]
 #define ITEM_WHEAT          ALL_ITEMS[22]
 #define ITEM_BREAD          ALL_ITEMS[23]
+#define ITEM_ANVIL          ALL_ITEMS[24]
+#define ITEM_IRON_AXE       ALL_ITEMS[25]
+#define ITEM_IRON_PICKAXE   ALL_ITEMS[26]
+#define ITEM_IRON_SWORD     ALL_ITEMS[27]
 
 extern const item_t ALL_ITEMS[];
 /**

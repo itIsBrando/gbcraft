@@ -4,6 +4,7 @@
 #include "hotbar.h"
 #include "menu.h"
 #include "player.h"
+#include "item.h"
 
 #include "window.h"
 #include "keypad.h"
@@ -232,6 +233,7 @@ bool plr_pay_stamina(ent_t *plr, s8 amt)
 static obj_t *spr = NULL;
 
 /**
+ * Sets the player's active item logically and visually
  * @param item item that is part of its inventory, or can be null
  */
 void ent_player_set_active_item(ent_t *plr, item_t *item)
@@ -239,9 +241,10 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
     if(!spr)
         spr = spr_alloc(0, 160-8, 0);
     
+    _hotbar_index = 0;
     plr->player.activeItem = item;
     mnu_draw_item(item, 1, 2);
-    spr_set_tile(spr, item ? item->tile : 0);
+    item_set_icon(spr, item);
 }
 
 

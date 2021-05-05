@@ -25,6 +25,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // wood axe crafting
         .result=&ITEM_WOOD_AXE,
         .costs_num=1,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_WOOD, 5),
         }
@@ -32,6 +33,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // wood pickaxe
         .result=&ITEM_WOOD_PICKAXE,
         .costs_num=1,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
@@ -39,6 +41,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // wood sword
         .result=&ITEM_WOOD_SWORD,
         .costs_num=1,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
@@ -46,6 +49,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // wood hoe
         .result=&ITEM_WOOD_HOE,
         .costs_num=1,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_WOOD, 5)
         }
@@ -53,6 +57,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // stone axe
         .result=&ITEM_STONE_AXE,
         .costs_num=2,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_STONE, 5),
             CREATE_COST(ITEM_TYPE_WOOD, 5),
@@ -61,6 +66,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // stone pickaxe
         .result=&ITEM_STONE_PICKAXE,
         .costs_num=2,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_STONE, 5),
             CREATE_COST(ITEM_TYPE_WOOD, 5)
@@ -69,6 +75,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     { // stone sword
         .result=&ITEM_STONE_SWORD,
         .costs_num=2,
+        .amount=0,
         .costs = {
             CREATE_COST(ITEM_TYPE_STONE, 5),
             CREATE_COST(ITEM_TYPE_WOOD, 5),
@@ -93,6 +100,13 @@ const recipe_t CRAFTING_RECIPES[] = {
         .costs_num=1,
         .costs = {
             CREATE_COST(ITEM_TYPE_STONE, 20),
+        }
+    },
+    { // anvil
+        .result=&ITEM_ANVIL,
+        .costs_num=1,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_IRON, 5),
         }
     },
 };
@@ -127,6 +141,39 @@ const recipe_t FURNACE_RECIPES[] = {
     }
 };
 
+const recipe_t ANVIL_RECIPE[] = {
+    {
+        .result=&ITEM_IRON_AXE,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_IRON, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
+
+        },
+    },
+    {
+        .result=&ITEM_IRON_PICKAXE,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_IRON, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
+
+        },
+    },
+    {
+        .result=&ITEM_IRON_SWORD,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_IRON, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5),
+
+        },
+    },
+};
+
 
 void ent_furniture_update(ent_t *e)
 {
@@ -155,12 +202,15 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
     case FURNITURE_TYPE_FURNACE:
         mnu_open_crafting(plr, FURNACE_RECIPES, sizeof(FURNACE_RECIPES) / sizeof(FURNACE_RECIPES[0]));
         break;
+    case FURNITURE_TYPE_ANVIL:
+        mnu_open_crafting(plr, ANVIL_RECIPE, sizeof(ANVIL_RECIPE) / sizeof(ANVIL_RECIPE[0]));
+        break;
     default:
         text_error("Unknown furniture type");
-        break;
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 
@@ -171,7 +221,7 @@ bool ent_furniture_maypass(ent_t *f, ent_t *e)
 
 
 // sprite indexes for 16x16 furniture sprites
-const u8 _fur_spr[] = {53, 49, 45};
+const u8 _fur_spr[] = {53, 49, 45, 65};
 
 inline u8 ent_furniture_get_tile(const ent_t *e)
 {

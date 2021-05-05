@@ -91,6 +91,10 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("SAPLING", 39, ITEM_TYPE_SAPLING, 7, 1),
     DEFINE_ITEM("WHEAT", 40, ITEM_TYPE_WHEAT, 9, 1),
     DEFINE_ITEM("BREAD", 41, ITEM_TYPE_BREAD, 10, 1),
+    DEFINE_ITEM("ANVIL", 42, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_ANVIL),
+    DEFINE_ITEM("IRON AXE", 17, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_AXE),
+    DEFINE_ITEM("IRON PICK", 19, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_PICKAXE),
+    DEFINE_ITEM("IRON SWORD", 18, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_SWORD),
 };
 
 
@@ -262,7 +266,8 @@ bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
 static const item_t *_furn_items[] = {
     &ITEM_BENCH,
     &ITEM_CHEST,
-    &ITEM_FURNACE
+    &ITEM_FURNACE,
+    &ITEM_ANVIL,
 };
 
 
@@ -327,6 +332,11 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
 
+    // if there are any entities on our tile, then return
+    ent_t *ents[2];
+    if(ent_get_all_stack(plr->level, NULL, ents, lvl_to_pixel_x(x), lvl_to_pixel_y(y), 2) > 0)
+        return false;
+
     ent_t *e = ent_add(plr->level, ENT_TYPE_FURNITURE, x, y);
     e->furniture.type = item->furnituretype;
     ent_furniture_set_tile(e);
@@ -366,6 +376,12 @@ bool item_can_attack_all(item_t *item, ent_t *ent)
  */
 void item_change_count(item_t *item, const s8 change)
 {
+    if(item->type == ITEM_TYPE_TOOL && change < 0)
+    {
+        item_remove_from_inventory(item);
+        return;
+    }
+
     if(item->count + change > 64)
         item->count = 64;
     else
@@ -374,8 +390,7 @@ void item_change_count(item_t *item, const s8 change)
     if(item->parent->parent->player.activeItem == item)
     {
 
-        if(item->count > 0)
-        {
+        if(item->count > 0) {
             mnu_draw_item(item, 1, 2);
         } else {
             ent_player_set_active_item(item->parent->parent, NULL);
@@ -394,7 +409,7 @@ void item_change_count(item_t *item, const s8 change)
  * - gold
  * - gem
 */
-static const u16 _pals[] = {1, 0, 0};
+static const u16 _pals[] = {1, 0, 2, 2};
 
 
 obj_t *item_new_icon(item_t *item , u16 x, u16 y)
@@ -409,7 +424,7 @@ obj_t *item_new_icon(item_t *item , u16 x, u16 y)
 /** @see item_new_icon */
 void item_set_icon(obj_t *obj, const item_t *item)
 {
-    spr_set_tile(obj,  item ? item->tile : 15);
+    spr_set_tile(obj,  item ? item->tile : 1023); // 1023 is empty tile
     spr_set_size(obj, SPR_SIZE_8x8);
     spr_set_priority(obj, SPR_PRIORITY_LOWEST);
     spr_show(obj);
