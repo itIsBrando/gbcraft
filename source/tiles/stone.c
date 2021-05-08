@@ -11,7 +11,7 @@ void tile_stone_hurt(level_t *lvl, uint dmg, uint x, uint y)
 
     //@todo add particles
 
-    if(dmg > 20)
+    if(dmg > 35)
     {
         uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
 

@@ -19,7 +19,9 @@ void tile_tree_hurt(level_t *lvl, uint dmg, uint x, uint y)
         y = lvl_to_pixel_y(y);
         ent_item_new(lvl, x, y, (item_t*)&ITEM_WOOD, 2);
         if((rnd_random() & 0x3) == 0)
-            ent_item_new(lvl, x, y, (item_t*)&ITEM_SAPLING, 2);
+            ent_item_new(lvl, x, y, (item_t*)&ITEM_SAPLING, 1);
+        if((rnd_random() & 0x7) == 0)
+            ent_item_new(lvl, x, y, &ITEM_APPLE, 1);
     } else {
         lvl_set_data(lvl, x, y, dmg);
     }

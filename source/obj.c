@@ -28,6 +28,7 @@ obj_t *spr_alloc(const u16 x, const u16 y, const u16 tile)
 	uint index = spr_get_free_index();
 
 	obj_t *ptr = &__spr_buffer[index];
+	ptr->attr0 = ptr->attr1 = ptr->attr2 = 0;
 
 	spr_move(ptr, x, y);
 	spr_set_tile(ptr, tile);
@@ -53,7 +54,7 @@ void spr_free(obj_t *obj)
 
 void spr_init()
 {
-	memset(__spr_free_indexes, 0, sizeof(__spr_free_indexes));
+	memset(__spr_free_indexes, false, sizeof(__spr_free_indexes));
 	REG_DISPCNT |= OBJ_ON | OBJ_1D_MAP;
 }
 

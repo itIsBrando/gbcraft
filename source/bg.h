@@ -28,7 +28,7 @@ void bg_init(BG_REGULAR *bg, const uint8_t mapBlock, const uint8_t tileBlock, co
 void bg_affine_init(AFFINE_BG *bg, const uint8_t mapBlock, const uint8_t tileBlock, const uint8_t num);
 
 
-void bg_clamp_coordinates(const BG_REGULAR *bg, u16 *tx, u16 *ty);
+void bg_clamp_coordinates(const BG_REGULAR *bg, uint *tx, uint *ty);
 void bg_show(const BG_REGULAR *bg);
 void bg_hide(const BG_REGULAR *bg);
 
@@ -49,8 +49,8 @@ void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, u16 tile);
 
 void bg_move_by(BG_REGULAR *bg, const direction_t direction);
 
-u16 bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty);
-u16 bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty);
+uint bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty);
+uint bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty);
 
 /**
  * Sets the size of a background. Default is 32x32
@@ -78,9 +78,9 @@ void bg_set_priority(BG_REGULAR *bg, bg_priority_t p);
 void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, void *data);
 
 
-void bg_move(BG_REGULAR *bg, const u16 x, const u16 y);
-u16 bg_get_scx(const BG_REGULAR *bg);
-u16 bg_get_scy(const BG_REGULAR *bg);
+void bg_move(BG_REGULAR *bg, const uint x, const uint y);
+int bg_get_scx(const BG_REGULAR *bg);
+int bg_get_scy(const BG_REGULAR *bg);
 
 
 /**
@@ -91,8 +91,8 @@ u16 bg_get_scy(const BG_REGULAR *bg);
  * @param is8bpp determine whether tiles are 8bpp or 4bpp
  */
 void bg_load_tiles(
-    const uint8_t charbank, const u16 position,
-    const unsigned char *data, const u16 size, const bool is8bpp
+    const uint8_t charbank, const uint position,
+    const unsigned char *data, const uint size, const bool is8bpp
 );
 
 #endif

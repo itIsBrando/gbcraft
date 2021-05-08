@@ -10,7 +10,7 @@ void tile_iron_hurt(level_t *lvl, uint dmg, uint x, uint y)
 {
     dmg += lvl_get_data(lvl, x, y);
 
-    if(dmg > 40)
+    if(dmg > 80)
     {
         lvl_set_tile(lvl, x, y, tile_get(TILE_MUD));
         x = lvl_to_pixel_x(x);

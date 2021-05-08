@@ -39,7 +39,7 @@ void lt_show(level_t *lvl)
     spr_set_size(lt_player_mask, SPR_SIZE_64x64);
     spr_set_gfx_mode(lt_player_mask, SPR_GFX_ALPHA_BLENDING); */
 
-    blnd_set(BLEND_BOT_BG2 | BLEND_TOP_BG0 ,
+    blnd_set(BLEND_BOT_BG2 | BLEND_TOP_BG0,
      BLEND_MODE_1);
 
     blnd_set_weights(31, 3);

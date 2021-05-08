@@ -52,7 +52,7 @@ void bg_move_by(BG_REGULAR *bg, const direction_t direction)
 /**
  * Scrolls the background to (`x`, `y`)
  */
-void bg_move(BG_REGULAR *bg, const u16 x, const u16 y)
+void bg_move(BG_REGULAR *bg, const uint x, const uint y)
 {
     if(bg->is_affine)
     {
@@ -71,7 +71,7 @@ void bg_move(BG_REGULAR *bg, const u16 x, const u16 y)
 /**
  * Gets the background's scroll offset in the x direction
  */
-inline u16 bg_get_scx(const BG_REGULAR *bg)
+inline int bg_get_scx(const BG_REGULAR *bg)
 {
     return bg->bgx;
 }
@@ -80,7 +80,7 @@ inline u16 bg_get_scx(const BG_REGULAR *bg)
 /**
  * Gets the background's scroll offset in the y direction
  */
-inline u16 bg_get_scy(const BG_REGULAR *bg)
+inline int bg_get_scy(const BG_REGULAR *bg)
 {
     return bg->bgy;
 }
@@ -89,7 +89,7 @@ inline u16 bg_get_scy(const BG_REGULAR *bg)
 /**
  * Adjust coordinates for overflow on affine backgrounds
  */
-inline void bg_clamp_coordinates(const BG_REGULAR *bg, u16 *tx, u16 *ty)
+inline void bg_clamp_coordinates(const BG_REGULAR *bg, uint *tx, uint *ty)
 {
     *tx &= (1 << bg->width_bits)-1;
     *ty &= (1 << bg->width_bits)-1;
@@ -101,7 +101,7 @@ inline void bg_clamp_coordinates(const BG_REGULAR *bg, u16 *tx, u16 *ty)
  * @see bg_get_tile()
  * @todo add support for large BG_REGULAR maps
  */
-u16 bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
+uint bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
 {
     return map_mem[bg->map_base + bg_get_quadrant(tx, ty)][tx + (ty << 5)];
 }
@@ -112,7 +112,7 @@ u16 bg_get_tile_absolute(const BG_REGULAR *bg, uint tx, uint ty)
  * @param tx coordinate = tx + bgXoffset
  * @param ty coordinate = ty + bgYoffset
  */
-u16 bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty)
+uint bg_get_tile(const BG_REGULAR *bg, uint tx, uint ty)
 {
     return bg_get_tile_absolute(bg, tx + (bg_get_scx(bg) >> 3), ty + (bg_get_scy(bg) >> 3));
 }
@@ -139,7 +139,7 @@ void bg_write_tile(const BG_REGULAR *bg, uint x, uint y, u16 tile)
 void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, void *data)
 {
     vu16 *ptr;
-    u16 i, j;
+    uint i, j;
     // @todo AFFINE BG ODD SIZES DO NOT WORK
     if(bg->is_affine)
     {
@@ -176,7 +176,7 @@ void bg_rect(const BG_REGULAR *bg, uint x, uint y, const uint w, const uint h, v
 void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
 {
     vu16 *ptr;
-    u16 i, j;
+    uint i, j;
 
     if(bg->is_affine)
     {
@@ -209,7 +209,7 @@ void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
 }
 
 
-void bg_load_tiles(const uint8_t charbank, const u16 position, const unsigned char *data, const u16 size, const bool is8bpp)
+void bg_load_tiles(const uint8_t charbank, const uint position, const unsigned char *data, const uint size, const bool is8bpp)
 {
 	memcpy16((u16*)tile_mem[charbank][position << is8bpp],
      (u16*)data, size >> 1);
@@ -242,11 +242,11 @@ void bg_affine_init(AFFINE_BG *bg, const uint8_t mapBlock, const uint8_t tileBlo
 
     bg->BG_CNT = (vu16*)(0x04000008 + (num << 1));
     // initialize BG scroll registers
-    const u16 off = (0x10 * (num - 2));
+    const uint off = (0x10 * (num - 2));
     bg->x.aff = (vs32*)(0x04000028 + off);
     bg->y.aff = (vs32*)(0x0400002C + off);
 
-    *bg->BG_CNT = BG_256_COLOR | BG_SIZE_0 | BG_WRAP
+    *bg->BG_CNT = BG_256_COLOR | BG_SIZE_0 /*| BG_WRAP*/
      | BG_MAP_BASE(mapBlock) | BG_TILE_BASE(tileBlock);
 
     bg_move(bg, 0, 0);

@@ -177,9 +177,12 @@ void gen_generate_underworld(level_t *lvl)
     {
             u8 tile = TILE_STONE;
 
-            if(n1[index] > 1500)
-                tile = TILE_IRON;
-            else if(n1[index] > 50)
+            if(n1[index] > 1500) {
+                if(lvl->layer == 1)
+                    tile = TILE_IRON;
+                // @todo lower levels have more valuable ore
+
+            } else if(n1[index] > 50)
                 tile = TILE_MUD;
             
             lvl->map[index] = tile;

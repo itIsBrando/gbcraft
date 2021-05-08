@@ -43,7 +43,7 @@ typedef struct {
         vu16 *reg; // private members (for regular bgs)
         vs32 *aff; // private members (for affine bgs)
     } y;
-    u16 bgx, bgy;   // because BG scroll registers are write only
+    int bgx, bgy;   // because BG scroll registers are write only
     bool is_affine; // determines whether or not this struct is affine or regular
 } BG_REGULAR;
 

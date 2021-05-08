@@ -95,6 +95,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("IRON AXE", 17, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_AXE),
     DEFINE_ITEM("IRON PICK", 19, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_PICKAXE),
     DEFINE_ITEM("IRON SWORD", 18, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_SWORD),
+    DEFINE_ITEM("APPLE", 43, ITEM_TYPE_APPLE, 10, 1),
 };
 
 
@@ -113,7 +114,7 @@ const char *item_lookup_name(item_t *item)
 
 const item_t *item_get_from_type(item_type_t type, s16 data)
 {
-    for(u16 i = 0; i < sizeof(ALL_ITEMS) / sizeof(ALL_ITEMS[0]); i++)
+    for(uint i = 0; i < sizeof(ALL_ITEMS) / sizeof(ALL_ITEMS[0]); i++)
     {
         if(type == ALL_ITEMS[i].type)
         {
@@ -207,7 +208,7 @@ item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv)
 }
 
 
-bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_GRASS)
         return false;
@@ -220,7 +221,7 @@ bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u1
 }
 
 
-bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_GRASS)
         return false;
@@ -233,7 +234,7 @@ bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_GRASS)
         return false;
@@ -246,19 +247,14 @@ bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_GRASS && tile->type != TILE_MUD)
         return false;
 
-
-    u16 px = (plr->x + 4 + bg_get_scx(main_background)) >> 4,
-        py = (plr->y + 4 + bg_get_scy(main_background)) >> 4;
-    if(!(px == x && py == y))
-    {   item_change_count(item, -1);
-        lvl_set_tile(plr->level, x, y, tile_get(TILE_STONE));
-    }
-
+    item_change_count(item, -1);
+    lvl_set_tile(plr->level, x, y, tile_get(TILE_STONE));
+    
     return true;
 }
 
@@ -271,7 +267,7 @@ static const item_t *_furn_items[] = {
 };
 
 
-bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_MUD || plr->level->layer)
         return false;
@@ -283,7 +279,7 @@ bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(tile->type != TILE_GRASS)
         return false;
@@ -294,7 +290,7 @@ bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, 
 }
 
 
-bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     // pick up furniture entities
     if(item && item->tooltype == TOOL_TYPE_PICKUP)
@@ -324,7 +320,7 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16
 }
 
 
-bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     // create furniture item
     x = (x << 4) - bg_get_scx(main_background);
@@ -353,7 +349,7 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x
 }
 
 
-bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y)
+bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
     if(plr_heal(plr, 2))
     {
@@ -412,7 +408,7 @@ void item_change_count(item_t *item, const s8 change)
 static const u16 _pals[] = {1, 0, 2, 2};
 
 
-obj_t *item_new_icon(item_t *item , u16 x, u16 y)
+obj_t *item_new_icon(item_t *item , uint x, uint y)
 {
     obj_t *s = spr_alloc(x, y, item->tile);
     item_set_icon(s, item);
@@ -424,7 +420,7 @@ obj_t *item_new_icon(item_t *item , u16 x, u16 y)
 /** @see item_new_icon */
 void item_set_icon(obj_t *obj, const item_t *item)
 {
-    spr_set_tile(obj,  item ? item->tile : 34);
+    spr_set_tile(obj,  item ? item->tile : 15);
     spr_set_size(obj, SPR_SIZE_8x8);
     spr_set_priority(obj, SPR_PRIORITY_LOWEST);
     spr_show(obj);

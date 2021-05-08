@@ -1,5 +1,6 @@
 #include "level.h"
 #include "tile.h"
+#include "render.h"
 #include "entity.h"
 
 #include "text.h"
@@ -15,13 +16,15 @@ level_t *lvl_current = NULL;
 
 
 /**
- * Unbounded check for a tile
+ * Bounded check for a tile
  * @param x absolute tile x
  * @param y absolute tile y
  * @returns the raw, stored tile at (x, y)
  */
 tile_type_t lvl_get_tile_type(const level_t *lvl, uint x, uint y)
 {
+    if(x > 64 || y > 64)
+        return TILE_NONE;
     return lvl->map[x + (y << 6)];
 }
 
@@ -83,8 +86,9 @@ void lvl_set_tile(level_t *lvl, uint x, uint y, const tile_t *tile)
  * Generates a new level
  * @returns a pointer to the new level FROM THE HEAP
  * @note must be freed
+ * @note no terrain is generated
  */
-level_t *lvl_new(u16 layer, level_t *parent)
+level_t *lvl_new(uint layer, level_t *parent)
 {
     level_t *lvl = malloc(sizeof(level_t));
 
@@ -96,7 +100,6 @@ level_t *lvl_new(u16 layer, level_t *parent)
     lvl->mob_density = 0;
     lvl->ent_size = 0;
 
-    // do map generation based on layer @todo
     memset(lvl->data, 0, LEVEL_SIZE);
 
     return lvl;
@@ -107,9 +110,9 @@ level_t *lvl_new(u16 layer, level_t *parent)
  * Converts an absolute tile x coordinate to a pixel x coordinate
  * @returns x coordinate between 0-240
  */
-inline uint lvl_to_pixel_x(uint tx)
+inline uint lvl_to_pixel_x(int tx)
 {
-    tx <<= 4;
+    tx *= 16;
     tx -= bg_get_scx(main_background);
     return tx;
 }
@@ -119,9 +122,9 @@ inline uint lvl_to_pixel_x(uint tx)
  * Converts an absolute tile y coordinate to a pixel y coordinate
  * @returns y coordinate between 0-160
  */
-inline uint lvl_to_pixel_y(uint ty)
+inline uint lvl_to_pixel_y(int ty)
 {
-    ty <<= 4;
+    ty *= 16;
     ty -= bg_get_scy(main_background);
     return ty;
 }
@@ -132,9 +135,13 @@ inline uint lvl_to_pixel_y(uint ty)
  * @param px [0-240)
  * @returns [0-64)
  */
-inline uint lvl_to_tile_x(uint px)
+inline uint lvl_to_tile_x(int px)
 {
-    return (px + bg_get_scx(main_background)) >> 4;
+    px += bg_get_scx(main_background);
+    if(px >= 0)
+        return px >> 4;
+    else
+        return px / 16;
 }
 
 
@@ -143,9 +150,13 @@ inline uint lvl_to_tile_x(uint px)
  * @param py [0-160)
  * @returns [0-64)
  */
-inline uint lvl_to_tile_y(uint py)
+inline uint lvl_to_tile_y(int py)
 {
-    return (py + bg_get_scy(main_background)) >> 4;
+    py += bg_get_scy(main_background);
+    if(py >= 0)
+        return py >> 4;
+    else
+        return py / 16;
 }
 
 

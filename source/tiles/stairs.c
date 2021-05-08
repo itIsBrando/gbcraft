@@ -23,7 +23,6 @@ bool tile_stair_down_ontouch(ent_t *e, uint x, uint y)
 
     mnu_load_level();
 
-    // @todo enter new level
     level_t *curLevel = e->level;
     uint curLayer = curLevel->layer;
     level_t *newLevel;

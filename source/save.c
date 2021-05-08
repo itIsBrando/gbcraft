@@ -96,7 +96,7 @@ void sve_set_bank(bool bank)
     *(vu8*)(0x0E000000) = bank;
 }
 
-// @todo add timeout
+
 void sve_write_byte(u8 byte, u16 address)
 {
     sve_send_command(0xa0);

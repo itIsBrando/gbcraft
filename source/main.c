@@ -22,7 +22,7 @@
 
 #include "save.h"
 #include "level.h"
-#include "tile.h"
+#include "render.h"
 #include "entity.h"
 #include "terraingen.h"
 #include "item.h"
@@ -34,6 +34,7 @@ extern void foo(const char *); // @todo remove the need for this
 BG_REGULAR *main_background;
 
 int main(void) {
+reset:
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
@@ -102,17 +103,10 @@ int main(void) {
 		gen_generate(level);
 		plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 
-		ent_add(level, ENT_TYPE_SLIME, 50, 50);
-		ent_add(level, ENT_TYPE_ZOMBIE, 150, 10);
-
 		item_add_to_inventory(&ITEM_IRON, &plr->player.inventory);
-		item_add_to_inventory(&ITEM_STONE, &plr->player.inventory);
 		item_change_count(plr->player.inventory.items, 19);
-		item_add_to_inventory(&ITEM_STONE_AXE, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
-		item_add_to_inventory(&ITEM_CHEST, &plr->player.inventory);
-		item_add_to_inventory(&ITEM_DOOR, &plr->player.inventory);
 		plr_move_to(plr, 32, 32);
 	} else {
 		sve_load_from_persistant(level);
@@ -128,7 +122,7 @@ int main(void) {
 	obj_t *cursor = spr_alloc(0, 0, 0);
 	u8 curTime = 0;
 
-	while (true) {
+	do {
 		key_scan();
 		uint keys = key_pressed_no_repeat();
 		level_t *lvl = lvl_get_current();
@@ -177,6 +171,7 @@ int main(void) {
 			if(onupdate)
 				onupdate(e);
 			
+			// @todo. is this necessary??
 			// if we changed the current level, then these entities are no longer aactive
 			if(lvl != lvl_get_current())
 				break;
@@ -190,7 +185,16 @@ int main(void) {
 		
 		VBlankIntrWait();
 		spr_copy_all();
+
+	} while(!plr->player.dead);
+
+	for(uint i = 0; i < 4; i++)
+	{
+		if(world[i])
+			free(world[i]);
 	}
 
-	// free(level);
+	memset16(oam_mem, 0, 128 << 2);
+
+	goto reset;
 }

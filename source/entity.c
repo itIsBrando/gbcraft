@@ -58,7 +58,7 @@ uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer,
  */
 ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 {
-    ent_t *buffer[50];
+    ent_t *buffer[MAX_ENTITY_SIZE];
     *outputSize = 0;
 
     for(u16 i = 0; i < lvl->ent_size; i++)
@@ -224,14 +224,25 @@ ent_t *ent_change_level(ent_t *e, level_t *newLevel)
 
 static void lvl_update_player_pointer(level_t *lvl)
 {
+    ent_t *e = lvl->entities;
     for(uint i = 0; i < lvl->ent_size; i++)
     {
-        ent_t *e = &lvl->entities[i];
         if(e->type == ENT_TYPE_PLAYER)
         {
             lvl->player = e;
+            break;
         }
+
+        e++;
     }
+
+    // reorders pointers
+    for(uint i = 0; i < e->player.inventory.size; i++)
+    {
+        e->player.inventory.items[i].parent = &e->player.inventory;
+    }
+
+    e->player.inventory.parent = e;
 }
 
 
@@ -251,9 +262,10 @@ void ent_remove(level_t *lvl, ent_t *ent)
 
     spr_free(ent->sprite);
 
-    // @todo report error
-    if(index == -1)
+    if(index == -1) {
+        text_error("COULD NOT FIND ENTITY IN TABLE");
         return;
+    }
 
     // if this entity is at the end of the table, ignore
     if(index == lvl->ent_size - 1) {
@@ -306,6 +318,9 @@ bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
     x += rect->sx;
     y += rect->sy;
 
+    if(x > 64 * 16 - 12 || y > 64 * 16 - 12)
+        return false;
+
     const uint w = 16 - rect->sx - rect->ex,
      h = 16 - rect->sy - rect->ey;
 
@@ -324,8 +339,6 @@ bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
         if(events->maypass && !events->maypass(ent))
             return false;
         
-        // @todo fix this. The stairways down requires this
-        //   function to return after switching levels
         if(events->ontouch) {
             if(events->ontouch(ent, tx, ty))
                 return false;

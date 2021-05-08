@@ -31,6 +31,7 @@
 #define ITEM_IRON_AXE       ALL_ITEMS[25]
 #define ITEM_IRON_PICKAXE   ALL_ITEMS[26]
 #define ITEM_IRON_SWORD     ALL_ITEMS[27]
+#define ITEM_APPLE          ALL_ITEMS[28]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -97,7 +98,7 @@ item_t *item_get_from_inventory(const item_type_t type, const inventory_t *inv);
  * @param x pixel x coordinate
  * @param y pixel y coordinate
  */
-obj_t *item_new_icon(item_t *item , u16 x, u16 y);
+obj_t *item_new_icon(item_t *item , uint x, uint y);
 
 
 /**
@@ -114,14 +115,14 @@ void item_change_count(item_t *item, const s8 change);
 
 bool item_can_attack_all(item_t *item, ent_t *ent);
 
-bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_stone_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_wood_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_door_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_floor_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
 
-bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
-bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, u16 x, u16 y);
+bool item_sapling_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_seed_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
+bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y);
 #endif

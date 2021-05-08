@@ -4,6 +4,8 @@
 #include "defines.h"
 #include "obj.h"
 
+#define MAX_ENTITY_SIZE 20
+
 enum {
     TILE_GRASS,
     TILE_WATER,
@@ -54,6 +56,7 @@ typedef enum {
     ITEM_TYPE_SEED,
     ITEM_TYPE_WHEAT,
     ITEM_TYPE_BREAD,
+    ITEM_TYPE_APPLE,
 } item_type_t; // order relevant?
 
 
@@ -148,8 +151,8 @@ typedef struct {
         item_t *,   // reference to this item
         ent_t *,    // player entity
         const tile_t *,  // pointer to the tile in the map where the item that will be placed on
-        u16 x,      // absolute tile x of the tile 
-        u16 y      // absolute tile y of the tile
+        uint x,      // absolute tile x of the tile 
+        uint y      // absolute tile y of the tile
     ); // called when a player presses `A` with this item in their inventory
     bool (*canattack)(item_t *, ent_t *);
 } item_event_t;
@@ -236,6 +239,7 @@ typedef struct {
     u8 on_stairs; // >0 after entering a staircase
     bool is_swimming;
     bool removed; // true when the player has changed levels. Used to interrupt flow inside functions because this entity pointer will be decayed soon
+    bool dead;
     item_t *activeItem;
     inventory_t inventory;
     u8 invulnerability;
@@ -306,7 +310,7 @@ typedef struct tile_t {
 
 typedef struct level_t {
     uint ent_size;  // number of entities in the `entities` table
-    ent_t entities[50]; // @todo allocate on heap
+    ent_t entities[MAX_ENTITY_SIZE]; // @todo allocate on heap
     ent_t *player;
     tile_type_t map[LEVEL_SIZE]; // needs to be adapted to level.size @todo
     u8 data[LEVEL_SIZE];

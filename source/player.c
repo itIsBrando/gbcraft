@@ -5,6 +5,7 @@
 #include "menu.h"
 #include "player.h"
 #include "item.h"
+#include "lighting.h"
 
 #include "window.h"
 #include "keypad.h"
@@ -12,6 +13,7 @@
 #include "obj.h"
 #include "text.h"
 #include <stdlib.h>
+#include <gba_systemcalls.h>
 
 static void ent_move_all(level_t *lvl, const direction_t direction, const uint dist);
 
@@ -21,8 +23,7 @@ void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
     e->player.removed = false;
-    text_error("NEW PLAYER");
-
+    
     e->level->player = e;
 	e->player.max_health = e->player.health = 20;
 	e->player.max_stamina = e->player.stamina = 20;
@@ -123,8 +124,6 @@ void ent_player_update(ent_t *plr)
     }
 
     plr_apply_knockback(plr);
-    /** vvvvv @todo REMOVE */
-    ent_draw(plr);
 }
 
 
@@ -311,7 +310,10 @@ bool plr_hurt(ent_t *mob, ent_t *e, int dmg)
     e->yKnockback = dir_get_y(mob->dir) * 5;
 
     if(e->player.health <= 0)
+    {
         e->player.health = 0;
+        plr_kill(e);
+    }
 
     e->player.invulnerability = 20;
 
@@ -421,4 +423,35 @@ bool plr_heal(ent_t *e, uint by)
     }
 
     return false;
+}
+
+
+/**
+ * Player death animation
+ * @todo finish
+ */
+void plr_kill(ent_t *e)
+{
+    e->player.dead = true;
+    lt_show(e->level);
+
+    for(uint i = 0; i < 32; i++)
+    {
+        blnd_set_weights(31, 31-i);
+        VBlankIntrWait();
+        VBlankIntrWait();
+        VBlankIntrWait();
+    }
+
+    bg_fill(win_get_0()->background, 0, 0, 240/8, 3, 0);
+    text_set_pal(1);
+    text_print("YOU HAVE DIED.", 15-7, 0);
+    text_set_pal(0);
+    
+    for(uint i = 0; i < 60 * 10; i++)
+    {
+        VBlankIntrWait();
+    }
+    
+    lt_hide();
 }

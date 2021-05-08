@@ -13,11 +13,12 @@
 - [ ] Add attack bonus for swords (and axes?)
 - [ ] Add seed selection
 - [ ] Add slime tile drop
-- [ ] Add apple
+- [ ] Add golden apple
 - [ ] Add bonus damage to sword
 - [ ] Add pickup tool sprite
 - [ ] Add torches
-- [ ] Add iron tools
+- [x] Add iron tools
+- [x] Add apple
 - [x] Add iron
 - [x] Add lighting to caves
 - [x] Add player swimming animation
@@ -85,8 +86,14 @@
 - [ ] **Add indication that a tile is being destroyed**
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
-- [ ] **Cover up ugly map overflow**
 - [ ] Add door opening/closing sound effect
+- [ ] Chests can wrongly be picked up with items in it
+- [ ] Add save menu
+- [ ] change `player.activeItem` to be an index to item rather than pointer
+- [x] Add player death
+- [x] **Cover up ugly map overflow**
+- [x] Allow wood floor to be broken with axe
+- [x] Allow doors to be broken with axe
 - [x] Tiles can be interacted with even with an item in hand
 - [x] Move & cleanup player's cursor sprite handling
 - [x] Add mob spawning on lower levels
@@ -105,16 +112,18 @@
 
 
 ### Bug
-- [ ] Out-of-bounds placing tiles is weird
 - [ ] Blocks can be placed on top of entities
 - [ ] Blocks can be placed on top of player
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
-- [ ] Random null pointer crash when ItemEntity exists on lower level
 - [ ] Inventory cursor does not show up after entering lower level
-- [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
 - [ ] Swimming animation is messed up when player spawns in water
-- [x] Crashes after picking up live item entity when stairs are used
+- [ ] Random crashes while spamming `A` and harvesting wheat
+- [ ] Crashes after picking up live item entity when stairs are used
+- [ ] **THE POINTERS OF A CHEST'S INVENTORY WILL CHANGE IF `ent_remove` IS CALLED. \*GAME BREAKING!!!\***
+- [x] After changing level, items do not get removed from inventory, instead the count underflows
+- [x] Random null pointer crash when ItemEntity exists on lower level
+- [x] Out-of-bounds placing tiles is weird
 - [x] Entity removal causes player entity to be overriden. POINTER TO PLAYER CHANGES WHEN ENTITIES ARE REMOVED SO THE POINTER TO THE PLAYER WILL BE ANOTHER ENTITY OR OUTSIDE VIABLE RANGE.
 - [x] Fix graphically remenants after closing chest
 - [x] Fix graphically remenants after closing crafting

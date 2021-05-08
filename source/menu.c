@@ -410,7 +410,7 @@ void mnu_draw_hotbar(ent_t *player)
 void mnu_draw_item(item_t *item, uint x, uint y)
 {
     text_print(item ? (char*)item->name : "NONE    ", x, y);
-    if(item && item->type != ITEM_TYPE_TOOL)
+    if(item && item->type != ITEM_TYPE_FURNITURE && item->type != ITEM_TYPE_TOOL)
         text_uint(item->count, x + 10, y);
 }
 
