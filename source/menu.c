@@ -15,6 +15,27 @@
 
 #define EMPTY_TILE_INDEX 0
 
+
+void mnu_draw_border()
+{
+    const BG_REGULAR *bg = win_get_0()->background;
+
+    // horizontal
+    bg_fill(bg, 1, 0, 26, 1, 520);
+    bg_fill(bg, 1, 17, 26, 1, TILE_FLIP_VERTICAL(520));
+
+    // vertical
+    bg_fill(bg, 0, 1, 1, 16, 521);
+    bg_fill(bg, 27, 1, 1, 16, TILE_FLIP_HORIZONTAL(521));
+
+    // corners
+    bg_write_tile(bg, 0, 0, 519);
+    bg_write_tile(bg, 27, 0, TILE_FLIP_HORIZONTAL(519));
+    bg_write_tile(bg, 0,  17, TILE_FLIP_VERTICAL(519));
+    bg_write_tile(bg, 27, 17, TILE_FLIP_VERTICAL(TILE_FLIP_HORIZONTAL(519)));
+}
+
+
 static void mnu_scroll_up()
 {
     WIN_REGULAR *win = win_get_0();
@@ -101,8 +122,9 @@ void mnu_open_inventory(ent_t *player)
 {
     WIN_REGULAR *win = win_get_0();
 
-    text_print("INVENTORY", 0, 0);
     bg_fill(win->background, 0, 1, 28, 18, EMPTY_TILE_INDEX);
+    mnu_draw_border();
+    text_print("INVENTORY", 3, 0);
     ent_hide_all(player->level);
 
     mnu_scroll_up();    
@@ -112,9 +134,9 @@ void mnu_open_inventory(ent_t *player)
 
     uint key;
 
-    obj_t **icons = mnu_draw_item_list(inv->items, inv_size, 2, 2);
+    obj_t **icons = mnu_draw_item_list(inv->items, inv_size, 3, 2);
 
-    obj_t *cursor = spr_alloc(8, 24, 16);
+    obj_t *cursor = spr_alloc(16, 24, 16);
     uint curY = 0;
 
     while(true) {
@@ -135,7 +157,7 @@ void mnu_open_inventory(ent_t *player)
             break;
         }
 
-        spr_move(cursor, 8, 24 + (curY << 3));
+        spr_move(cursor, 16, 24 + (curY << 3));
         VBlankIntrWait();
         spr_copy_all();
     }
@@ -214,9 +236,9 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
 {
     WIN_REGULAR *win = win_get_0();
 
-    ent_player_set_active_item(plr, NULL);
-    text_print("CRAFTING", 0, 0);
-    bg_fill(win->background, 0, 1, 28, 18, EMPTY_TILE_INDEX);
+    mnu_draw_border();
+    text_print("CRAFTING", 3, 0);
+    bg_fill(win->background, 1, 1, 26, 15, EMPTY_TILE_INDEX);
 
     ent_hide_all(plr->level);
 
@@ -231,7 +253,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
             items[i].count = recipes[i].amount;
     }
 
-    obj_t **icons = mnu_draw_item_list(items, recipe_size, 2, 2);
+    obj_t **icons = mnu_draw_item_list(items, recipe_size, 3, 2);
     u16 key;
 
     obj_t **costIcons = malloc(4 * sizeof(obj_t *));
@@ -241,7 +263,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
     _crafting_draw_costs(recipes, costIcons, plr);
 
     // init cursor
-    obj_t *cursor = spr_alloc(8, 24, 16);
+    obj_t *cursor = spr_alloc(16, 24, 16);
     uint curY = 0;
 
     do {
@@ -279,7 +301,7 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
             }
         }
 
-        spr_move(cursor, 8, 24 + (curY << 3));
+        spr_move(cursor, 16, 24 + (curY << 3));
         VBlankIntrWait();
         spr_copy_all();
     } while(key != KEY_B);
@@ -310,10 +332,11 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
 {
     WIN_REGULAR *win = win_get_0();
 
-    ent_player_set_active_item(plr, NULL);
-    bg_fill(win->background, 0, 0, 28, 10, EMPTY_TILE_INDEX);
-    text_print("INVENTORY", 0, 0);
-    text_print("CHEST", 23, 0);
+    ent_player_set_active_item(plr, NULL); // @todo remove this but do not break `player.active_item`
+    bg_fill(win->background, 1, 1, 26, 16, EMPTY_TILE_INDEX);
+    mnu_draw_border();
+    text_print("INVENTORY", 2, 0);
+    text_print("CHEST", 21, 0);
 
     ent_hide_all(plr->level);
 
@@ -324,12 +347,12 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
     inventory_t *invs[] = {plr_inv, chst_inv};
 
     // store all of the item icons in a list
-    obj_t **plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 2, 2);
+    obj_t **plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 3, 2);
     obj_t **chest_icons = mnu_draw_item_list(chst_inv->items, chst_inv->size, 16, 2);
     u16 key;
 
     uint xCur = 0, yCur = 0;
-    obj_t *cursor = spr_alloc(8, 24, 16);
+    obj_t *cursor = spr_alloc(0, 0, 16);
 
     do {
         key_scan();
@@ -346,7 +369,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
             yCur = 0, xCur = 1;
 
         // switch inventory stuff
-        if(key & KEY_A)
+        if(key_pressed_no_repeat() & KEY_A)
         {
             inventory_t *curInv = invs[xCur];
             inventory_t *otherInv = invs[!xCur];
@@ -359,8 +382,8 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
                 item_add_to_inventory(item, otherInv);
                 item_remove_from_inventory((item_t *)item);
 
-                bg_fill(win->background, 0, 1, 30, 10, EMPTY_TILE_INDEX);
-                plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 2, 2);
+                bg_fill(win->background, 1, 1, 26, 16, EMPTY_TILE_INDEX);
+                plr_icons = mnu_draw_item_list(plr_inv->items, plr_inv->size, 3, 2);
                 chest_icons = mnu_draw_item_list(chst_inv->items, chst_inv->size, 16, 2);
 
                 // prevent overflow
@@ -369,7 +392,7 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
             }
         }
 
-        spr_move(cursor, 8 + (xCur * 14 * 8), 24 + (yCur << 3));
+        spr_move(cursor, 16 + (xCur * 13 * 8), 24 + (yCur << 3));
 
         VBlankIntrWait();
         spr_copy_all();
@@ -398,7 +421,7 @@ void mnu_draw_hotbar(ent_t *player)
 
     bar_draw_health(player);
     bar_draw_stamina(player);
-    mnu_draw_item(player->player.activeItem, 1, 2);
+    mnu_draw_item(plr_get_active_item(player), 1, 2);
 }
 
 
@@ -425,17 +448,22 @@ uint mnu_open_main()
 
     bg_fill(win->background, 0, 0, 240/8, 160/8, EMPTY_TILE_INDEX);
     text_print("GBACRAFT", 0, 0);
-    text_print("PLAY", 2, 4);
-    text_print("LOAD", 2, 5);
+    text_print("GENERATE", 11, 7);
+    text_print("LOAD WORLD", 10, 8 + 1);
+    text_print("HOW TO", 12, 9 + 2);
     win_move(win, 0, 0, 240, 160);
 
     uint key;
 
     *TME0CNT = 128; // enable timer 0
 
-    obj_t *cur = spr_alloc(8, 32, 16);
+    obj_t *cur = spr_alloc(0, 0, 16),
+        *cur2 = spr_alloc(0, 0, 16);
+
+    spr_flip(cur2, SPR_FLIP_HORIZONTAL);
 
     uint yCur = 0;
+    uint xCur[] = {72, 64, 80};
 
     do {
         key_scan();
@@ -446,13 +474,16 @@ uint mnu_open_main()
         else if((key & KEY_UP) && yCur)
             yCur--;
 
-        spr_move(cur, 8, 32 + (yCur << 3));
+        spr_move(cur, xCur[yCur], 56 + (yCur << 4));
+        spr_move(cur2, 232 - xCur[yCur], 56 + (yCur << 4));
 
         VBlankIntrWait();
         spr_copy(cur, 0);
+        spr_copy(cur2, 1);
     } while(key != KEY_A);
 
     spr_free(cur);
+    spr_free(cur2);
     // set RNG seed
     rnd_seed(*TME0DATA);
 
@@ -464,7 +495,7 @@ uint mnu_open_main()
 void mnu_load_level()
 {
     WIN_REGULAR *w = win_get_0();
-    bg_fill(w->background, 0, 0, 240/16, 10, 0);
+    bg_fill(w->background, 0, 0, 240/8, 18, 0);
     win_move(w, 0, 0, 240, 160);
     text_print("LOADING WORLD...", 0, 0);
 }

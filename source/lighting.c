@@ -7,9 +7,6 @@
 static BG_REGULAR lt_bg;
 static obj_t *lt_player_mask = NULL;
 
-#define TILE_FLIP_HORIZONTAL(t) ((t) | BIT(0xA))
-#define TILE_FLIP_VERTICAL(t) ((t) | BIT(0xB))
-
 /**
  * Should be called only once and before entering a cave.
  */
@@ -56,4 +53,16 @@ void lt_hide()
 
     // disable blending
     blnd_set(0, 0);
+}
+
+
+/**
+ * Creates a light source
+ * @param tx absolute tile x
+ * @param ty absolute tile y
+ * @todo does nothing :'(
+ */
+void lt_create_source(uint tx, uint ty)
+{
+
 }

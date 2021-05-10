@@ -12,6 +12,7 @@
 #include "bg.h"
 #include "obj.h"
 #include "text.h"
+#include "memory.h"
 #include <stdlib.h>
 #include <gba_systemcalls.h>
 
@@ -23,6 +24,7 @@ void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
     e->player.removed = false;
+    e->player.active_item = 0;
     
     e->level->player = e;
 	e->player.max_health = e->player.health = 20;
@@ -39,8 +41,14 @@ void ent_player_update(ent_t *plr)
     uint keys_no_repeat = key_pressed_no_repeat();
     const bool isMoving = keys & (KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN);
 
-    if(plr->player.invulnerability)
+    if(plr->player.invulnerability) {
         plr->player.invulnerability--;
+        if((plr->player.invulnerability & 4))
+            spr_hide(plr->sprite);
+        else
+            spr_show(plr->sprite);
+
+    }
 
     if(keys & KEY_LEFT)
     {
@@ -156,26 +164,18 @@ void plr_set_swim(ent_t *e, bool state)
 }
 
 
-void ent_player_onrelocate(ent_t *eOld, ent_t *eNew, level_t *lvl)
+void ent_player_onrelocate(ent_t *e, level_t *lvl)
 {
-    inventory_t *inv = &eOld->player.inventory;
-    inventory_t *newInv = &eNew->player.inventory;
+    inventory_t *inv = &e->player.inventory;
 
-    newInv->parent = eNew;
-    
-    eNew->player.activeItem = NULL;
+    inv->parent = e;
 
     for(uint i = 0; i < inv->size; i++) 
     {
-        newInv->items[i] = inv->items[i];
-        newInv->items[i].parent = newInv;
+        inv->items[i].parent = inv;
     }
-
-    newInv->size = inv->size;
     
-    eOld->player.removed = true;
-
-    lvl->player = eNew;
+    lvl->player = e;
 }
 
 
@@ -243,12 +243,39 @@ void ent_player_set_active_item(ent_t *plr, item_t *item)
     if(!spr)
         spr = spr_alloc(0, 160-8, 0);
 
-    if(!item)
-        _hotbar_index = 0;
-
-    plr->player.activeItem = item;
     mnu_draw_item(item, 1, 2);
     item_set_icon(spr, item);
+
+    if(!item) {
+        _hotbar_index = 0;
+        plr->player.active_item = 0;
+        return;
+    }
+
+    item_t *invItems = plr->player.inventory.items;
+    for(uint i = 0; i < plr->player.inventory.size; i++)
+    {
+        if(item == invItems) {
+            plr->player.active_item = i+1;
+            _hotbar_index = i;
+            return;
+        }
+        invItems++;
+    }
+
+    text_error("NOT FOUND");
+}
+
+
+/**
+ * @returns the player's active item, or NULL
+ */
+item_t *plr_get_active_item(const ent_t *plr)
+{
+    if(plr->player.active_item == 0)
+        return NULL;
+    
+    return (item_t*)&plr->player.inventory.items[plr->player.active_item-1];
 }
 
 
@@ -315,7 +342,7 @@ bool plr_hurt(ent_t *mob, ent_t *e, int dmg)
         plr_kill(e);
     }
 
-    e->player.invulnerability = 20;
+    e->player.invulnerability = 40;
 
     bar_draw_health(e);
     return false;
@@ -327,8 +354,8 @@ void plr_move_by(ent_t *player, const direction_t direction, const uint dist)
     if(ent_can_move(player, direction, dist))
     {
         ent_move_all(player->level, dir_get_opposite(direction), dist);
-        s16 dx = dir_get_x(direction) * dist;
-        s16 dy = dir_get_y(direction) * dist;
+        int dx = dir_get_x(direction) * dist;
+        int dy = dir_get_y(direction) * dist;
         bg_move(main_background, bg_get_scx(main_background) + dx, bg_get_scy(main_background) + dy);
     }
 }
@@ -356,25 +383,50 @@ static void ent_move_all(level_t *lvl, const direction_t direction, const uint d
 
 
 /**
+ * Held item
+ * @param item can be NULL
+ * @returns the amount of additional damage should be dealt based on the held tool
+ */
+int plr_get_attack_bonus(const item_t *item)
+{
+    if(!item || item->type != ITEM_TYPE_TOOL)
+        return 0;
+    else if(item->tooltype == TOOL_TYPE_AXE)
+        return item->level << 1;
+    else if(item->tooltype == TOOL_TYPE_SWORD)
+        return item->level * 3;
+    
+    return 1;
+}
+
+
+/**
  * Called when the user presses the `A` button
  */
 void ent_player_interact(const ent_t *plr)
 {
     // check to see if we can interact with an entity
-    uint px = 120 + (dir_get_x(plr->dir) * 8),
-         py = 80 + (dir_get_y(plr->dir) * 8);
+    uint px = 120 + (dir_get_x(plr->dir) * 15),
+         py = 80 + (dir_get_y(plr->dir) * 15);
     ent_t *ents[5];
     uint s = 0;
     
-    if(!plr->player.activeItem || (plr->player.activeItem && plr->player.activeItem->tooltype != TOOL_TYPE_PICKUP))
+    item_t *active_item = plr_get_active_item(plr);
+    if(!active_item || (active_item && active_item->tooltype != TOOL_TYPE_PICKUP))
         s = ent_get_all_stack(plr->level, plr, ents, px, py, 5);
 
     for(uint i = 0; i < s; i++)
     {
         ent_t *e = ents[i];
 
-        if(e->events->onhurt && e->events->onhurt(e, (ent_t*)plr, 2))
-            break;
+        if(e->events->onhurt) {
+            e->events->onhurt(
+                e,
+                (ent_t*)plr,
+                1 + (rnd_random() & 0x3) + plr_get_attack_bonus(active_item)
+            );
+            return;
+        }
     }
 
     uint x = lvl_to_tile_x(124), y = lvl_to_tile_y(84);
@@ -384,11 +436,11 @@ void ent_player_interact(const ent_t *plr)
 
     const tile_t *t = lvl_get_tile(plr->level, x, y);
     // interact with held item
-    if(plr->player.activeItem)
+    if(active_item)
     { // interact with item
-        const item_event_t *e = plr->player.activeItem->event;
+        const item_event_t *e = active_item->event;
         if(e->interact && e->interact(
-                plr->player.activeItem,
+                active_item,
                 (ent_t*)plr,
                 t,
                 x, y
@@ -450,8 +502,13 @@ void plr_kill(ent_t *e)
     
     for(uint i = 0; i < 60 * 10; i++)
     {
+        key_scan();
         VBlankIntrWait();
+        if(key_pressed_no_repeat() != 0)
+            break;
     }
     
     lt_hide();
 }
+
+

@@ -14,6 +14,7 @@
 #include "window.h"
 #include "memory.h"
 #include "keypad.h"
+#include "lib/DMA.h"
 
 #include "tiles16.h"
 #include "character_idle.h"
@@ -28,6 +29,7 @@
 #include "item.h"
 #include "menu.h"
 #include "lighting.h"
+
 
 extern const char FLASH_ID_TEXT[];
 extern void foo(const char *); // @todo remove the need for this
@@ -62,6 +64,7 @@ reset:
 	sprite_palette_mem[16 + 12] = RGB15(0xff, 0xff, 0xff);
 	sprite_palette_mem[16 + 2] = RGB15(0xd, 8, 07); // set color brown (for wood tools)
 	sprite_palette_mem[32 + 2] = RGB15(29, 29, 28); // set color cream (for iron tools)
+	sprite_palette_mem[16 + 8] = RGB15(0, 29, 3);
 
 	BG_REGULAR bg;
 	main_background = &bg;
@@ -103,15 +106,16 @@ reset:
 		gen_generate(level);
 		plr = ent_add(level, ENT_TYPE_PLAYER, 120-8, 80-8);
 
-		item_add_to_inventory(&ITEM_IRON, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_WOOD, &plr->player.inventory);
 		item_change_count(plr->player.inventory.items, 19);
 		item_add_to_inventory(&ITEM_PICKUP, &plr->player.inventory);
 		item_add_to_inventory(&ITEM_BENCH, &plr->player.inventory);
+		item_add_to_inventory(&ITEM_WOOD_AXE, &plr->player.inventory);
 		plr_move_to(plr, 32, 32);
 	} else {
 		sve_load_from_persistant(level);
 		plr = lvl_get_player(level);
-		ent_player_set_active_item(plr, NULL); // active item pointer probs decayed
+		item_add_to_inventory(&ITEM_LANTERN, &plr->player.inventory);
 	}
 
 	lvl_change_level(level);
@@ -134,7 +138,7 @@ reset:
 			// cursor @todo move this elsewhere
 			uint x = (plr->x+4) + (dir_get_x(plr->dir) * 9);
 			uint y = (plr->y+4) + (dir_get_y(plr->dir) * 11);
-			item_set_icon(cursor, plr->player.activeItem);
+			item_set_icon(cursor, plr_get_active_item(plr));
 			curTime = 10;
 			spr_move(cursor, x, y);
 			spr_show(cursor);
@@ -183,8 +187,9 @@ reset:
 			spr_hide(cursor);
 		}
 		
-		VBlankIntrWait();
 		spr_copy_all();
+		// spr_copy_all_DMA();
+		VBlankIntrWait();
 
 	} while(!plr->player.dead);
 
@@ -194,7 +199,7 @@ reset:
 			free(world[i]);
 	}
 
-	memset16(oam_mem, 0, 128 << 2);
+	memset16((u16*)oam_mem, 0, 128 << 2);
 
 	goto reset;
 }

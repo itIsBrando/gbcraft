@@ -69,14 +69,14 @@ item_event_t ITEM_EVENTS[] =
 const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("WOOD", 9, ITEM_TYPE_WOOD, 0, 1),
     DEFINE_ITEM("STONE", 10, ITEM_TYPE_STONE, 1, 1),
-    DEFINE_ITEM("STONE AXE", 17, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_AXE),
-    DEFINE_ITEM("STONE PICK", 19, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_PICKAXE),
-    DEFINE_ITEM("STONE SWORD", 18, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_SWORD),
-    DEFINE_ITEM("PICKUP TOOL", 20, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKUP),
+    DEFINE_ITEM("STONE AXE", 17, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_AXE, .palette=0),
+    DEFINE_ITEM("STONE PICK", 19, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_PICKAXE, .palette=0),
+    DEFINE_ITEM("STONE SWORD", 18, ITEM_TYPE_TOOL, 2, 2, .tooltype=TOOL_TYPE_SWORD, .palette=0),
+    DEFINE_ITEM("PICKUP TOOL", 44, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKUP, .palette=0),
     DEFINE_ITEM("BENCH", 34, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CRAFTING),
-    DEFINE_ITEM("WOOD AXE", 17, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_AXE),
-    DEFINE_ITEM("WOOD PICK", 19, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKAXE),
-    DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD),
+    DEFINE_ITEM("WOOD AXE", 17, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_AXE, .palette=1),
+    DEFINE_ITEM("WOOD PICK", 19, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_PICKAXE, .palette=1),
+    DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD, .palette=1),
     DEFINE_ITEM("CHEST", 33, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CHEST),
     DEFINE_ITEM("IRON ORE", 12, ITEM_TYPE_IRON_ORE, 4, 1),
     DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
@@ -85,30 +85,27 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("FURNACE", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
     DEFINE_ITEM("COAL", 11, ITEM_TYPE_COAL, 4, 1),
     DEFINE_ITEM("DOOR", 36, ITEM_TYPE_DOOR, 5, 1),
-    DEFINE_ITEM("WOOD FLOOR", 37, ITEM_TYPE_FLOOR, 6, 1),
+    DEFINE_ITEM("WOOD FLR", 37, ITEM_TYPE_FLOOR, 6, 1),
     DEFINE_ITEM("WOOD HOE", 20, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_HOE),
     DEFINE_ITEM("SEED", 38, ITEM_TYPE_SEED, 8, 1),
     DEFINE_ITEM("SAPLING", 39, ITEM_TYPE_SAPLING, 7, 1),
     DEFINE_ITEM("WHEAT", 40, ITEM_TYPE_WHEAT, 9, 1),
     DEFINE_ITEM("BREAD", 41, ITEM_TYPE_BREAD, 10, 1),
     DEFINE_ITEM("ANVIL", 42, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_ANVIL),
-    DEFINE_ITEM("IRON AXE", 17, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_AXE),
-    DEFINE_ITEM("IRON PICK", 19, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_PICKAXE),
-    DEFINE_ITEM("IRON SWORD", 18, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_SWORD),
+    DEFINE_ITEM("IRON AXE", 17, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_AXE, .palette=2),
+    DEFINE_ITEM("IRON PICK", 19, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_PICKAXE, .palette=2),
+    DEFINE_ITEM("IRON SWORD", 18, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_SWORD, .palette=2),
     DEFINE_ITEM("APPLE", 43, ITEM_TYPE_APPLE, 10, 1),
+    DEFINE_ITEM("LANTERN", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_LANTERN),
+    DEFINE_ITEM("SLIME", 12, ITEM_TYPE_SLIME, 4, 1, .palette=1),
 };
 
 
 const char *item_lookup_name(item_t *item)
 {
-    inventory_t inv;
-
-    inv.size = sizeof(ALL_ITEMS) / sizeof(ALL_ITEMS[0]);
-    for(uint i = 0; i < inv.size; i++) {
-        inv.items[i] = ALL_ITEMS[i];
-    }
-
-    return item_get_from_inventory_matching(item, &inv)->name;
+    uint size = sizeof(ALL_ITEMS) / sizeof(ALL_ITEMS[0]);
+    
+    return item_get_perfect_match(item, ALL_ITEMS, size)->name;
 }
 
 
@@ -126,15 +123,6 @@ const item_t *item_get_from_type(item_type_t type, s16 data)
     }
 
     return NULL;
-}
-
-
-bool item_can_attack(const item_t *item)
-{
-    if(item == NULL || item->type == ITEM_TYPE_TOOL)
-        return true;
-
-    return false;
 }
 
 
@@ -174,24 +162,27 @@ bool item_remove_from_inventory(item_t *item)
     return false;
 }
 
-
-item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *inv)
+item_t *item_get_perfect_match(const item_t *item, const item_t *list, const uint size)
 {
-    for(uint i = 0; i < inv->size; i++)
+
+    for(uint j = 0; j < size; j++)
     {
-        if(inv->items[i].type == item->type && inv->items[i].tooltype == item->tooltype)
+        if(list[j].type == item->type && list[j].tooltype == item->tooltype)
         {
-            // make sure the tool levels are equal
-            if(item->type == ITEM_TYPE_TOOL && item->level != inv->items[i].level)
-                break;
-            else if(item->type == ITEM_TYPE_FURNITURE && item->furnituretype != inv->items[i].furnituretype)
-                break;
-            
-            return (item_t*)&inv->items[i];
+            if(item->type == ITEM_TYPE_TOOL && item->level == list[j].level) {
+                return (item_t*)&list[j];
+            } else if(item->type != ITEM_TYPE_TOOL)
+                return (item_t*)&list[j];
         }
     }
 
     return NULL;
+}
+
+
+inline item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *inv)
+{
+    return item_get_perfect_match(item, inv->items, inv->size);
 
 }
 
@@ -264,6 +255,7 @@ static const item_t *_furn_items[] = {
     &ITEM_CHEST,
     &ITEM_FURNACE,
     &ITEM_ANVIL,
+    &ITEM_LANTERN,
 };
 
 
@@ -295,8 +287,8 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, ui
     // pick up furniture entities
     if(item && item->tooltype == TOOL_TYPE_PICKUP)
     {
-        x = lvl_to_pixel_x(x);
-        y = lvl_to_pixel_y(y);
+        x = lvl_to_pixel_x(x) + 8;
+        y = lvl_to_pixel_y(y) + 8;
         ent_t *e[5];
         uint s = ent_get_all_stack(plr->level, plr, e, x, y, 5);
 
@@ -383,7 +375,7 @@ void item_change_count(item_t *item, const s8 change)
     else
         item->count += change;
 
-    if(item->parent->parent->player.activeItem == item)
+    if(item->parent->parent->type == ENT_TYPE_PLAYER && plr_get_active_item(item->parent->parent) == item)
     {
 
         if(item->count > 0) {
@@ -405,8 +397,6 @@ void item_change_count(item_t *item, const s8 change)
  * - gold
  * - gem
 */
-static const u16 _pals[] = {1, 0, 2, 2};
-
 
 obj_t *item_new_icon(item_t *item , uint x, uint y)
 {
@@ -425,8 +415,5 @@ void item_set_icon(obj_t *obj, const item_t *item)
     spr_set_priority(obj, SPR_PRIORITY_LOWEST);
     spr_show(obj);
 
-    if(item->type == ITEM_TYPE_TOOL)
-        spr_set_pal(obj, _pals[item->level-1]);
-    else
-        spr_set_pal(obj, 0);
+    spr_set_pal(obj, item->palette);
 }

@@ -55,8 +55,7 @@ static bool _use_recursion;
 static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
     tile_surround_mask mask = tile_get_surrounding((level_t *)lvl, tile->type, x >> 1, y >> 1);
-    //| tile_get_surrounding((level_t *)lvl, tile->connect_to, x >> 1, y >> 1);
-    const u8 t = tile->tiling.center;
+    const uint t = tile->tiling.center;
 
     if(tile->indexing != TILE_INDEXING_9PT)
         return mask;
@@ -133,7 +132,7 @@ void tile_render_nearby(tile_surround_mask mask, const level_t *lvl, const tile_
     {
         int xx = x + (dir_get_x(i) << 1),
             yy = y + (dir_get_y(i) << 1);
-        if(xx < 0 || yy < 0 || xx >= LEVEL_WIDTH || yy >= LEVEL_HEIGHT)
+        if(xx < 0 || yy < 0 || xx >= LEVEL_WIDTH*2 || yy >= LEVEL_HEIGHT*2)
             continue;
         
         const tile_t *t = lvl_get_tile((level_t*)lvl, xx >> 1, yy >> 1);

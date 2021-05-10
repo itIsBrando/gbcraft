@@ -57,6 +57,7 @@ typedef enum {
     ITEM_TYPE_WHEAT,
     ITEM_TYPE_BREAD,
     ITEM_TYPE_APPLE,
+    ITEM_TYPE_SLIME,
 } item_type_t; // order relevant?
 
 
@@ -99,6 +100,7 @@ typedef enum {
     FURNITURE_TYPE_CHEST,
     FURNITURE_TYPE_FURNACE,
     FURNITURE_TYPE_ANVIL,
+    FURNITURE_TYPE_LANTERN,
 } furniture_type_t;
 
 
@@ -139,10 +141,10 @@ typedef struct {
     void (*init)(ent_t *);    /** Called when entity is created. @param ent entity */
     void (*doDamage)(ent_t *, ent_t *);    // called when damage is done
     bool (*ontouch)(ent_t *, ent_t *, u16, u16);     /** called when entity collides with this @param x relative pixel x @param y relative pixel y @returns true to inhibit movement*/
-    bool (*maypass)(ent_t *, ent_t *);
+    bool maypass;           /** Now just a bool ;) */
     void (*ondeath)(struct ent_t *);               // called when this dies
     void (*onupdate)(struct ent_t *);              // called every frame
-    void (*onrelocate)(ent_t *eOld, ent_t *eNew, level_t *lvl); /** called when the location of a pointer to an entity is about to change. @param eOld location of old pointer @param eNew location of the new pointer @param lvl new level pointer*/
+    void (*onrelocate)(ent_t *eNew, level_t *lvl); /** called when the location of a pointer to an entity is about to change. @param eOld location of old pointer @param eNew location of the new pointer @param lvl new level pointer*/
 } ent_event_t;
 
 
@@ -182,6 +184,7 @@ typedef enum {
 
 typedef struct item_t {
     u16 tile; // tile number of the inventory representation
+    u8 palette; // palette number for item icon
     item_type_t type;
     union {
         tooltype_t tooltype;
@@ -226,8 +229,8 @@ typedef struct {
  * Used for collision
  */
 typedef struct {
-    u16 sx, ex; // start and end X
-    u16 sy, ey; // start and end Y
+    uint sx, sy; // start x and start y
+    uint w, h; // width and height
 } bounding_rect_t;
 
 
@@ -236,11 +239,11 @@ typedef struct {
     s8 max_health;
     s8 stamina;
     s8 max_stamina;
-    u8 on_stairs; // >0 after entering a staircase
+    uint on_stairs; // >0 after entering a staircase
     bool is_swimming;
     bool removed; // true when the player has changed levels. Used to interrupt flow inside functions because this entity pointer will be decayed soon
     bool dead;
-    item_t *activeItem;
+    uint active_item; // index of the player's select item in its inventory
     inventory_t inventory;
     u8 invulnerability;
     u8 stamina_time;
@@ -249,26 +252,26 @@ typedef struct {
 
 typedef struct {
     s8 health;
-    u8 walk;
+    uint walk;
     s8 xAccel;
     s8 yAccel;
-    u8 invulernability;
+    uint invulernability;
 } zombie_t;
 
 typedef struct {
     s8 health;
-    s8 jump_time;
+    int jump_time;
     s8 xAccel;
     s8 yAccel;
-    u8 invulernability;
+    uint invulernability;
 } slime_t;
 
 
 typedef struct {
     s8 dx;
     s8 dy;
-    u16 frames_alive;
-    u8 count;
+    uint frames_alive;
+    uint count;
     item_t *item;
 } itemEntity_t;
 
@@ -297,14 +300,13 @@ typedef struct tile_t {
         u8 center;   // for 9pt indexing.
         u8 topRight; // for top-bottom indexing, single_8x8 & single_16x16
     } tiling;
-    u8 connect_to;  // Another tile that connects visually (9pt indexing only)
     tile_indexing_mode_t indexing;
     const tile_event_t *event;
 } tile_t;
 
 
-#define LEVEL_WIDTH 128
-#define LEVEL_HEIGHT 128
+#define LEVEL_WIDTH 64
+#define LEVEL_HEIGHT 64
 #define LEVEL_SIZE (LEVEL_HEIGHT * LEVEL_WIDTH)
 
 

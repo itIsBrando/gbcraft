@@ -41,6 +41,8 @@ int rnd_random()
 
 /**
  * Generates a random number
+ * @param min inclusive
+ * @param max exclusive
  * @note from Tonc
  * @warning (max - min) < 0x8000
  */

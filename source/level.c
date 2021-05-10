@@ -179,7 +179,9 @@ bool lvl_try_spawn_position(level_t *lvl, uint *x, uint *y)
     int px = plr->x + bg_get_scx(main_background);
     int py = plr->y + bg_get_scy(main_background);
     
-    if(abs(px - *x) + abs(py - *y) > 80)
+    int diffx = abs(px - *x);
+    int diffy = abs(py - *y);
+    if(diffx + diffy > 90 || diffx + diffy < 16)
         return false;
 
     const tile_type_t t = lvl_get_tile_type(lvl, *x >> 4, *y >> 4);

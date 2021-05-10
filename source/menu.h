@@ -20,6 +20,12 @@ void mnu_open_crafting(ent_t *plr, const recipe_t *recipes, const uint recipe_si
 void mnu_open_chest(ent_t *e, ent_t *plr);
 uint mnu_open_main();
 
+
+/**
+ * Draws a border around a pop-up menu
+ */
+void mnu_draw_border();
+
 void mnu_load_level();
 
 #endif

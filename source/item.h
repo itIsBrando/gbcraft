@@ -32,6 +32,8 @@
 #define ITEM_IRON_PICKAXE   ALL_ITEMS[26]
 #define ITEM_IRON_SWORD     ALL_ITEMS[27]
 #define ITEM_APPLE          ALL_ITEMS[28]
+#define ITEM_LANTERN        ALL_ITEMS[29]
+#define ITEM_SLIME          ALL_ITEMS[30]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -40,14 +42,6 @@ extern const item_t ALL_ITEMS[];
  * @returns false if item could not be removed
  */
 bool item_remove_from_inventory(item_t *item);
-
-
-
-/**
- * Checks to see if an item can be used for attacking
- * @returns true if the item can attack another entity
- */
-bool item_can_attack(const item_t *item);
 
 
 /**
@@ -81,6 +75,15 @@ item_t *item_add_to_inventory(const item_t *item, inventory_t *inv);
  * @note more precise than `item_get_from_inventory()`
  */
 item_t *item_get_from_inventory_matching(const item_t *item, const inventory_t *inv);
+
+
+/**
+ * @param item item to find in `list`
+ * @param list array of pointers to item_t
+ * @param size number of elements in `list`
+ * @see item_get_from_inventory_matching
+ */
+item_t *item_get_perfect_match(const item_t *item, const item_t *list, const uint size);
 
 /**
  * Checks for an item in an inventory

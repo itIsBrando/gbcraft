@@ -10,13 +10,16 @@
 - [ ] Allow players to *interact* with entities, in addition to attack
 - [ ] Add gold
 - [ ] Add gem
-- [ ] Add attack bonus for swords (and axes?)
 - [ ] Add seed selection
-- [ ] Add slime tile drop
+- [ ] Add 'how-to`/`controls` menu
 - [ ] Add golden apple
-- [ ] Add bonus damage to sword
-- [ ] Add pickup tool sprite
-- [ ] Add torches
+- [ ] Add lantern lighting effect
+- [ ] Add lantern sprite
+- [ ] Rewrite `memcpy16` and `memset16` routines in assembly
+- [ ] Use DMA transfers to copy sprites. They broke rn :'(
+- [x] Add slime tile drop
+- [x] Add bonus damage to sword
+- [x] Add pickup tool sprite
 - [x] Add iron tools
 - [x] Add apple
 - [x] Add iron
@@ -88,8 +91,11 @@
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
 - [ ] Add door opening/closing sound effect
 - [ ] Chests can wrongly be picked up with items in it
-- [ ] Add save menu
-- [ ] change `player.activeItem` to be an index to item rather than pointer
+- [ ] Add pause menu
+- [ ] Hide player's cursor when a menu is opened
+- [x] Add border around in-game menus
+- [x] change `player.activeItem` to be an index to item rather than pointer
+- [x] Change `ent_maypass` to a `bool` rather than a costly function calls
 - [x] Add player death
 - [x] **Cover up ugly map overflow**
 - [x] Allow wood floor to be broken with axe

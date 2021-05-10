@@ -1,5 +1,6 @@
 #include "obj.h"
 #include "memory.h"
+#include "lib/DMA.h"
 
 #include <gba_video.h>
 #include <string.h>
@@ -77,6 +78,16 @@ void spr_copy_all()
 		
 		dst++, src++, isFree++;
 	}
+}
+
+
+void spr_copy_all_DMA()
+{
+	volatile obj_t *dst = oam_mem;
+	obj_t *src = __spr_buffer;
+	uint size = SPRITE_NUM << 2;
+
+	dma_copy(DMA_CHANNEL_3, src, dst, size);
 }
 
 

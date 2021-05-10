@@ -31,13 +31,15 @@ uint ent_get_all_stack(level_t *lvl, const ent_t *ignoredEntity, ent_t **buffer,
     ent_t *e = lvl->entities;
     for(uint i = 0; i < lvl->ent_size; i++)
     {
-        if(e == ignoredEntity)
-        {
+        const bounding_rect_t *rect = ent_get_bounding_rect(e);
+
+        if(e == ignoredEntity) {
             e++;
             continue;
         }
-        if((x >= e->x) && (x <= e->x + 16) && (y >= e->y) && (y <= e->y + 16))
-        {
+
+        uint ex = e->x + rect->sx, ey = e->y + rect->sy;
+        if((x >= ex) && (x <= ex + rect->w) && (y >= ey) && (y <= ey + rect->h)) {
             buffer[index++] = e;
             if(index >= maxSize)
                 return index - 1;
@@ -86,6 +88,7 @@ ent_t **ent_get_all(level_t *lvl, u16 x, u16 y, u8 *outputSize)
 // order matters. Based on `ent_type_t`
 static const ent_event_t events[] = {
     { // player
+        .maypass=true,
         .init=ent_player_init,
         .onrelocate=ent_player_onrelocate,
         .onhurt=NULL,
@@ -94,14 +97,16 @@ static const ent_event_t events[] = {
         .onupdate=ent_player_update
     },
     { // slime
+        .maypass=true,
         .init=ent_slime_init,
         .onhurt=ent_slime_hurt,
         .ontouch=NULL,
         .ondeath=NULL,
-        .maypass=NULL,
+        .maypass=true,
         .onupdate=ent_slime_update
     },
     { // zombie
+        .maypass=true,
         .init=ent_zombie_init,
         .onhurt=ent_zombie_hurt,
         .ontouch=NULL,
@@ -109,16 +114,16 @@ static const ent_event_t events[] = {
         .onupdate=ent_zombie_update
     },
     { // furniture
+        .maypass=false,
         .init=ent_furniture_init,
         .onhurt=ent_furniture_interact,
-        .maypass=ent_furniture_maypass,
         .ontouch=NULL,
         .ondeath=NULL,
         .onupdate=ent_furniture_update
     },
     { // item entity
+        .maypass=true,
         .onhurt=NULL,
-        .maypass=NULL,
         .doDamage=NULL,
         .ontouch=ent_item_ontouch,
         .ondeath=NULL,
@@ -153,11 +158,11 @@ uint ent_get_tile(const ent_t *e) {
  * Order matters based on  ent_type_t
  */
 static const bounding_rect_t __rects[] = {
-    {3, 2, 3, 1}, // player
-    {2, 2, 1, 3}, // slime
-    {3, 2, 2, 0}, // zombie
-    {3, 2, 4, 1}, // furniture
-    {0, 8, 0, 8}, // item
+    {.sx=3, .sy=2, .w=10, .h=12}, // player
+    {.sx=3, .sy=5, .w=8, .h=10}, // slime
+    {.sx=3, .sy=2, .w=10, .h=14}, // zombie
+    {.sx=3, .sy=3, .w=11,  .h=13}, // furniture
+    {.sx=0, .sy=0, .w=8,  .h=8}, // item
 };
 
 /**
@@ -215,34 +220,13 @@ ent_t *ent_change_level(ent_t *e, level_t *newLevel)
     ent->sprite = spr_alloc(spr_get_x(&spr), spr_get_y(&spr), spr_get_tile(&spr));
     spr_set_size(ent->sprite, SPR_SIZE_16x16);
 
+    if(e->type == ENT_TYPE_PLAYER)
+        e->player.removed = true;
+
     if(e->events->onrelocate)
-        e->events->onrelocate(e, ent, newLevel);
+        e->events->onrelocate(ent, newLevel);
 
     return ent;
-}
-
-
-static void lvl_update_player_pointer(level_t *lvl)
-{
-    ent_t *e = lvl->entities;
-    for(uint i = 0; i < lvl->ent_size; i++)
-    {
-        if(e->type == ENT_TYPE_PLAYER)
-        {
-            lvl->player = e;
-            break;
-        }
-
-        e++;
-    }
-
-    // reorders pointers
-    for(uint i = 0; i < e->player.inventory.size; i++)
-    {
-        e->player.inventory.items[i].parent = &e->player.inventory;
-    }
-
-    e->player.inventory.parent = e;
 }
 
 
@@ -280,7 +264,16 @@ void ent_remove(level_t *lvl, ent_t *ent)
     // memcpy(&lvl->entities[index], &lvl->entities[index + 1], (lvl->ent_size - index) * sizeof(ent_t));
 
     lvl->ent_size--;
-    lvl_update_player_pointer(lvl);
+
+    // relocate entity pointers
+    ent_t *e = lvl->entities;
+    for(uint i = 0; i < lvl->ent_size; i++)
+    {
+        if(e->events->onrelocate)
+            e->events->onrelocate(e, lvl);
+
+        e++;
+    }
 }
 
 
@@ -307,22 +300,18 @@ inline const bounding_rect_t *ent_get_bounding_rect(const ent_t *ent)
 bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
 {
     const bounding_rect_t *rect = ent_get_bounding_rect(ent);
-    uint x = ent->x + bg_get_scx(main_background);
-    uint y = ent->y + bg_get_scy(main_background);
+    uint x = ent->x + bg_get_scx(main_background) + rect->sx;
+    uint y = ent->y + bg_get_scy(main_background) + rect->sy;
     int cx = dir_get_x(direction);
     int cy = dir_get_y(direction);
 
     x += cx * dist + cx;
     y += cy * dist + cy;
-    
-    x += rect->sx;
-    y += rect->sy;
 
     if(x > 64 * 16 - 12 || y > 64 * 16 - 12)
         return false;
 
-    const uint w = 16 - rect->sx - rect->ex,
-     h = 16 - rect->sy - rect->ey;
+    const uint w = rect->w, h = rect->h;
 
     const uint dx[] = {0, w, 0, w};
     const uint dy[] = {0, 0, h, h};
@@ -356,10 +345,13 @@ bool ent_can_move(ent_t *ent, const direction_t direction, uint dist)
     for(uint i = 0; i < s; i++)
     {
         const ent_event_t *events = e[i]->events;
-        if(events->maypass && !events->maypass(e[i], ent))
+        if(!events->maypass)
             return false;
 
         if(events->ontouch && events->ontouch(e[i], ent, px, py))
+            return false;
+        
+        if(ent->events->ontouch && ent->events->ontouch(ent, e[i], px, py))
             return false;
     }
 
@@ -473,10 +465,10 @@ bool ent_mob_ontouch(ent_t *e, ent_t *other, u16 x, u16 y)
 
 void ent_draw(const ent_t *ent)
 {
-    spr_move(ent->sprite, ent->x, ent->y);
     
     if(ent_is_on_screen(ent)) {
         spr_show(ent->sprite);
+        spr_move(ent->sprite, ent->x, ent->y);
     } else {
         spr_hide(ent->sprite);
     }

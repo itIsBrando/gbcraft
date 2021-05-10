@@ -5,6 +5,7 @@
 #include <string.h>
 #include "memory.h"
 #include "text.h"
+#include "lib/DMA.h"
 
 /**
  * Checks to see if the entity is one that should be saved or not
@@ -208,7 +209,10 @@ void sve_write_to_persistant(const save_t *sav)
 void sve_load_save(save_t *save, level_t *lvl)
 {
     memcpy(lvl->map, save->map, sizeof(save->map));
-
+    // dma_copy(DMA_CHANNEL_3, save->map, lvl->map, sizeof(save->map));
+#ifdef DEBUG
+    text_print("SAVE SIZE:", 0, 2);
+#endif
     for(uint i = 0; i < save->ent_size; i++) {
         ent_t *e = &lvl->entities[i];
         *e = save->entities[i];
@@ -217,9 +221,6 @@ void sve_load_save(save_t *save, level_t *lvl)
         spr_set_priority(e->sprite, SPR_PRIORITY_HIGH);
         ent_load_events(e);
 
-        // if(e->events->init)
-        //     e->events->init(e);
-
         if(e->type == ENT_TYPE_PLAYER)
             lvl->player = e;
 
@@ -227,8 +228,10 @@ void sve_load_save(save_t *save, level_t *lvl)
         if(e->type == ENT_TYPE_PLAYER || e->type == ENT_TYPE_FURNITURE)
         {
             inventory_t *inv = e->type == ENT_TYPE_PLAYER ? &e->player.inventory : &e->furniture.inventory;
-
             item_t *item = inv->items;
+
+            inv->parent = e;
+            
             for(uint j = 0; j < inv->size; j++)
             {
                 item->parent = inv;
@@ -236,8 +239,6 @@ void sve_load_save(save_t *save, level_t *lvl)
                 item->name = item_lookup_name(&inv->items[j]);
                 item++;
             }
-
-            inv->parent = e;
         }
 
     }

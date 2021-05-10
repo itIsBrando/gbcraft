@@ -57,9 +57,7 @@ void ent_player_interact(const ent_t *plr); // not a standard event
 bool ent_slime_hurt(ent_t *, ent_t *, s8);
 bool ent_zombie_hurt(ent_t *e, ent_t *atker, s8 damage);
 
-void ent_player_onrelocate(ent_t *eOld, ent_t *eNew, level_t *lvl);
-
-bool ent_furniture_maypass(ent_t *f, ent_t *e);
+void ent_player_onrelocate(ent_t *e, level_t *lvl);
 
 bool ent_item_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
 bool ent_mob_ontouch(ent_t *e, ent_t *other, u16 x, u16 y);
@@ -70,5 +68,6 @@ void ent_player_set_active_item(ent_t *plr, item_t *item);
 bool plr_heal(ent_t *e, uint by);
 bool plr_pay_stamina(ent_t *plr, s8 amt);
 void plr_set_swim(ent_t *e, bool state);
+item_t *plr_get_active_item(const ent_t *plr);
 
 #endif

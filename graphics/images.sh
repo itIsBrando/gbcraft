@@ -1,4 +1,4 @@
-grit character_idle.bmp -gTEBFB00 -gu8 -ftc -gB4 
+grit character_idle.bmp -gTEBFB00 -gu8 -ftc -gB4
 
 # tile width & height: 16
 # tile trans: f8f8f8

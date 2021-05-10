@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "level.h"
+#include "item.h"
 
 #include "memory.h"
 #include "text.h"
@@ -13,7 +14,7 @@ inline u16 absa(s16 a, s16 b)
 
 void ent_slime_init(ent_t *e)
 {
-    e->slime.health = 10;
+    e->slime.health = 5 + (e->level->layer << 1);
 }
 
 
@@ -21,6 +22,16 @@ void ent_slime_update(ent_t *s)
 {
     slime_t *slime = &s->slime;
     direction_t d = dir_get(slime->xAccel, slime->yAccel);
+
+    ent_apply_knockback(s);
+    if(s->slime.invulernability)
+    {
+        s->slime.invulernability--;
+        spr_set_pal(s->sprite, slime->invulernability & 0x1);
+        
+        ent_draw(s);
+        return;
+    }
 
     if(!ent_move(s, d, 1) || (rnd_random() & 0x1F) == 0)
     {
@@ -56,13 +67,6 @@ void ent_slime_update(ent_t *s)
     else
         spr_set_tile(s->sprite, 61);
 
-    ent_apply_knockback(s);
-    if(s->slime.invulernability)
-    {
-        s->slime.invulernability--;
-        spr_set_pal(s->sprite, slime->invulernability & 0x1);
-    }
-
     ent_draw(s);
 }
 
@@ -81,6 +85,9 @@ bool ent_slime_hurt(ent_t *e, ent_t *atker, s8 damage)
     e->slime.invulernability = 10;
 
     if(e->slime.health <= 0) {
+        // if((rnd_random() & 0x3) == 0)
+            ent_item_new(e->level, e->x, e->y, &ITEM_SLIME, 1);
+
         ent_kill(e);
         return true;
     }

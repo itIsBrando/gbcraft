@@ -22,6 +22,7 @@ void ent_item_new(level_t *level, u16 x, u16 y, const item_t *item, u8 cnt)
     e->xKnockback = rnd_random_bounded(-1, 1) * 6;
     e->yKnockback = rnd_random_bounded(-1, 1) * 6;
 
+    spr_set_pal(e->sprite, item->palette);
     spr_set_size(e->sprite, SPR_SIZE_8x8);
     spr_set_tile(e->sprite, item->tile);
 }

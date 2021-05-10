@@ -3,6 +3,10 @@
 
 #include "types.h"
 
+
+#define TILE_FLIP_HORIZONTAL(t) ((t) | BIT(0xA)) /** flips an 8-bit tile @warning only for regular bgs!! */
+#define TILE_FLIP_VERTICAL(t) ((t) | BIT(0xB)) /** flips an 8-bit tile @warning only for regular bgs!! */
+
 u16 RGB15(u16 r, u16 g, u16 b);
 
 int dir_get_x(direction_t direction); // @todo move elsewhere

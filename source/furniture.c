@@ -1,6 +1,8 @@
 #include "menu.h"
 #include "entity.h"
 #include "item.h"
+#include "lighting.h"
+#include "level.h"
 
 #include "obj.h"
 #include "text.h"
@@ -109,6 +111,15 @@ const recipe_t CRAFTING_RECIPES[] = {
             CREATE_COST(ITEM_TYPE_IRON, 5),
         }
     },
+    // { // lantern
+    //     .result=&ITEM_LANTERN,
+    //     .costs_num=3,
+    //     .costs = {
+    //         CREATE_COST(ITEM_TYPE_COAL, 5),
+    //         CREATE_COST(ITEM_TYPE_WOOD, 5),
+    //         CREATE_COST(ITEM_TYPE_IRON, 1),
+    //     }
+    // }
 };
 
 
@@ -174,11 +185,30 @@ const recipe_t ANVIL_RECIPE[] = {
     },
 };
 
+void ent_lantern_update(ent_t *e);
+
 
 void ent_furniture_update(ent_t *e)
 {
+    if(e->furniture.type == FURNITURE_TYPE_LANTERN) {
+        ent_lantern_update(e);
+        return;
+    }
+
     if(ent_is_on_screen(e))
         spr_move(e->sprite, e->x, e->y);
+}
+
+
+void ent_lantern_update(ent_t *e)
+{
+    if(ent_is_on_screen(e))
+    {
+        uint tx = lvl_to_tile_x(e->x);
+        uint ty = lvl_to_tile_y(e->y);
+
+        lt_create_source(tx, ty);
+    }
 }
 
 
@@ -205,6 +235,8 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
     case FURNITURE_TYPE_ANVIL:
         mnu_open_crafting(plr, ANVIL_RECIPE, sizeof(ANVIL_RECIPE) / sizeof(ANVIL_RECIPE[0]));
         break;
+    case FURNITURE_TYPE_LANTERN:
+        return false;
     default:
         text_error("Unknown furniture type");
         return false;
@@ -214,14 +246,14 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
 }
 
 
-bool ent_furniture_maypass(ent_t *f, ent_t *e)
-{
-    return false;
-}
-
-
 // sprite indexes for 16x16 furniture sprites
-const u8 _fur_spr[] = {53, 49, 45, 65};
+const u8 _fur_spr[] = {
+    53, 
+    49,
+    45,
+    65,
+    45, // lantern @todo add sprite
+};
 
 inline u8 ent_furniture_get_tile(const ent_t *e)
 {

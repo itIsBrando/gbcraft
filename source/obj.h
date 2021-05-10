@@ -96,6 +96,12 @@ void spr_copy(obj_t *, const uint index);
  */
 void spr_copy_all();
 
+
+/**
+ * Copies all sprites to OAM using DMA channel 3. Should be faster than `spr_copy_all`
+ */
+void spr_copy_all_DMA();
+
 void spr_move(obj_t *, const uint, const uint);
 
 
