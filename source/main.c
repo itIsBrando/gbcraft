@@ -15,6 +15,7 @@
 #include "memory.h"
 #include "keypad.h"
 #include "lib/DMA.h"
+#include "lib/mem.h"
 
 #include "tiles16.h"
 #include "character_idle.h"
@@ -40,7 +41,7 @@ reset:
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
-	memcpy16((u16*)sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
+	mem_cpy16((u16*)sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
 	memcpy16((u16*)sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen >> 1);
 	memcpy16((u16*)sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen >> 1);
 	memcpy16((u16*)background_palette_mem, (u16*)tilesetPal, tilesetPalLen >> 1);
