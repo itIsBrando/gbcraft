@@ -1,7 +1,7 @@
 #include <gba_video.h>
 
 #include "bg.h"
-#include "memory.h"
+#include "lib/mem.h"
 #include "text.h"
 
 
@@ -212,7 +212,7 @@ void bg_fill(const BG_REGULAR *bg, uint x, uint y, uint w, uint h, u16 tile)
 void bg_load_tiles(const uint8_t charbank, const uint position, const unsigned char *data, const uint size, const bool is8bpp)
 {
 	memcpy16((u16*)tile_mem[charbank][position << is8bpp],
-     (u16*)data, size >> 1);
+     (u16*)data, size);
 }
 
 

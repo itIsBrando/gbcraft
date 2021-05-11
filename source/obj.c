@@ -1,5 +1,5 @@
 #include "obj.h"
-#include "memory.h"
+#include "random.h"
 #include "lib/DMA.h"
 
 #include <gba_video.h>

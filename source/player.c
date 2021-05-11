@@ -8,11 +8,11 @@
 #include "lighting.h"
 
 #include "window.h"
-#include "keypad.h"
+#include "lib/keypad.h"
 #include "bg.h"
 #include "obj.h"
 #include "text.h"
-#include "memory.h"
+#include "random.h"
 #include <stdlib.h>
 #include <gba_systemcalls.h>
 

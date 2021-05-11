@@ -1,6 +1,6 @@
 #include "entity.h"
 #include "level.h"
-#include "memory.h"
+#include "random.h"
 
 #include "item.h"
 #include "bg.h"

@@ -6,8 +6,8 @@
 #include "text.h"
 #include <stdlib.h>
 #include <string.h>
-#include "keypad.h"
-#include "memory.h"
+#include "lib/keypad.h"
+#include "random.h"
 
 static BG_REGULAR *target_bg;
 uint lvl_ticks;
@@ -96,9 +96,9 @@ level_t *lvl_new(uint layer, level_t *parent)
         text_error("Could not allocate heap for level");
     lvl->layer = layer;
     lvl->parent = (struct level_t*)parent;
-    // lvl->size = 64;
     lvl->mob_density = 0;
     lvl->ent_size = 0;
+    lvl_set_world(lvl);
 
     memset(lvl->data, 0, LEVEL_SIZE);
 
@@ -246,7 +246,7 @@ void lvl_change_level(level_t *newLevel)
         lvl_unload(lvl_current);
 
     lvl_current = newLevel;
-    world[newLevel->layer] = newLevel;
+    lvl_set_world(newLevel);
 
     ent_t *e = lvl_current->entities;
     for(uint i = 0; i < lvl_current->ent_size; i++)
@@ -261,6 +261,15 @@ void lvl_change_level(level_t *newLevel)
     }
 
     lvl_blit();
+}
+
+
+/**
+ * Sets the active level
+ */
+inline void lvl_set_world(level_t *lvl)
+{
+    world[lvl->layer] = lvl;
 }
 
 

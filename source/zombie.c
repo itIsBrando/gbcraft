@@ -1,5 +1,5 @@
 #include "obj.h"
-#include "memory.h"
+#include "random.h"
 #include "bg.h"
 #include <stdlib.h>
 

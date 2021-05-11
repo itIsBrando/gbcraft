@@ -27,10 +27,10 @@ bool sve_is_entity_essential(const ent_t *e)
  */
 uint sve_compute_checksum(const save_t *save)
 {
-    u8 *ptr = (u8*)save->map;
+    u8 *ptr = (u8*)save->lvls;
     uint checksum = 0;
 
-    for(uint i = 0; i < sizeof(save->map); i++)
+    for(uint i = 0; i < sizeof(save_level_t) * 2; i++)
         checksum += *ptr++;
 
     return checksum;
@@ -45,29 +45,51 @@ bool sve_validate_checksum(const save_t *save)
     return save->checksum == sve_compute_checksum(save);
 }
 
+
+/**
+ * @param lvl can be NULL
+ * @param layer layer of the level
+ */
+void sve_save_level(save_t *save, level_t *lvl, uint layer)
+{
+    save_level_t *saveLvl = &save->lvls[layer];
+    uint size = 0;
+    
+    if(lvl == NULL)
+    {
+        saveLvl->is_generated = false;
+        return;
+    }
+
+    saveLvl->is_generated = true;
+    
+    for(uint i = 0; i < lvl->ent_size; i++)
+    {
+        if(sve_is_entity_essential(&lvl->entities[i])) {
+            saveLvl->entities[size++] = lvl->entities[i];
+        }
+    }
+    
+    saveLvl->ent_size = size;
+    memcpy(saveLvl->map, lvl->map, sizeof(lvl->map));
+}
+
+
 /**
  * Saves a level for powering off
  */
-void sve_save_level(level_t *lvl)
+void sve_save_game(level_t **world)
 {
     save_t *save = calloc(sizeof(save_t), sizeof(uint8_t));
-    uint index = 0;
 
-    memcpy(save->test, "TSTWORLD", 8);
+    memcpy(save->name, "TSTWORLD", 8);
 
-    // copy entities
-    for(uint i = 0; i < lvl->ent_size; i++)
-    {
-        if(sve_is_entity_essential(&lvl->entities[i]))
-            save->entities[index++] = lvl->entities[i];
-    }
+    for(uint i = 0; i < 3; i++)
+        sve_save_level(save, world[i], i);
 
-    save->ent_size = index;
-    save->layer = lvl->layer;
+    save->layer = lvl_get_current()->layer;
     save->scx = bg_get_scx(main_background);
     save->scy = bg_get_scy(main_background);
-
-    memcpy(&save->map, lvl->map, sizeof(save->map));
 
     save->checksum = sve_compute_checksum(save);
     sve_write_to_persistant(save);
@@ -206,19 +228,26 @@ void sve_write_to_persistant(const save_t *sav)
 }
 
 
-void sve_load_save(save_t *save, level_t *lvl)
+void sve_load_level(save_t *save, level_t **world, uint layer)
 {
-    memcpy(lvl->map, save->map, sizeof(save->map));
-    // dma_copy(DMA_CHANNEL_3, save->map, lvl->map, sizeof(save->map));
-#ifdef DEBUG
-    text_print("SAVE SIZE:", 0, 2);
-#endif
-    for(uint i = 0; i < save->ent_size; i++) {
+    level_t *lvl = world[layer];
+    save_level_t *saveLvl = &save->lvls[layer];
+
+    if(!saveLvl->is_generated) {
+        world[layer] = NULL;
+        return;
+    }
+
+    if(!lvl) {
+        world[layer] = lvl = lvl_new(layer, NULL);
+    }
+
+    memcpy(lvl->map, saveLvl->map, sizeof(lvl->map));
+
+    for(uint i = 0; i < saveLvl->ent_size; i++) {
         ent_t *e = &lvl->entities[i];
-        *e = save->entities[i];
-        e->sprite = spr_alloc(e->x, e->y, ent_get_tile(e));
-        spr_set_size(e->sprite, SPR_SIZE_16x16);
-        spr_set_priority(e->sprite, SPR_PRIORITY_HIGH);
+        *e = saveLvl->entities[i];
+        e->sprite = NULL;
         ent_load_events(e);
 
         if(e->type == ENT_TYPE_PLAYER)
@@ -243,20 +272,20 @@ void sve_load_save(save_t *save, level_t *lvl)
 
     }
     
-    lvl->ent_size = save->ent_size;
-    lvl->layer = save->layer;
-
-    bg_move(main_background, save->scx, save->scy);
+    lvl->ent_size = saveLvl->ent_size;
+    lvl->layer = layer;
 }
 
 
 /**
  * Call from outside
  * @param lvl level_t to fill
+ * @returns level that is currently active in savefile
  */
-void sve_load_from_persistant(level_t *lvl)
+level_t *sve_load_from_persistant(level_t **world)
 {
     save_t *save = malloc(sizeof(save_t));
+    uint layer = save->layer;
 
     REG_WAITCNT = 0x4317; // set waitstates based on GBAtek
 
@@ -266,8 +295,19 @@ void sve_load_from_persistant(level_t *lvl)
         text_error("CHECKSUM FAILED!!");
 
     text_print("LOADING WORLD", 0, 1);
-    text_print(save->test, 14, 1);
+    text_print(save->name, 14, 1);
 
-    sve_load_save(save, lvl);
+    for(uint i = 0; i < 3; i++)
+    {
+        sve_load_level(save, world, i);
+
+        if(i && world[i])
+            world[i]->parent = world[i-1]->parent;
+    }
+
+    bg_move(main_background, save->scx, save->scy);
+
     free(save);
+
+    return world[layer];
 }

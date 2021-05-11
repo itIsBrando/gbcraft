@@ -3,6 +3,7 @@
 
 #include "../defines.h"
 
-void mem_cpy16(void *dst, void *src, uint size);
+void memcpy16(void *dst, void *src, uint size);
+void memset16(void *dst, u16 c, uint size);
 
 #endif

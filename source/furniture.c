@@ -6,7 +6,7 @@
 
 #include "obj.h"
 #include "text.h"
-#include "memory.h"
+#include "random.h"
 
 #define CREATE_COST(itemType, amt) {\
  .item_type=(itemType),\
@@ -119,7 +119,7 @@ const recipe_t CRAFTING_RECIPES[] = {
     //         CREATE_COST(ITEM_TYPE_WOOD, 5),
     //         CREATE_COST(ITEM_TYPE_IRON, 1),
     //     }
-    // }
+    // },
 };
 
 
@@ -149,7 +149,15 @@ const recipe_t FURNACE_RECIPES[] = {
             CREATE_COST(ITEM_TYPE_GOLD_ORE, 5),
             CREATE_COST(ITEM_TYPE_COAL, 1),
         }
-    }
+    },
+    { // golden apple
+        .result=&ITEM_GOLDEN_APPLE,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_APPLE, 1),
+            CREATE_COST(ITEM_TYPE_GOLD, 2),
+        },
+    },
 };
 
 const recipe_t ANVIL_RECIPE[] = {

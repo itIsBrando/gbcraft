@@ -79,9 +79,9 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("WOOD SWORD", 18, ITEM_TYPE_TOOL, 2, 1, .tooltype=TOOL_TYPE_SWORD, .palette=1),
     DEFINE_ITEM("CHEST", 33, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_CHEST),
     DEFINE_ITEM("IRON ORE", 12, ITEM_TYPE_IRON_ORE, 4, 1),
-    DEFINE_ITEM("GOLD ORE", 2, ITEM_TYPE_GOLD_ORE, 4, 1),
+    DEFINE_ITEM("GOLD ORE", 10, ITEM_TYPE_GOLD_ORE, 4, 1, .palette=3),
     DEFINE_ITEM("IRON", 13, ITEM_TYPE_IRON, 4, 1),
-    DEFINE_ITEM("GOLD", 2, ITEM_TYPE_GOLD, 4, 1),
+    DEFINE_ITEM("GOLD", 9, ITEM_TYPE_GOLD, 4, 1, .palette=1),
     DEFINE_ITEM("FURNACE", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_FURNACE),
     DEFINE_ITEM("COAL", 11, ITEM_TYPE_COAL, 4, 1),
     DEFINE_ITEM("DOOR", 36, ITEM_TYPE_DOOR, 5, 1),
@@ -98,6 +98,7 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("APPLE", 43, ITEM_TYPE_APPLE, 10, 1),
     DEFINE_ITEM("LANTERN", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_LANTERN),
     DEFINE_ITEM("SLIME", 12, ITEM_TYPE_SLIME, 4, 1, .palette=1),
+    DEFINE_ITEM("GLDN APPLE", 43, ITEM_TYPE_GOLDEN_APPLE, 10, 1, .palette=1),
 };
 
 
@@ -343,7 +344,9 @@ bool item_furniture_interact(item_t *item, ent_t *plr, const tile_t *tile, uint 
 
 bool item_food_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, uint y)
 {
-    if(plr_heal(plr, 2))
+    uint amt = 2 + (item->type == ITEM_TYPE_GOLDEN_APPLE) * 3;
+
+    if(plr_pay_stamina(plr, 2) && plr_heal(plr, amt))
     {
         item_change_count(item, -1);
         return true;

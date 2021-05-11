@@ -33,5 +33,6 @@ void lvl_blit();
 
 void lvl_change_level(level_t *newLevel);
 level_t *lvl_get_current();
+void lvl_set_world(level_t *lvl);
 
 #endif

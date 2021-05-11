@@ -3,20 +3,21 @@
 
 ### Features
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
-- [ ] Add `interrupt.h`
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
-- [ ] Move tile rending functions into a new file, `render.c`/`.h`
-- [ ] Create sub-classes for entity creation. ex: `ent_slime_add`
-- [ ] Allow players to *interact* with entities, in addition to attack
-- [ ] Add gold
 - [ ] Add gem
+- [ ] Add gem tools
+- [ ] Add lava
 - [ ] Add seed selection
 - [ ] Add 'how-to`/`controls` menu
-- [ ] Add golden apple
 - [ ] Add lantern lighting effect
 - [ ] Add lantern sprite
-- [ ] Rewrite `memcpy16` and `memset16` routines in assembly
 - [ ] Use DMA transfers to copy sprites. They broke rn :'(
+- [x] Add levels are saved!
+- [x] Add golden apple
+- [x] Add gold
+- [x] Create sub-classes for entity creation. ex: `ent_slime_add`
+- [x] Move tile rending functions into a new file, `render.c`/`.h`
+- [x] Rewrite `memcpy16` and `memset16` routines in assembly
 - [x] Add slime tile drop
 - [x] Add bonus damage to sword
 - [x] Add pickup tool sprite
@@ -93,6 +94,7 @@
 - [ ] Chests can wrongly be picked up with items in it
 - [ ] Add pause menu
 - [ ] Hide player's cursor when a menu is opened
+- [ ] Have `failed checksum` error return user to main menu, rather than brute-force a error-bound load
 - [x] Add border around in-game menus
 - [x] change `player.activeItem` to be an index to item rather than pointer
 - [x] Change `ent_maypass` to a `bool` rather than a costly function calls
@@ -122,7 +124,7 @@
 - [ ] Blocks can be placed on top of player
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
 - [ ] Inventory cursor does not show up after entering lower level
-- [ ] Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)
+- [ ] **Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)**
 - [ ] Swimming animation is messed up when player spawns in water
 - [ ] Random crashes while spamming `A` and harvesting wheat
 - [ ] Crashes after picking up live item entity when stairs are used

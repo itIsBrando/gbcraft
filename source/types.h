@@ -58,6 +58,7 @@ typedef enum {
     ITEM_TYPE_BREAD,
     ITEM_TYPE_APPLE,
     ITEM_TYPE_SLIME,
+    ITEM_TYPE_GOLDEN_APPLE,
 } item_type_t; // order relevant?
 
 

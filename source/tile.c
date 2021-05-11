@@ -5,7 +5,7 @@
 #include "entity.h"
 #include "menu.h"
 
-#include "memory.h"
+#include "random.h"
 #include "text.h"
 #include "bg.h"
 

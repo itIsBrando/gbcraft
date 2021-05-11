@@ -3,9 +3,9 @@
 #include "level.h"
 
 #include "window.h"
-#include "keypad.h"
+#include "lib/keypad.h"
 #include "text.h"
-#include "memory.h"
+#include "random.h"
 #include <stdlib.h>
 
 typedef u16 terr_t;

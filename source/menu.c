@@ -2,9 +2,9 @@
 #include "obj.h"
 #include "text.h"
 #include "window.h"
-#include "keypad.h"
+#include "lib/keypad.h"
 #include <gba_systemcalls.h>
-#include "memory.h"
+#include "random.h"
 #include <stdlib.h>
 
 #include "menu.h"

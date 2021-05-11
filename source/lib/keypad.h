@@ -1,7 +1,7 @@
 #ifndef KEYPAD_H
 #define KEYPAD_H
 
-#include "defines.h"
+#include "../defines.h"
 
 typedef enum KEYPAD_BITS {
 	KEY_A		=	(1<<0),	/*keypad A button */

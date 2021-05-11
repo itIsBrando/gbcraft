@@ -2,7 +2,7 @@
 #include "level.h"
 #include "item.h"
 
-#include "memory.h"
+#include "random.h"
 #include "text.h"
 
 // absolute value add

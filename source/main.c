@@ -12,8 +12,8 @@
 #include "obj.h"
 #include "bg.h"
 #include "window.h"
-#include "memory.h"
-#include "keypad.h"
+#include "lib/keypad.h"
+#include "random.h"
 #include "lib/DMA.h"
 #include "lib/mem.h"
 
@@ -41,10 +41,10 @@ reset:
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
-	mem_cpy16((u16*)sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16((u16*)sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16((u16*)sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen >> 1);
-	memcpy16((u16*)background_palette_mem, (u16*)tilesetPal, tilesetPalLen >> 1);
+	memcpy16((u16*)sprite_palette_mem, (u16*)character_idlePal, character_idlePalLen);
+	memcpy16((u16*)sprite_palette_mem + 16, (u16*)character_idlePal, character_idlePalLen);
+	memcpy16((u16*)sprite_palette_mem + 32, (u16*)character_idlePal, character_idlePalLen);
+	memcpy16((u16*)background_palette_mem, (u16*)tilesetPal, tilesetPalLen);
 
 	// copy sprite to tile 1 in tileblock 4
 	bg_load_tiles(4, 1, character_idleTiles, character_idleTilesLen, false);
@@ -54,17 +54,21 @@ reset:
 	bg_load_tiles(1, 1, tiles16Tiles, tiles16TilesLen, false); // load 4bpp tiles
 
 	// set first tile to be non-transparent black
-	memset16((u16*)&tile_mem[0][0], 0xCCCC, 32);
+	memset16((u16*)&tile_mem[0][0], 0xCCCC, 64);
 	// set tile 517 to be transparent black
-	memset16((u16*)&tile_mem[0][517], 0x0000, 16); // this tile is 4bpp
+	memset16((u16*)&tile_mem[0][517], 0x0000, 32); // this tile is 4bpp
 	background_palette_mem[0xC] = RGB15(4, 4, 4);
 
 	background_palette_mem[0] = RGB15(2, 2, 2);
 	background_palette_mem[16 + 8] = RGB15(255, 0, 0); // set color red for text
 	background_palette_mem[16 + 4] = RGB15(6, 6, 6); // set bg color to darkish-black for pal 1
+	sprite_palette_mem[13] = RGB15(29, 31, 0);
+	sprite_palette_mem[16 + 6] = RGB15(29, 31, 0); // yellow for golden apple
 	sprite_palette_mem[16 + 12] = RGB15(0xff, 0xff, 0xff);
+	sprite_palette_mem[16 + 3] = RGB15(29, 31, 0); // yellow for gold ore
 	sprite_palette_mem[16 + 2] = RGB15(0xd, 8, 07); // set color brown (for wood tools)
 	sprite_palette_mem[32 + 2] = RGB15(29, 29, 28); // set color cream (for iron tools)
+	sprite_palette_mem[48 + 2] = RGB15(29, 31, 0); // set color yellow (for gold tools)
 	sprite_palette_mem[16 + 8] = RGB15(0, 29, 3);
 
 	BG_REGULAR bg;
@@ -114,9 +118,8 @@ reset:
 		item_add_to_inventory(&ITEM_WOOD_AXE, &plr->player.inventory);
 		plr_move_to(plr, 32, 32);
 	} else {
-		sve_load_from_persistant(level);
+		level = sve_load_from_persistant(world);
 		plr = lvl_get_player(level);
-		item_add_to_inventory(&ITEM_LANTERN, &plr->player.inventory);
 	}
 
 	lvl_change_level(level);
@@ -152,7 +155,7 @@ reset:
 		}
 		else if(keys == KEY_SELECT)
 		{
-			sve_save_level(level);
+			sve_save_game(world);
 		}
 
 		lvl_ticks++;

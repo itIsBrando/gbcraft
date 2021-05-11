@@ -34,6 +34,7 @@
 #define ITEM_APPLE          ALL_ITEMS[28]
 #define ITEM_LANTERN        ALL_ITEMS[29]
 #define ITEM_SLIME          ALL_ITEMS[30]
+#define ITEM_GOLDEN_APPLE   ALL_ITEMS[31]
 
 extern const item_t ALL_ITEMS[];
 /**

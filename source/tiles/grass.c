@@ -3,7 +3,7 @@
 #include "../item.h"
 #include "../tile.h"
 
-#include "../memory.h"
+#include "../random.h"
 
 
 bool tile_grass_maypass(ent_t *e)

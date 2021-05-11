@@ -1,21 +1,5 @@
-#include "memory.h"
+#include "random.h"
 
-
-void memcpy16(u16 *dst, const u16 *src, u16 hwsize)
-{
-	for(uint i = 0; i < hwsize; i++)
-	{
-		*dst = *src;
-		dst++, src++;
-	}
-}
-
-
-void memset16(u16 *dst, const u16 c, u16 hwsize)
-{
-	for(u16 i = 0; i < hwsize; i++)
-		*dst++ = c;
-}
 
 static int _rnd_seed;
 

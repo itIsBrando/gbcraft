@@ -3,7 +3,7 @@
 #include "../item.h"
 #include "../tile.h"
 
-#include "../memory.h"
+#include "../random.h"
 
 void tile_stone_hurt(level_t *lvl, uint dmg, uint x, uint y)
 {
