@@ -109,6 +109,7 @@ inline void sve_send_command(u8 cmd)
     REG_EEPROM_CMD1 = cmd;
 }
 
+
 /**
  * Sets bank number for EEPROMs larger than 64KBytes
  * @param bank [0-1]
@@ -280,7 +281,7 @@ void sve_load_level(save_t *save, level_t **world, uint layer)
 /**
  * Call from outside
  * @param lvl level_t to fill
- * @returns level that is currently active in savefile
+ * @returns level that is currently active in savefile, NULL if failed
  */
 level_t *sve_load_from_persistant(level_t **world)
 {
@@ -291,8 +292,11 @@ level_t *sve_load_from_persistant(level_t **world)
 
     sve_read_data((u8*)save, sizeof(save_t), 0);
 
-    if(!sve_validate_checksum(save))
-        text_error("CHECKSUM FAILED!!");
+    if(!sve_validate_checksum(save)) {
+        text_print("CANNOT LOAD", 0, 1);
+        text_error("CHECKSUM FAILED");
+        return NULL;
+    }
 
     text_print("LOADING WORLD", 0, 1);
     text_print(save->name, 14, 1);

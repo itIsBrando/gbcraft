@@ -19,7 +19,7 @@ item_event_t ITEM_EVENTS[] =
         .interact=item_stone_interact
     },
     [2]={ // tools
-        .canattack=item_can_attack_all,
+        .canattack=true,
         .interact=item_tool_interact
     },
     [3]={ // furniture

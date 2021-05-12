@@ -157,7 +157,7 @@ typedef struct {
         uint x,      // absolute tile x of the tile 
         uint y      // absolute tile y of the tile
     ); // called when a player presses `A` with this item in their inventory
-    bool (*canattack)(item_t *, ent_t *);
+    bool canattack;
 } item_event_t;
 
 

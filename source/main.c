@@ -37,7 +37,6 @@ extern void foo(const char *); // @todo remove the need for this
 BG_REGULAR *main_background;
 
 int main(void) {
-reset:
 	REG_DISPCNT = 1; //  mode 1: bg0=reg bg1=reg bg2=aff bg3=none
 
 	// copy sprite data and palette
@@ -72,6 +71,7 @@ reset:
 	sprite_palette_mem[16 + 8] = RGB15(0, 29, 3);
 
 	BG_REGULAR bg;
+reset:
 	main_background = &bg;
 	bg_affine_init(main_background, 12, 0, 2);
 	bg_set_size(main_background, BG_SIZE_AFF_128x128);
@@ -118,7 +118,9 @@ reset:
 		item_add_to_inventory(&ITEM_WOOD_AXE, &plr->player.inventory);
 		plr_move_to(plr, 32, 32);
 	} else {
-		level = sve_load_from_persistant(world);
+		if(!(level = sve_load_from_persistant(world)))
+			goto reset;
+
 		plr = lvl_get_player(level);
 	}
 

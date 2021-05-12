@@ -94,7 +94,7 @@
 - [ ] Chests can wrongly be picked up with items in it
 - [ ] Add pause menu
 - [ ] Hide player's cursor when a menu is opened
-- [ ] Have `failed checksum` error return user to main menu, rather than brute-force a error-bound load
+- [x] Have `failed checksum` error return user to main menu, rather than brute-force a error-bound load
 - [x] Add border around in-game menus
 - [x] change `player.activeItem` to be an index to item rather than pointer
 - [x] Change `ent_maypass` to a `bool` rather than a costly function calls

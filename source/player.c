@@ -429,7 +429,7 @@ void ent_player_interact(const ent_t *plr)
         }
     }
 
-    uint x = lvl_to_tile_x(124), y = lvl_to_tile_y(84);
+    uint x = lvl_to_tile_x(120), y = lvl_to_tile_y(80);
 
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
@@ -509,6 +509,17 @@ void plr_kill(ent_t *e)
     }
     
     lt_hide();
+}
+
+
+/**
+ * Hides the extraneous sprites related to the player
+ * @todo implement
+ */
+void plr_hide()
+{
+    spr_hide(spr);
+    spr_hide(swim_sprite);
 }
 
 

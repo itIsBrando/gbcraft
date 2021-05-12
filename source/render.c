@@ -12,7 +12,7 @@ static void tile_render_single_8x8(const level_t *lvl, tile_t *tile, u16 x, u16 
 {
     bg_fill(target_bg, x, y, 2, 2, tile->tiling.center);
 
-    tile_render_nearby(SURROUNDING_DOWN | SURROUNDING_LEFT | SURROUNDING_UP | SURROUNDING_RIGHT, lvl, tile, x, y);
+    tile_render_nearby(lvl, tile, x, y);
 }
 
 
@@ -25,7 +25,7 @@ static void tile_render_single_16x16(const level_t *lvl, tile_t *tile, u16 x, u1
 
     bg_rect(target_bg, x, y, 2, 2, data);
 
-    tile_render_nearby(SURROUNDING_DOWN | SURROUNDING_LEFT | SURROUNDING_UP | SURROUNDING_RIGHT, lvl, tile, x, y);
+    tile_render_nearby(lvl, tile, x, y);
 }
 
 
@@ -46,7 +46,7 @@ static void tile_render_top_bot(const level_t *lvl, tile_t *tile, u16 x, u16 y)
     if(mask & SURROUNDING_UP)
         tile_render_top_bot(lvl, tile, x, y - 1);
 
-    tile_render_nearby(mask, lvl, tile, x, y);
+    tile_render_nearby(lvl, tile, x, y);
 }
 
 static bool _use_recursion;
@@ -122,16 +122,15 @@ static tile_surround_mask _render_9pt(const level_t *lvl, tile_t *tile, u16 x, u
 }
 
 
-void tile_render_nearby(tile_surround_mask mask, const level_t *lvl, const tile_t *tile, u16 x, u16 y)
+void tile_render_nearby(const level_t *lvl, const tile_t *tile, u16 x, u16 y)
 {
-
     if(!_use_recursion)
         return;
 
     for(uint i = 0; i < 8; i++)
     {
-        int xx = x + (dir_get_x(i) << 1),
-            yy = y + (dir_get_y(i) << 1);
+        int xx = x + (dir_get_x(i) * 2),
+            yy = y + (dir_get_y(i) * 2);
         if(xx < 0 || yy < 0 || xx >= LEVEL_WIDTH*2 || yy >= LEVEL_HEIGHT*2)
             continue;
         
@@ -146,9 +145,9 @@ void tile_render_nearby(tile_surround_mask mask, const level_t *lvl, const tile_
 
 static void tile_render_9pt(const level_t *lvl, tile_t *tile, u16 x, u16 y)
 {
-    tile_surround_mask mask = _render_9pt(lvl, tile, x, y);
+    _render_9pt(lvl, tile, x, y);
 
-    tile_render_nearby(mask, lvl, tile, x, y);
+    tile_render_nearby(lvl, tile, x, y);
 }
 
 
