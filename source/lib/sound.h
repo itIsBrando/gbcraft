@@ -3,6 +3,7 @@
 
 #include "../defines.h"
 
+
 #define _BASE 0x04000000
 #define REG_1_SWEEP *((vu16*)(_BASE + 0x60))
 #define REG_1_CNT   *((vu16*)(_BASE + 0x62))
@@ -127,6 +128,7 @@ typedef enum {
  */
 #define SND_SQU_CNT_MAKE(len, duty, stepTime, mode, volume) ((len & SND_SQR_LEN_MASK) | (duty) | (((stepTime) << 8) & SND_SQR_STEP_TIME_MASK) | (mode) | (((volume) << 12) & SND_SQR_ENV_VOL_MASK) )
 
+
 typedef struct {
     snd_sweep_t sweep;
     snd_square_frequency_t freq;
@@ -134,7 +136,9 @@ typedef struct {
 } snd_square_t;
 
 
-void snd_play_square(snd_square_t *snd);
+extern const snd_square_t SOUND_EFFECT_PUNCH;
+
+void snd_play_square(const snd_square_t *snd);
 
 
 #endif

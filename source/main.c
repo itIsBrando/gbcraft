@@ -193,11 +193,6 @@ reset:
 		{
 			spr_hide(cursor);
 		}
-        
-        if(keys == KEY_B) {
-            snd_play_square(NULL);
-            text_print("SOUND PLAYED", 0, 0);   
-        }
 		
 		spr_copy_all();
 		// spr_copy_all_DMA();

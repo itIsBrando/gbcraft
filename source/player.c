@@ -9,6 +9,7 @@
 
 #include "window.h"
 #include "lib/keypad.h"
+#include "lib/sound.h"
 #include "bg.h"
 #include "obj.h"
 #include "text.h"
@@ -293,7 +294,7 @@ const direction_t _dirs[] = {DIRECTION_RIGHT, DIRECTION_LEFT, DIRECTION_DOWN, DI
     DIRECTION_RIGHT_DOWN, DIRECTION_LEFT_DOWN, DIRECTION_RIGHT_UP, DIRECTION_LEFT_UP
 };
 
-// inverts the direction @todo move elsewhere
+/** inverts the direction @todo move elsewhere */
 inline direction_t dir_get_opposite(direction_t direction)
 {
     return _dirs[direction];
@@ -409,6 +410,7 @@ int plr_get_attack_bonus(const item_t *item)
     return 1;
 }
 
+
 /**
  * Shows a sprite when the player interacts with a tile
  * @param dir player's facing direction
@@ -464,6 +466,8 @@ void ent_player_interact(const ent_t *plr)
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
 
+    snd_play_square(&SOUND_EFFECT_PUNCH);
+    
     const tile_t *t = lvl_get_tile(plr->level, x, y);
     // interact with held item
     if(active_item)
