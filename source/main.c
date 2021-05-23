@@ -30,6 +30,7 @@
 #include "item.h"
 #include "menu.h"
 #include "lighting.h"
+#include "lib/sound.h"
 
 
 extern const char FLASH_ID_TEXT[];
@@ -142,8 +143,8 @@ reset:
 		{
 			ent_player_interact(plr);
 			// cursor @todo move this elsewhere
-			uint x = (plr->x+4) + (dir_get_x(plr->dir) * 9);
-			uint y = (plr->y+4) + (dir_get_y(plr->dir) * 11);
+			uint x = 116 + (dir_get_x(plr->dir) * 9);
+			uint y = 76 + (dir_get_y(plr->dir) * 11);
 			item_set_icon(cursor, plr_get_active_item(plr));
 			curTime = 10;
 			spr_move(cursor, x, y);
@@ -192,6 +193,11 @@ reset:
 		{
 			spr_hide(cursor);
 		}
+        
+        if(keys == KEY_B) {
+            snd_play_square(NULL);
+            text_print("SOUND PLAYED", 0, 0);   
+        }
 		
 		spr_copy_all();
 		// spr_copy_all_DMA();

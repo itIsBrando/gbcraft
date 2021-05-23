@@ -19,16 +19,20 @@
 static void ent_move_all(level_t *lvl, const direction_t direction, const uint dist);
 
 static obj_t *swim_sprite = NULL;
+static obj_t *hit_sprite = NULL;
+uint hit_timer = 0;
+
 
 void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
     e->player.removed = false;
+    e->player.is_swimming = false;
     e->player.active_item = 0;
     
     e->level->player = e;
-	e->player.max_health = e->player.health = 20;
-	e->player.max_stamina = e->player.stamina = 20;
+    e->player.max_health = e->player.health = 20;
+    e->player.max_stamina = e->player.stamina = 20;
 }
 
 
@@ -130,6 +134,12 @@ void ent_player_update(ent_t *plr)
                 spr_set_tile(plr->sprite, 22);
         }
     }
+    
+    if(hit_timer)
+    {
+        if(--hit_timer == 0)
+            spr_hide(hit_sprite);
+    }
 
     plr_apply_knockback(plr);
 }
@@ -145,16 +155,15 @@ void plr_set_swim(ent_t *e, bool state)
         return;
     
     e->player.is_swimming = state;
+    
+    // create the swimming sprite if it does not exist
+    if(!swim_sprite) {
+        swim_sprite = spr_alloc(112, 92, 30);
+        spr_set_size(swim_sprite, SPR_SIZE_16x8);
+        spr_set_priority(swim_sprite, SPR_PRIORITY_HIGHEST);
+    }
 
-    if(state)
-    {
-        if(!swim_sprite)
-        {
-            swim_sprite = spr_alloc(112, 92, 30);
-            spr_set_size(swim_sprite, SPR_SIZE_16x8);
-            spr_set_priority(swim_sprite, SPR_PRIORITY_HIGHEST);
-        }
-        
+    if(state) {
         spr_show(swim_sprite);
         spr_set_size(e->sprite, SPR_SIZE_16x8);
     } else if(swim_sprite) {
@@ -232,6 +241,7 @@ bool plr_pay_stamina(ent_t *plr, s8 amt)
 }
 
 
+// this is the sprite that represents the player's active item
 static obj_t *spr = NULL;
 
 /**
@@ -399,6 +409,26 @@ int plr_get_attack_bonus(const item_t *item)
     return 1;
 }
 
+/**
+ * Shows a sprite when the player interacts with a tile
+ * @param dir player's facing direction
+ */
+void plr_show_interaction(direction_t dir)
+{
+    uint x = lvl_to_tile_x(120) + dir_get_x(dir);
+    uint y = lvl_to_tile_y(80)  + dir_get_y(dir);
+    // x += 8;
+    // y += 8;
+    if(!hit_sprite) {
+        hit_sprite = spr_alloc(0, 0, 69);
+        spr_set_size(hit_sprite, SPR_SIZE_16x16);
+    }
+    
+    spr_show(hit_sprite);
+    spr_move(hit_sprite, lvl_to_pixel_x(x), lvl_to_pixel_y(y));
+    hit_timer = 10;
+}
+
 
 /**
  * Called when the user presses the `A` button
@@ -429,7 +459,7 @@ void ent_player_interact(const ent_t *plr)
         }
     }
 
-    uint x = lvl_to_tile_x(120), y = lvl_to_tile_y(80);
+    uint x = lvl_to_tile_x(120 - 4), y = lvl_to_tile_y(80 - 4);
 
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
@@ -444,8 +474,11 @@ void ent_player_interact(const ent_t *plr)
                 (ent_t*)plr,
                 t,
                 x, y
-        ))
-            return;
+        )) {
+            plr_show_interaction(plr->dir);
+            return;            
+        }
+
     }
     
     // interact with tile if we did not interact with item

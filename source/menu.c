@@ -412,10 +412,11 @@ void mnu_open_chest(ent_t *e, ent_t *plr)
 
 /**
  * Draws the player's hotbar
+ * @todo move to `hotbar.h`
  */
 void mnu_draw_hotbar(ent_t *player)
 {
-    bg_fill(win_get_0()->background, 0, 0, 20, 10, EMPTY_TILE_INDEX);
+    bg_fill(win_get_0()->background, 0, 0, 30, 10, EMPTY_TILE_INDEX);
     win_move(win_get_0(), 0, 160-24, 240, 24);
 	text_print("HOTBAR   ", 0, 0);
 

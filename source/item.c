@@ -99,6 +99,10 @@ const item_t ALL_ITEMS[] = {
     DEFINE_ITEM("LANTERN", 35, ITEM_TYPE_FURNITURE, 3, 1, .furnituretype=FURNITURE_TYPE_LANTERN),
     DEFINE_ITEM("SLIME", 12, ITEM_TYPE_SLIME, 4, 1, .palette=1),
     DEFINE_ITEM("GLDN APPLE", 43, ITEM_TYPE_GOLDEN_APPLE, 10, 1, .palette=1),
+    DEFINE_ITEM("GEM", 12, ITEM_TYPE_GEM, 4, 1, .palette=2),
+    DEFINE_ITEM("GEM AXE", 17, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_AXE, .palette=3),
+    DEFINE_ITEM("GEM PICK", 19, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_PICKAXE, .palette=3),
+    DEFINE_ITEM("GEM SWORD", 18, ITEM_TYPE_TOOL, 2, 3, .tooltype=TOOL_TYPE_SWORD, .palette=3),
 };
 
 
@@ -134,12 +138,15 @@ item_t *item_add_to_inventory(const item_t *item, inventory_t *inv)
     if(i) {
         i->count += item->count;
         return i;
-    } else {
+    } else if(inv->size < INVENTORY_SIZE) {
         item_t *inv_item = &inv->items[inv->size++];
         *inv_item = *item;
         inv_item->parent = inv;
         return inv_item;
     }
+    
+    text_error("NO ROOM IN INVENTORY");
+    return NULL;
 }
 
 
@@ -154,7 +161,7 @@ bool item_remove_from_inventory(item_t *item)
     {
         if(&inv->items[i] == item)
         {
-            memcpy(&inv->items[i], &inv->items[i + 1], (30 - i) * sizeof(item_t));
+            memcpy(&inv->items[i], &inv->items[i + 1], (MAX_INVENTORY_SIZE - i) * sizeof(item_t));
             inv->size--;
             return true;
         }
@@ -297,6 +304,11 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, ui
         {
             if(e[i]->type == ENT_TYPE_FURNITURE)
             {
+                if(e[i]->furniture.type == FURNITURE_TYPE_CHEST && e[i]->furniture.inventory.size) {
+                    // @todo add visual to inform user why they cannot remove their chest
+                    break;
+                }
+
                 item_add_to_inventory(_furn_items[e[i]->furniture.type], &plr->player.inventory);
                 ent_remove(e[i]->level, e[i]);
                 return true;
@@ -307,9 +319,9 @@ bool item_tool_interact(item_t *item, ent_t *plr, const tile_t *tile, uint x, ui
     }
 
     if(tile->event->interact)
-        tile->event->interact(plr, item, x, y);
+        return tile->event->interact(plr, item, x, y);
 
-    return true;
+    return false; // does this change cause bugs?
 }
 
 
@@ -365,18 +377,18 @@ bool item_can_attack_all(item_t *item, ent_t *ent)
 /**
  * Increases or decreases the count of this `item_t`
  */
-void item_change_count(item_t *item, const s8 change)
+void item_change_count(item_t *item, const int change)
 {
     if(item->type == ITEM_TYPE_TOOL && change < 0)
     {
         item_remove_from_inventory(item);
         return;
     }
+    
+    item->count += change;
 
-    if(item->count + change > 64)
+    if(item->count > 64)
         item->count = 64;
-    else
-        item->count += change;
 
     if(item->parent->parent->type == ENT_TYPE_PLAYER && plr_get_active_item(item->parent->parent) == item)
     {

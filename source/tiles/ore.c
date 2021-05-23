@@ -23,11 +23,13 @@ void tile_iron_hurt(level_t *lvl, uint dmg, uint x, uint y)
 }
 
 
-void tile_iron_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_iron_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if((item && item->tooltype != TOOL_TYPE_PICKAXE) || ent->type != ENT_TYPE_PLAYER)
-        return;
+        return false;
 
     if(plr_pay_stamina(ent, 4 - item->level))
         tile_iron_hurt(ent->level, 2 + (item->level << 1), x, y);
+        
+    return true;
 }

@@ -29,15 +29,17 @@ void tile_tree_hurt(level_t *lvl, uint dmg, uint x, uint y)
 }
 
 
-void tile_tree_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_tree_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if((item && item->tooltype != TOOL_TYPE_AXE) || ent->type != ENT_TYPE_PLAYER)
-        return;
+        return false;
 
     if(!plr_pay_stamina(ent, 3 + (!item)))
-        return;
+        return false;
 
     uint bonus = item ? item->level : -1;
 
     tile_tree_hurt(ent->level, 5 + bonus, x, y);
+    
+    return true;
 }

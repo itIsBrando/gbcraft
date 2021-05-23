@@ -35,6 +35,10 @@
 #define ITEM_LANTERN        ALL_ITEMS[29]
 #define ITEM_SLIME          ALL_ITEMS[30]
 #define ITEM_GOLDEN_APPLE   ALL_ITEMS[31]
+#define ITEM_GEM            ALL_ITEMS[32]
+#define ITEM_GEM_AXE        ALL_ITEMS[33]
+#define ITEM_GEM_PICKAXE    ALL_ITEMS[34]
+#define ITEM_GEM_SWORD      ALL_ITEMS[35]
 
 extern const item_t ALL_ITEMS[];
 /**
@@ -115,7 +119,7 @@ void item_set_icon(obj_t *obj, const item_t *item);
 /**
  * Updates an entity's position if it is on screen
  */
-void item_change_count(item_t *item, const s8 change);
+void item_change_count(item_t *item, const int change);
 
 bool item_can_attack_all(item_t *item, ent_t *ent);
 

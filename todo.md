@@ -5,13 +5,15 @@
 - [ ] Add vblank interrupt to copy `obj_t` to OAM
 - [ ] Allow `bg_write_tile()` to accept coordinates greater than 32 for regular backgrounds
 - [ ] Add gem
-- [ ] Add gem tools
+- [x] Add gem tools
 - [ ] Add lava
 - [ ] Add seed selection
-- [ ] Add 'how-to`/`controls` menu
+- [ ] Add `how-to` & `controls` menu
 - [ ] Add lantern lighting effect
 - [ ] Add lantern sprite
 - [ ] Use DMA transfers to copy sprites. They broke rn :'(
+- [ ] Finish zombie AI
+- [ ] Add dungeon generation??
 - [x] Add levels are saved!
 - [x] Add golden apple
 - [x] Add gold
@@ -87,13 +89,19 @@
 - [ ] New tree sprite
 - [ ] Scroll inventory items when list is too long
 - [ ] Entity death animaton
-- [ ] **Add indication that a tile is being destroyed**
+- [x] **Add indication that a tile is being destroyed**
+- [ ] ^ Hitting indication does not appear when no active item is present
 - [ ] Fixed background colors and other paletting problems!!!!
 - [ ] Create ALL sprites, that way we do not have to worry about any palettes!!!!
 - [ ] Add door opening/closing sound effect
-- [ ] Chests can wrongly be picked up with items in it
+- [ ] Inform user on why they cannot remove their chest
+- [x] Chests can wrongly be picked up with items in it
 - [ ] Add pause menu
-- [ ] Hide player's cursor when a menu is opened
+- [x] Hide player's cursor when a menu is opened
+- [ ] Add player hitting sound
+- [ ] Inhibit player movement during hit time
+- [x] Add bound checking to inventories
+- [x] Add bound checking to entity tables
 - [x] Have `failed checksum` error return user to main menu, rather than brute-force a error-bound load
 - [x] Add border around in-game menus
 - [x] change `player.activeItem` to be an index to item rather than pointer
@@ -123,7 +131,8 @@
 - [ ] Blocks can be placed on top of entities
 - [ ] Blocks can be placed on top of player
 - [ ] `bg.h` does not support regular backgrounds with sizes larger than 32x32
-- [ ] Inventory cursor does not show up after entering lower level
+- [ ] Item entities do not have proper sprite sizes when level changes
+- [x] Inventory cursor does not show up after entering lower level
 - [ ] **Saving level in the underworld will corrupt save (likely cuz player is not in `world[0]`)**
 - [ ] Swimming animation is messed up when player spawns in water
 - [ ] Random crashes while spamming `A` and harvesting wheat

@@ -191,6 +191,33 @@ const recipe_t ANVIL_RECIPE[] = {
 
         },
     },
+    {
+        .result=&ITEM_GEM_SWORD,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_GEM, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
+        },
+    },
+    {
+        .result=&ITEM_GEM_AXE,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_GEM, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
+        },
+    },
+    {
+        .result=&ITEM_GEM_PICKAXE,
+        .amount=0,
+        .costs_num=2,
+        .costs = {
+            CREATE_COST(ITEM_TYPE_GEM, 5),
+            CREATE_COST(ITEM_TYPE_WOOD, 5)
+        },
+    },
 };
 
 void ent_lantern_update(ent_t *e);
@@ -256,10 +283,10 @@ bool ent_furniture_interact(ent_t *f, ent_t *plr, s8 dmg)
 
 // sprite indexes for 16x16 furniture sprites
 const u8 _fur_spr[] = {
-    53, 
-    49,
-    45,
-    65,
+    53, // crafting table
+    49, // chest
+    45, // furnace
+    65, // anvil
     45, // lantern @todo add sprite
 };
 

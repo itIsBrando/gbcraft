@@ -27,9 +27,13 @@ void tile_stone_hurt(level_t *lvl, uint dmg, uint x, uint y)
 }
 
 
-void tile_stone_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_stone_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
-    if(item && item->tooltype == TOOL_TYPE_PICKAXE && plr_pay_stamina(ent, 4))
+    if(item && item->tooltype == TOOL_TYPE_PICKAXE && plr_pay_stamina(ent, 4)) {
         tile_stone_hurt(ent->level, 6 + (item->level << 2), x, y);
+        return true;
+    }
+        
+    return false;
 }
 

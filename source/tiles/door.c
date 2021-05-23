@@ -21,25 +21,28 @@ void tile_door_hurt(level_t *lvl, uint dmg, uint x, uint y)
 }
 
 
-void tile_door_closed_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_door_closed_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if(item && item->tooltype == TOOL_TYPE_AXE) {
         if(plr_pay_stamina(ent, 5 - item->level))
             tile_door_hurt(ent->level, 1, x, y);
-        return;
+        return false;
     }
 
     lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_OPEN));
+    return true;
 }
 
 
-void tile_door_open_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_door_open_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if(item && item->tooltype == TOOL_TYPE_AXE) {
         if(plr_pay_stamina(ent, 5 - item->level))
             tile_door_hurt(ent->level, 1, x, y);
-        return;
+        return false;
     }
 
     lvl_set_tile(ent->level, x, y, tile_get(TILE_DOOR_CLOSED));
+    
+    return true;
 }

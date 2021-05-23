@@ -5,6 +5,8 @@
 #include "obj.h"
 
 #define MAX_ENTITY_SIZE 20
+#define INVENTORY_SIZE 20 // has to be 50????
+#define MAX_INVENTORY_SIZE INVENTORY_SIZE /** @todo maintain constitent naming convention, remove INVENTORY_SIZE*/
 
 enum {
     TILE_GRASS,
@@ -59,7 +61,7 @@ typedef enum {
     ITEM_TYPE_APPLE,
     ITEM_TYPE_SLIME,
     ITEM_TYPE_GOLDEN_APPLE,
-} item_type_t; // order relevant?
+} item_type_t; // order relevant? (bk from future: "no")
 
 
 typedef enum {
@@ -165,7 +167,7 @@ typedef struct {
 typedef struct tile_event_t {
     bool(*ontouch)(ent_t *, uint, uint);
     bool(*maypass)(ent_t *);
-    void (*interact)(ent_t *, item_t *item, uint x, uint y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
+    bool (*interact)(ent_t *, item_t *item, uint x, uint y); /** @param item item_t used to interact with this tile @param x tile x @param y tile y*/
     void (*onrandomtick)(level_t *lvl, uint x, uint y); /** @param x absolute tile x @param y absolute tile y */
 } tile_event_t;
 
@@ -202,8 +204,8 @@ typedef struct item_t {
 
 
 typedef struct inventory_t {
-    u16 size;
-    item_t items[30];
+    uint size;
+    item_t items[MAX_INVENTORY_SIZE];
     ent_t *parent;
 } inventory_t;
 

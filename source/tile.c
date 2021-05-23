@@ -149,7 +149,7 @@ bool tile_no_pass(ent_t *e)
 }
 
 
-void tile_wheat_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_wheat_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     level_t *lvl = ent->level;
     const uint px = lvl_to_pixel_x(x), py = lvl_to_pixel_y(y);
@@ -157,6 +157,8 @@ void tile_wheat_interact(ent_t *ent, item_t *item, uint x, uint y)
     lvl_set_tile(lvl, x, y, tile_get(TILE_MUD));
     ent_item_new(lvl, px, py, &ITEM_WHEAT, 1);
     ent_item_new(lvl, px, py, &ITEM_SEED, (rnd_random() & 0x3));
+    
+    return true;
 }
 
 

@@ -13,11 +13,13 @@ void tile_floor_hurt(level_t *lvl, uint dmg, uint x, uint y)
 
 
 
-void tile_floor_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_floor_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if(!item || item->tooltype != TOOL_TYPE_AXE)
-        return;
+        return false;
 
     if(plr_pay_stamina(ent, 2))
         tile_floor_hurt(ent->level, 1, x, y);
+        
+    return true;
 }

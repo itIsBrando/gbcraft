@@ -179,8 +179,10 @@ void ent_load_events(ent_t *e)
  */
 ent_t *ent_add(level_t *lvl, ent_type_t type, u16 x, u16 y)
 {
-    if(lvl->ent_size >= 50)
+    if(lvl->ent_size > MAX_ENTITY_SIZE) {
+        text_error("ERROR ALOTTING NEW ENTITY");
         return NULL;
+    }
     
     ent_t *ent = &lvl->entities[lvl->ent_size++];
 
@@ -239,6 +241,7 @@ void ent_remove(level_t *lvl, ent_t *ent)
             index = i;
             break;
         }
+        
     }
 
     if(ent->type == ENT_TYPE_SLIME || ent->type == ENT_TYPE_ZOMBIE)
@@ -266,8 +269,8 @@ void ent_remove(level_t *lvl, ent_t *ent)
     lvl->ent_size--;
 
     // relocate entity pointers
-    ent_t *e = lvl->entities;
-    for(uint i = 0; i < lvl->ent_size; i++)
+    ent_t *e = &lvl->entities[index];
+    for(uint i = index; i < lvl->ent_size; i++)
     {
         if(e->events->onrelocate)
             e->events->onrelocate(e, lvl);

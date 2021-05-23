@@ -23,10 +23,13 @@ void tile_wood_hurt(level_t *lvl, uint dmg, uint x, uint y)
 }
 
 
-void tile_wood_interact(ent_t *ent, item_t *item, uint x, uint y)
+bool tile_wood_interact(ent_t *ent, item_t *item, uint x, uint y)
 {
     if(item && item->tooltype == TOOL_TYPE_AXE && plr_pay_stamina(ent, 4 - item->level))
     {
        tile_wood_hurt(ent->level, 5 + item->level, x, y);
+       return true;
     }
+    
+    return false;
 }
