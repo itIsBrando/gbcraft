@@ -20,7 +20,7 @@ const uint __snd_rates[12]=
 #define SND_ENABLE() REG_SND_STATUS = (1 << 7)
 
 const snd_square_t SOUND_EFFECT_PUNCH = {
-    .sweep=SND_SWEEP_MAKE(0, SND_SWEEP_INC, 2),
+    .sweep=SND_SWEEP_MAKE(1, SND_SWEEP_DEC, 0),
     // plays D  
     .freq=SND_FREQ_MAKE(SND_RATE(2, 2), SND_FREQ_TIMED),
     .control=SND_SQU_CNT_MAKE(28, SND_SQR_DUTY_75, 1, SND_SQR_DEC, 10),

@@ -24,6 +24,22 @@ static obj_t *hit_sprite = NULL;
 uint hit_timer = 0;
 
 
+/**
+ * Note the difference between this and `ent_player_init`. This function is called ONCE in main
+ * `ent_player_init` is called for every new player entity
+ */
+void player_init() {
+    // create swim sprite
+    swim_sprite = spr_alloc(112, 92, 30);
+    spr_set_size(swim_sprite, SPR_SIZE_16x8);
+    spr_set_priority(swim_sprite, SPR_PRIORITY_HIGHEST);
+    
+    // create hit sprite
+    hit_sprite = spr_alloc(0, 0, 69);
+    spr_set_size(hit_sprite, SPR_SIZE_16x16);
+}
+
+
 void ent_player_init(ent_t *e)
 {
     e->player.inventory.parent = e;
@@ -157,12 +173,6 @@ void plr_set_swim(ent_t *e, bool state)
     
     e->player.is_swimming = state;
     
-    // create the swimming sprite if it does not exist
-    if(!swim_sprite) {
-        swim_sprite = spr_alloc(112, 92, 30);
-        spr_set_size(swim_sprite, SPR_SIZE_16x8);
-        spr_set_priority(swim_sprite, SPR_PRIORITY_HIGHEST);
-    }
 
     if(state) {
         spr_show(swim_sprite);
@@ -419,12 +429,6 @@ void plr_show_interaction(direction_t dir)
 {
     uint x = lvl_to_tile_x(120) + dir_get_x(dir);
     uint y = lvl_to_tile_y(80)  + dir_get_y(dir);
-    // x += 8;
-    // y += 8;
-    if(!hit_sprite) {
-        hit_sprite = spr_alloc(0, 0, 69);
-        spr_set_size(hit_sprite, SPR_SIZE_16x16);
-    }
     
     spr_show(hit_sprite);
     spr_move(hit_sprite, lvl_to_pixel_x(x), lvl_to_pixel_y(y));
@@ -461,7 +465,7 @@ void ent_player_interact(const ent_t *plr)
         }
     }
 
-    uint x = lvl_to_tile_x(120 - 4), y = lvl_to_tile_y(80 - 4);
+    uint x = lvl_to_tile_x(120), y = lvl_to_tile_y(80);
 
     x += dir_get_x(plr->dir);
     y += dir_get_y(plr->dir);
