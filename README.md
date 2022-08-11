@@ -1,4 +1,4 @@
-# GBCraft
+# GBcraft
 
 - A demake of Notch's [Minicraft](https://github.com/skeeto/Minicraft) for the GBA
 - Still in very early stages of development
@@ -8,13 +8,13 @@
 Built using devkitpro
 
 The title screen
-![menu](menu.png)
+![menu](screenshots/menu.png)
 
 A cozy little structure to protect yourself from nasty slimes
-![house](house.png)
+![house](screenshots/house.png)
 
 Player at a crafting bench
-![crafting](crafting.png)
+![crafting](screenshots/crafting.png)
 
 Underground caves to find iron and gold
-![cave](cave.png)
+![cave](screenshots/cave.png)
